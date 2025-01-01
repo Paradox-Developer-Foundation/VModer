@@ -1,0 +1,25 @@
+{
+  "name": "hoi4",
+  "displayName": "hoi4",
+  "description": "Syntax highlighting for Hearts of Iron IV Scripting Language",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.96.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "hoi4",
+      "aliases": ["hoi4", "hoi4"],
+      "extensions": [".txt", ".gui", ".gfx", ".mod"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "hoi4",
+      "scopeName": "source.hoi4",
+      "path": "./syntaxes/hoi4.tmLanguage.json"
+    }]
+  }
+}
