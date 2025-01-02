@@ -1,5 +1,6 @@
 ﻿using System.Collections.Frozen;
 using ParadoxPower.Process;
+using VModer.Core.Infrastructure;
 using VModer.Core.Services.GameResource.Base;
 
 namespace VModer.Core.Services.GameResource;
@@ -11,22 +12,19 @@ public sealed class CountryTagService : CommonResourcesService<CountryTagService
     /// </summary>
     public IReadOnlyCollection<string> CountryTags => _countryTagsLazy.Value;
 
-    private Lazy<IReadOnlyCollection<string>> _countryTagsLazy;
+    private readonly ResetLazy<string[]> _countryTagsLazy;
 
     public CountryTagService()
         : base(Path.Combine(Keywords.Common, "country_tags"), WatcherFilter.Text)
     {
-        _countryTagsLazy = new Lazy<IReadOnlyCollection<string>>(GetCountryTags);
+        _countryTagsLazy = new ResetLazy<string[]>(
+            () => Resources.Values.SelectMany(set => set.Items).ToArray()
+        );
         OnResourceChanged += (_, _) =>
         {
-            _countryTagsLazy = new Lazy<IReadOnlyCollection<string>>(GetCountryTags);
+            _countryTagsLazy.Reset();
             Log.Debug("Country tags changed, 已重置");
         };
-    }
-
-    private string[] GetCountryTags()
-    {
-        return Resources.Values.SelectMany(set => set.Items).ToArray();
     }
 
     protected override FrozenSet<string>? ParseFileToContent(Node rootNode)
@@ -44,7 +42,7 @@ public sealed class CountryTagService : CommonResourcesService<CountryTagService
         {
             return null;
         }
-        
+
         var countryTags = new HashSet<string>(leaves.Length);
         foreach (var leaf in leaves)
         {
