@@ -32,8 +32,8 @@ public sealed class GameFileType(string name, string value) : SmartEnum<GameFile
 
     private static bool IsGlobMatch(GameFileType fileType, string filePath)
     {
-        var key = fileType.Name;
-        var patter = fileType.Value;
+        string? key = fileType.Name;
+        string? patter = fileType.Value;
         if (!Globs.TryGetValue(key, out var glob))
         {
             glob = Glob.Parse(patter);

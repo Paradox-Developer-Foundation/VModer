@@ -334,7 +334,7 @@ public sealed class FileSystemSafeWatcher : IDisposable
                                 }
                             }
 
-                            var raiseEvent = true;
+                            bool raiseEvent = true;
                             if (
                                 current.Args.ChangeType is WatcherChangeTypes.Created or WatcherChangeTypes.Changed
                                 && File.Exists(current.Args.FullPath)

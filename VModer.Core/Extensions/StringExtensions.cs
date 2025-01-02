@@ -7,7 +7,7 @@ public static class StringExtensions
 	public static string ToFilePath(this string filePath)
 	{
 		var builder = new StringBuilder("file:///", filePath.Length + 16);
-		foreach (var c in filePath)
+		foreach (char c in filePath)
 		{
 			switch (c)
 			{

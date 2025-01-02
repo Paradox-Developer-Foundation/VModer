@@ -33,7 +33,7 @@ public static class EnumExtensions
     {
         var cultureInfo = CultureInfo.CurrentUICulture;
         Debug.WriteLine($"Current culture: {cultureInfo.Name}");
-        var name = cultureInfo.Name;
+        string name = cultureInfo.Name;
 
         if (name.StartsWith("zh"))
         {

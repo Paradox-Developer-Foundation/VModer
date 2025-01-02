@@ -4,7 +4,7 @@ public static class UriExtensions
 {
     public static string ToSystemPath(this Uri uri)
     {
-        var fileSystemPath = Uri.UnescapeDataString(uri.AbsolutePath);
+        string fileSystemPath = Uri.UnescapeDataString(uri.AbsolutePath);
         if (OperatingSystem.IsWindows())
         {
             if (fileSystemPath.StartsWith('/'))

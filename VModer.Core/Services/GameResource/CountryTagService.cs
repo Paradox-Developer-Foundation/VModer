@@ -48,7 +48,7 @@ public sealed class CountryTagService : CommonResourcesService<CountryTagService
         var countryTags = new HashSet<string>(leaves.Length);
         foreach (var leaf in leaves)
         {
-            var countryTag = leaf.Key;
+            string? countryTag = leaf.Key;
             // 国家标签长度必须为 3
             if (countryTag.Length != 3)
             {

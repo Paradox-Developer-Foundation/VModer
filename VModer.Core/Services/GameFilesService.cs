@@ -38,7 +38,7 @@ public sealed class GameFilesService
             return;
         }
 
-        var (startOffset, endOffset) = FindRange(existing, range);
+        (int startOffset, int endOffset) = FindRange(existing, range);
         existing.Remove(startOffset, endOffset - startOffset);
         existing.Insert(startOffset, text);
     }
@@ -62,7 +62,7 @@ public sealed class GameFilesService
         int startOffset = 0;
         int endOffset = 0;
 
-        for (var offset = 0; offset <= text.Length; offset++)
+        for (int offset = 0; offset <= text.Length; offset++)
         {
             if (line == range.Start.Line && charPos == range.Start.Character)
             {
@@ -76,7 +76,7 @@ public sealed class GameFilesService
 
             if (offset < text.Length)
             {
-                var c = text[offset];
+                char c = text[offset];
                 if (c == '\n')
                 {
                     line++;

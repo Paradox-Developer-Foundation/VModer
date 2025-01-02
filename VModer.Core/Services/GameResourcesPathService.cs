@@ -20,7 +20,7 @@ public sealed class GameResourcesPathService
         params string[] folderRelativePaths
     )
     {
-        var relativePath = Path.Combine(folderRelativePaths);
+        string relativePath = Path.Combine(folderRelativePaths);
         return GetAllFilePriorModByRelativePathForFolder(relativePath);
     }
 
@@ -37,8 +37,8 @@ public sealed class GameResourcesPathService
     )
     {
         Log.Info("正在获取文件夹 {Path} 下的文件", folderRelativePath);
-        var modFolder = Path.Combine(_settingService.ModRootFolderPath, folderRelativePath);
-        var gameFolder = Path.Combine(_settingService.GameRootFolderPath, folderRelativePath);
+        string modFolder = Path.Combine(_settingService.ModRootFolderPath, folderRelativePath);
+        string gameFolder = Path.Combine(_settingService.GameRootFolderPath, folderRelativePath);
 
         if (!Directory.Exists(gameFolder))
         {
@@ -60,8 +60,8 @@ public sealed class GameResourcesPathService
             return Directory.GetFiles(modFolder, filter);
         }
 
-        var gameFilesPath = Directory.GetFiles(gameFolder, filter);
-        var modFilesPath = Directory.GetFiles(modFolder, filter);
+        string[] gameFilesPath = Directory.GetFiles(gameFolder, filter);
+        string[] modFilesPath = Directory.GetFiles(modFolder, filter);
         return RemoveFileOfEqualName(gameFilesPath, modFilesPath);
     }
 
@@ -77,13 +77,13 @@ public sealed class GameResourcesPathService
         string[] modFilePaths
     )
     {
-        var set = new Dictionary<string, string>(Math.Max(gameFilePaths.Length, modFilePaths.Length));
+        Dictionary<string, string> set = new Dictionary<string, string>(Math.Max(gameFilePaths.Length, modFilePaths.Length));
 
         // 优先读取Mod文件
         // TODO: 做一下性能测试, 看和原来的算法有什么区别
-        foreach (var filePath in modFilePaths.Concat(gameFilePaths))
+        foreach (string filePath in modFilePaths.Concat(gameFilePaths))
         {
-            var fileName = Path.GetFileName(filePath) ?? throw new ArgumentException($"无法得到文件名: {filePath}");
+            string fileName = Path.GetFileName(filePath) ?? throw new ArgumentException($"无法得到文件名: {filePath}");
             set.TryAdd(fileName, filePath);
         }
 
@@ -101,13 +101,13 @@ public sealed class GameResourcesPathService
     /// <returns>文件绝对路径</returns>
     public string GetFilePathPriorModByRelativePath(string fileRelativePath)
     {
-        var modFilePath = Path.Combine(_settingService.ModRootFolderPath, fileRelativePath);
+        string modFilePath = Path.Combine(_settingService.ModRootFolderPath, fileRelativePath);
         if (File.Exists(modFilePath))
         {
             return modFilePath;
         }
 
-        var gameFilePath = Path.Combine(_settingService.GameRootFolderPath, fileRelativePath);
+        string gameFilePath = Path.Combine(_settingService.GameRootFolderPath, fileRelativePath);
         if (File.Exists(gameFilePath))
         {
             return gameFilePath;

@@ -39,7 +39,7 @@ public sealed class OreService : CommonResourcesService<OreService, string[]>
 
     public bool Contains(string resource)
     {
-        foreach (var ore in Ores)
+        foreach (string[] ore in Ores)
         {
             if (Array.Exists(ore, x => StringComparer.OrdinalIgnoreCase.Equals(x, resource)))
             {

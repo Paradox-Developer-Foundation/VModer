@@ -27,7 +27,7 @@ public sealed class GameModDescriptorService
     public GameModDescriptorService(SettingsService settingService)
     {
         var logger = LogManager.GetCurrentClassLogger();
-        var descriptorFilePath = Path.Combine(settingService.ModRootFolderPath, FileName);
+        string descriptorFilePath = Path.Combine(settingService.ModRootFolderPath, FileName);
         if (!File.Exists(descriptorFilePath))
         {
             _replacePaths = FrozenSet<string>.Empty;
@@ -54,7 +54,7 @@ public sealed class GameModDescriptorService
                     Name = item.ValueText;
                     break;
                 case "replace_path":
-                    var parts = item.ValueText.Split('/');
+                    string[] parts = item.ValueText.Split('/');
                     replacePathList.Add(Path.Combine(parts));
                     break;
             }

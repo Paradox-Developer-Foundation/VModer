@@ -43,11 +43,11 @@ public sealed class GameResourcesWatcherService : IDisposable
 
     private void OnModResourceFolderCreatedOrRenamed(object sender, FileSystemEventArgs args)
     {
-        var relativePath = Path.GetRelativePath(_settingService.ModRootFolderPath, args.FullPath);
-        var index = _waitingWatchFolders.FindIndex(tuple => tuple.folderRelativePath == relativePath);
+        string relativePath = Path.GetRelativePath(_settingService.ModRootFolderPath, args.FullPath);
+        int index = _waitingWatchFolders.FindIndex(tuple => tuple.folderRelativePath == relativePath);
         if (index != -1)
         {
-            var (_, resourcesService, filter, includeSubFolders) = _waitingWatchFolders[index];
+            (_, var resourcesService, string filter, bool includeSubFolders) = _waitingWatchFolders[index];
             Watch(relativePath, resourcesService, filter, includeSubFolders);
             _waitingWatchFolders.RemoveAt(index);
 
@@ -62,7 +62,7 @@ public sealed class GameResourcesWatcherService : IDisposable
         bool includeSubFolders = false
     )
     {
-        var modFolderPath = Path.Combine(_settingService.ModRootFolderPath, folderRelativePath);
+        string modFolderPath = Path.Combine(_settingService.ModRootFolderPath, folderRelativePath);
         // 如果 Mod文件夹 不存在, 监听上一级文件夹, 当 Mod文件夹 创建后, 自动监听
         if (!Directory.Exists(modFolderPath))
         {
@@ -121,7 +121,7 @@ public sealed class GameResourcesWatcherService : IDisposable
         {
             watcherList.ForEach(watcher => watcher.Dispose());
             _watchedPaths.Remove(folderRelativePath);
-            var isRemoved =
+            bool isRemoved =
                 _waitingWatchFolders.RemoveAll(tuple => tuple.folderRelativePath == folderRelativePath) != 0;
             if (isRemoved)
             {

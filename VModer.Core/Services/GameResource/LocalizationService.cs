@@ -1,5 +1,6 @@
 using System.Collections.Frozen;
 using System.Diagnostics.CodeAnalysis;
+using MethodTimer;
 using Microsoft.Extensions.DependencyInjection;
 using ParadoxPower.CSharp;
 using ParadoxPower.Localisation;
@@ -14,7 +15,7 @@ public sealed class LocalizationService
     private Dictionary<string, FrozenDictionary<string, string>>.ValueCollection Localisations =>
         Resources.Values;
 
-    // [Time("加载本地化文件")]
+    [Time("加载本地化文件")]
     public LocalizationService()
         : base(
             Path.Combine(
@@ -31,14 +32,14 @@ public sealed class LocalizationService
     /// <returns></returns>
     public string GetValue(string key)
     {
-        return TryGetValue(key, out var value) ? value : key;
+        return TryGetValue(key, out string? value) ? value : key;
     }
 
     public bool TryGetValue(string key, [NotNullWhen(true)] out string? value)
     {
         foreach (var localisation in Localisations)
         {
-            if (localisation.TryGetValue(key, out var result))
+            if (localisation.TryGetValue(key, out string? result))
             {
                 value = result;
                 return true;

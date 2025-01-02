@@ -46,7 +46,7 @@ public sealed class EditorDiagnosisService
     {
         int startChar;
         int endChar;
-        var startLine = Math.Max((int)position.Line - 1, 0);
+        int startLine = Math.Max((int)position.Line - 1, 0);
         if (length == 0)
         {
             startChar = 0;

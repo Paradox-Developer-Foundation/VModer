@@ -16,12 +16,12 @@ public sealed class AnalyzeService
 
     public Task AnalyzeFileAsync(Uri fileUri)
     {
-        if (!_gameFilesService.TryGetFileText(fileUri, out var fileText))
+        if (!_gameFilesService.TryGetFileText(fileUri, out string? fileText))
         {
             return Task.CompletedTask;
         }
 
-        var filePath = fileUri.ToSystemPath();
+        string filePath = fileUri.ToSystemPath();
         if (TextParser.TryParse(filePath, fileText, out _, out var error))
         {
             return _editorDiagnosisService.ClearDiagnoseAsync(fileUri);

@@ -104,10 +104,10 @@ public sealed class ModifierMergeManager
         LeafModifier modifier
     )
     {
-        var value = decimal.TryParse(modifier.Value, out var result) ? result : 0;
-        if (dictionary.TryGetValue(modifier.Key, out var rawValue))
+        decimal value = decimal.TryParse(modifier.Value, out decimal result) ? result : 0;
+        if (dictionary.TryGetValue(modifier.Key, out decimal rawValue))
         {
-            var newValue = rawValue - value;
+            decimal newValue = rawValue - value;
             if (newValue == decimal.Zero)
             {
                 dictionary.Remove(modifier.Key);
@@ -172,7 +172,7 @@ public sealed class ModifierMergeManager
             var newModifierMap = new Dictionary<string, decimal>(modifier.Modifiers.Count);
             foreach (var leafModifier in modifier.Modifiers)
             {
-                var value = decimal.TryParse(leafModifier.Value, out var result) ? result : 0;
+                decimal value = decimal.TryParse(leafModifier.Value, out decimal result) ? result : 0;
                 newModifierMap[leafModifier.Key] = value;
             }
             _nodeModifiers.Add(modifier.Key, newModifierMap);
@@ -184,20 +184,20 @@ public sealed class ModifierMergeManager
         LeafModifier modifier
     )
     {
-        var value = decimal.TryParse(modifier.Value, out var result) ? result : 0;
+        decimal value = decimal.TryParse(modifier.Value, out decimal result) ? result : 0;
         if (value == decimal.Zero)
         {
             return;
         }
 
-        ref var refValue = ref CollectionsMarshal.GetValueRefOrAddDefault(
+        ref decimal refValue = ref CollectionsMarshal.GetValueRefOrAddDefault(
             dictionary,
             modifier.Key,
-            out var exists
+            out bool exists
         );
         if (exists)
         {
-            var newValue = refValue + value;
+            decimal newValue = refValue + value;
             if (newValue == decimal.Zero)
             {
                 dictionary.Remove(modifier.Key);

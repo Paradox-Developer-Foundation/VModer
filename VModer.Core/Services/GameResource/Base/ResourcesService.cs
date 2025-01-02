@@ -34,7 +34,7 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
         var gameResourcesPathService = App.Services.GetRequiredService<GameResourcesPathService>();
         var watcherService = App.Services.GetRequiredService<GameResourcesWatcherService>();
 
-        var isFolderPath = pathType == PathType.Folder;
+        bool isFolderPath = pathType == PathType.Folder;
         var filePaths = isFolderPath
             ? gameResourcesPathService.GetAllFilePriorModByRelativePathForFolder(
                 _folderOrFileRelativePath,
@@ -45,7 +45,7 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
         // Resources 必须在使用 ParseFileAndAddToResources 之前初始化
         Resources = new Dictionary<string, TContent>(filePaths.Count);
 
-        foreach (var filePath in filePaths)
+        foreach (string filePath in filePaths)
         {
             ParseFileAndAddToResources(filePath);
         }
@@ -80,9 +80,9 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
         Debug.Assert(File.Exists(folderOrFilePath), "必须为文件");
 
         // 如果新增加的mod资源在原版资源中存在, 移除原版资源, 添加mod资源
-        var relativeFilePath = Path.GetRelativePath(_settingService.ModRootFolderPath, folderOrFilePath);
-        var gameFilePath = Path.Combine(_settingService.GameRootFolderPath, relativeFilePath);
-        var isRemoved = Resources.Remove(gameFilePath);
+        string relativeFilePath = Path.GetRelativePath(_settingService.ModRootFolderPath, folderOrFilePath);
+        string gameFilePath = Path.Combine(_settingService.GameRootFolderPath, relativeFilePath);
+        bool isRemoved = Resources.Remove(gameFilePath);
         if (isRemoved)
         {
             Log.Info("移除游戏资源成功: {GameFilePath}", gameFilePath);
@@ -100,7 +100,7 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
         if (Directory.Exists(folderOrFilePath))
         {
             foreach (
-                var filePath in Directory.GetFileSystemEntries(
+                string filePath in Directory.GetFileSystemEntries(
                     folderOrFilePath,
                     "*",
                     SearchOption.AllDirectories
@@ -114,10 +114,10 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
         if (Resources.Remove(folderOrFilePath))
         {
             Log.Info("移除 Mod 资源成功");
-            var relativeFilePath = Path.GetRelativePath(_settingService.ModRootFolderPath, folderOrFilePath);
+            string relativeFilePath = Path.GetRelativePath(_settingService.ModRootFolderPath, folderOrFilePath);
 
             // 如果删除的mod资源在原版资源中存在, 移除mod资源, 添加原版资源
-            var gameFilePath = Path.Combine(_settingService.GameRootFolderPath, relativeFilePath);
+            string gameFilePath = Path.Combine(_settingService.GameRootFolderPath, relativeFilePath);
             if (!File.Exists(gameFilePath))
             {
                 return;
@@ -139,8 +139,8 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
             return;
         }
 
-        var isRemoved = Resources.Remove(folderOrFilePath);
-        var isAdded = ParseFileAndAddToResources(folderOrFilePath);
+        bool isRemoved = Resources.Remove(folderOrFilePath);
+        bool isAdded = ParseFileAndAddToResources(folderOrFilePath);
         if (!isAdded)
         {
             Log.Info("{ServiceName} 不加载此 Mod 资源", _serviceName);
