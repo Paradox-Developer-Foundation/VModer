@@ -10,7 +10,7 @@ using VModer.Core.Services;
 
 namespace VModer.Core.Handlers;
 
-public sealed class TextDocumentHandler : TextDocumentHandlerBase
+public sealed class TextDocumentHandler : TextDocumentHandlerBase, IHandler
 {
     private readonly GameFilesService _filesService;
     private readonly AnalyzeService _analyzeService;
@@ -68,5 +68,10 @@ public sealed class TextDocumentHandler : TextDocumentHandlerBase
             OpenClose = true,
             Change = TextDocumentSyncKind.Incremental
         };
+    }
+
+    public void Initialize()
+    {
+        
     }
 }

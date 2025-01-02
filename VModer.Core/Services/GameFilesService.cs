@@ -2,7 +2,6 @@
 using System.Text;
 using EmmyLua.LanguageServer.Framework.Protocol.Message.TextDocument;
 using EmmyLua.LanguageServer.Framework.Protocol.Model;
-using EmmyLua.LanguageServer.Framework.Protocol.Model.TextDocument;
 using NLog;
 
 namespace VModer.Core.Services;

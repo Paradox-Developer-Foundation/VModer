@@ -58,7 +58,7 @@ public static class ParserExtensions
 
         if (child.IsLeafValueChild)
         {
-            return child.leafvalue.Key;
+            return child.leafValue.Key;
         }
 
         return null;
@@ -78,7 +78,7 @@ public static class ParserExtensions
 
         if (child.IsLeafValueChild)
         {
-            return child.leafvalue.ToRaw;
+            return child.leafValue.ToRaw;
         }
 
         if (child.IsCommentChild)
@@ -88,7 +88,7 @@ public static class ParserExtensions
 
         if (child.IsValueClauseChild)
         {
-            var valueClause = child.valueclause;
+            var valueClause = child.valueClause;
             var keys = new Types.Statement[valueClause.Keys.Length + 1];
             for (int i = 0; i < keys.Length; i++)
             {

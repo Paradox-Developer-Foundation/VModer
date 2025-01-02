@@ -65,7 +65,9 @@ export function activate(_context: ExtensionContext) {
 			// Notify the server about file changes to '.clientrc files contained in the workspace
 			fileEvents: [workspace.createFileSystemWatcher('**/.clientrc'), workspace.createFileSystemWatcher('**/*.txt')],
 		},
-		initializationOptions: {  }
+		initializationOptions: {
+			"GameRootFolderPath": workspace.getConfiguration().get<string>("VModer.GameRootPath")
+		}
 	};
 
 	// Create the language client and start the client.

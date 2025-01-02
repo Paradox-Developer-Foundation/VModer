@@ -7,9 +7,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
 using VModer.Core;
-using VModer.Core.Handlers;
 using VModer.Core.Services;
 using VModer.Core.Services.GameResource;
+using VModer.Core.Services.GameResource.Base;
 
 var settings = new HostApplicationBuilderSettings { Args = args, ApplicationName = "VModer" };
 
@@ -34,10 +34,20 @@ var server = LanguageServer.From(_networkStream, _networkStream);
 
 builder.Services.AddSingleton(server);
 builder.Services.AddSingleton<SettingsService>();
+
+builder.Services.AddSingleton<GameResourcesPathService>();
+builder.Services.AddSingleton<GameModDescriptorService>();
 builder.Services.AddSingleton<GameFilesService>();
-builder.Services.AddSingleton<LocalizationService>();
+builder.Services.AddSingleton<GameResourcesWatcherService>();
+
 builder.Services.AddSingleton<AnalyzeService>();
+builder.Services.AddSingleton<CompletionService>();
 builder.Services.AddSingleton<EditorDiagnosisService>();
+
+builder.Services.AddSingleton<LocalizationService>();
+builder.Services.AddSingleton<CountryTagService>();
+builder.Services.AddSingleton<OreService>();
+
 builder.Services.AddHostedService<LanguageServerHostedService>();
 
 builder.Logging.ClearProviders();

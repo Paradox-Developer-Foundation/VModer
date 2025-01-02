@@ -1,5 +1,4 @@
-﻿using EmmyLua.LanguageServer.Framework.Protocol.Message.Configuration;
-using EmmyLua.LanguageServer.Framework.Server;
+﻿using EmmyLua.LanguageServer.Framework.Server;
 using Microsoft.Extensions.Hosting;
 using NLog;
 using VModer.Core.Handlers;
@@ -28,30 +27,40 @@ public sealed class LanguageServerHostedService : IHostedService
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        _server.AddHandler(new HoverHandler());
-        _server.AddHandler(new TextDocumentHandler());
+        var handlers = new List<IHandler>
+        {
+            new DefinitionHandler(),
+            new CompletionHandler(),
+            new HoverHandler(),
+            new TextDocumentHandler()
+        };
+        foreach (var handler in handlers)
+        {
+            _server.AddHandler(handler);
+        }
         _server.OnInitialize(
             (c, s) =>
             {
+                _settings.GameRootFolderPath =
+                    c.InitializationOptions?.RootElement.GetProperty("GameRootFolderPath").GetString()
+                    ?? string.Empty;
+                _settings.ModRootFolderPath = c.RootUri?.FileSystemPath ?? string.Empty;
                 s.Name = "VModer";
                 s.Version = "1.0.0";
+
+                foreach (var handler in handlers)
+                {
+                   handler.Initialize();
+                }
                 return Task.CompletedTask;
             }
         );
         _server.OnInitialized(
-            async (c) =>
+            (c) =>
             {
-                var gameRootPath = await _server
-                    .Client.GetConfiguration(
-                        new ConfigurationParams
-                        {
-                            Items = [new ConfigurationItem { Section = "VModer.GameRootPath" }]
-                        },
-                        default
-                    )
-                    .ConfigureAwait(false);
-                _settings.GameRootFolderPath = gameRootPath[0].Value as string ?? string.Empty;
-                Log.Debug("Game root path: {@}", _settings.GameRootFolderPath);
+                Log.Info("Game root path: {Path}", _settings.GameRootFolderPath);
+                Log.Info("Workspace root path: {Path}", _settings.ModRootFolderPath);
+                return Task.CompletedTask;
             }
         );
 

@@ -6,22 +6,29 @@ using EmmyLua.LanguageServer.Framework.Server.Handler;
 
 namespace VModer.Core.Handlers;
 
-public sealed class HoverHandler : HoverHandlerBase
+public sealed class HoverHandler : HoverHandlerBase, IHandler
 {
     protected override Task<HoverResponse?> Handle(HoverParams request, CancellationToken token)
     {
-        return Task.FromResult<HoverResponse?>(new HoverResponse
-        {
-            Contents = new MarkupContent
+        return Task.FromResult<HoverResponse?>(
+            new HoverResponse
             {
-                Kind = MarkupKind.PlainText,
-                Value = request.TextDocument.Uri.UnescapeUri ?? String.Empty
+                Contents = new MarkupContent
+                {
+                    Kind = MarkupKind.PlainText,
+                    Value = request.TextDocument.Uri.UnescapeUri ?? String.Empty
+                }
             }
-        });
+        );
     }
 
-    public override void RegisterCapability(ServerCapabilities serverCapabilities, ClientCapabilities clientCapabilities)
+    public override void RegisterCapability(
+        ServerCapabilities serverCapabilities,
+        ClientCapabilities clientCapabilities
+    )
     {
         serverCapabilities.HoverProvider = true;
     }
+
+    public void Initialize() { }
 }
