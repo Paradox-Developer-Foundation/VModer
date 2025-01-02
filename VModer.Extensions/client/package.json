@@ -1,12 +1,12 @@
 {
-	"name": "lsp-sample",
-	"description": "A language server example",
-	"author": "Microsoft Corporation",
+	"name": "VModer",
+	"description": "A HOI4 language server",
+	"author": "textGamex",
 	"license": "MIT",
-	"version": "1.0.0",
+	"version": "0.1.0",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/Microsoft/vscode-extension-samples"
+		"url": "https://github.com/textGamex/VModer"
 	},
 	"publisher": "vscode-samples",
 	"categories": [],

@@ -11,6 +11,8 @@ namespace VModer.Core.Services;
 public sealed class EditorDiagnosisService
 {
     private readonly LanguageServer _server;
+
+    private static readonly List<Diagnostic> EmptyDiagnostics = [];
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
     public EditorDiagnosisService(LanguageServer server)
@@ -72,6 +74,4 @@ public sealed class EditorDiagnosisService
             new PublishDiagnosticsParams { Diagnostics = EmptyDiagnostics, Uri = fileUri }
         );
     }
-
-    private static readonly List<Diagnostic> EmptyDiagnostics = [];
 }
