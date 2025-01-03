@@ -29,9 +29,7 @@ public sealed class LanguageServerHostedService : IHostedService
     {
         var handlers = new List<IHandler>
         {
-            new DefinitionHandler(),
             new CompletionHandler(),
-            new HoverHandler(),
             new TextDocumentHandler()
         };
         foreach (var handler in handlers)

@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Globalization;
 using VModer.Core.Models;
 
@@ -32,7 +31,6 @@ public static class EnumExtensions
     private static GameLanguage GetSystemLanguage()
     {
         var cultureInfo = CultureInfo.CurrentUICulture;
-        Debug.WriteLine($"Current culture: {cultureInfo.Name}");
         string name = cultureInfo.Name;
 
         if (name.StartsWith("zh"))

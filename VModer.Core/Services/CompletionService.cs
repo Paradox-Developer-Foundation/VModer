@@ -1,8 +1,5 @@
 ﻿using EmmyLua.LanguageServer.Framework.Protocol.Message.Completion;
 using EmmyLua.LanguageServer.Framework.Protocol.Model;
-using EmmyLua.LanguageServer.Framework.Protocol.Model.Kind;
-using EmmyLua.LanguageServer.Framework.Protocol.Model.TextEdit;
-using EmmyLua.LanguageServer.Framework.Protocol.Model.Union;
 using MethodTimer;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
@@ -18,6 +15,8 @@ public sealed class CompletionService
 {
     private readonly GameFilesService _filesService = App.Services.GetRequiredService<GameFilesService>();
     private readonly OreService _oreService = App.Services.GetRequiredService<OreService>();
+    private readonly CountryTagService _countryTagService =
+        App.Services.GetRequiredService<CountryTagService>();
 
     private static readonly CompletionResponse EmptyResponse = new([]);
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
@@ -25,17 +24,18 @@ public sealed class CompletionService
     [Time]
     public CompletionResponse Resolve(CompletionParams request)
     {
-        if (!_filesService.TryGetFileText(request.TextDocument.Uri.Uri, out var fileText))
+        if (!_filesService.TryGetFileText(request.TextDocument.Uri.Uri, out string? fileText))
         {
             return EmptyResponse;
         }
 
-        var filePath = request.TextDocument.Uri.Uri.ToSystemPath();
+        string filePath = request.TextDocument.Uri.Uri.ToSystemPath();
         var type = GameFileType.FromFilePath(filePath);
         // TODO: 跟分析服务中的解析能否合并?
         if (!TextParser.TryParse(filePath, fileText, out var rootNode, out _))
         {
-            return EmptyResponse;
+            // 当输入未完成时, 无法解析为 AST, 则尝试获取光标前的字符串
+            return GetCompletionByStringBeforeCursor(fileText, request.Position);
         }
 
         var node = FindNodeByPosition(rootNode, request.Position.ToLocalPosition());
@@ -44,11 +44,96 @@ public sealed class CompletionService
         return GetCompletion(node, type);
     }
 
+    private CompletionResponse GetCompletionByStringBeforeCursor(string fileText, Position cursorPosition)
+    {
+        var list = new List<CompletionItem>();
+        // 计算光标前的字符串不需要转换位置
+        var leftString = GetStringBeforeCursor(fileText, cursorPosition);
+        Log.Debug("Left string: {P}", leftString.ToString());
+        if (leftString.Equals("add_core_of".AsSpan(), StringComparison.OrdinalIgnoreCase))
+        {
+            list.EnsureCapacity(_countryTagService.CountryTags.Count);
+            foreach (string countryTag in _countryTagService.CountryTags)
+            {
+                list.Add(new CompletionItem { Label = countryTag, Kind = CompletionItemKind.Keyword });
+            }
+        }
+
+        return new CompletionResponse(list);
+    }
+
+    /// <summary>
+    /// 获取光标前的字符串
+    /// </summary>
+    /// <param name="fileText"></param>
+    /// <param name="cursorPosition"></param>
+    /// <returns>光标前的字符串</returns>
+    private static ReadOnlySpan<char> GetStringBeforeCursor(string fileText, Position cursorPosition)
+    {
+        int line = 0;
+        ReadOnlySpan<char> cursorCurrentLineString = null;
+        foreach (var enumerateLine in fileText.AsSpan().EnumerateLines())
+        {
+            if (line == cursorPosition.Line)
+            {
+                cursorCurrentLineString = enumerateLine;
+                break;
+            }
+            line++;
+        }
+
+        if (cursorCurrentLineString.IsEmpty)
+        {
+            return cursorCurrentLineString;
+        }
+
+        int startIndex = GetStartIndex(cursorCurrentLineString);
+        int length = 0;
+        for (int i = startIndex; i < cursorCurrentLineString.Length && i < cursorPosition.Character; i++)
+        {
+            char c = cursorCurrentLineString[i];
+            if (c != ' ' && c != '=' && c != '{' && c != '}' && c != '\t')
+            {
+                length++;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        return cursorCurrentLineString.Slice(startIndex, length);
+    }
+
+    /// <summary>
+    /// 跳过多余字符, 获取真正地开始位置
+    /// </summary>
+    /// <param name="lineSpan"></param>
+    /// <returns></returns>
+    private static int GetStartIndex(ReadOnlySpan<char> lineSpan)
+    {
+        int startIndex = 0;
+        while (startIndex < lineSpan.Length)
+        {
+            char currentChar = lineSpan[startIndex];
+            if (currentChar is '{' or '}' or ' ' or '=' or '\t')
+            {
+                ++startIndex;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        return startIndex;
+    }
+
     /// <summary>
     /// 获取离光标最近的 <see cref="Node"/>
     /// </summary>
     /// <param name="node">节点</param>
-    /// <param name="cursorPosition">光标位置</param>
+    /// <param name="cursorPosition">光标位置(以 1 开始)</param>
     /// <returns>离光标最近的 <see cref="Node"/></returns>
     private static Node FindNodeByPosition(Node node, Position cursorPosition)
     {
@@ -99,7 +184,7 @@ public sealed class CompletionService
 
         if (node.Key.Equals("resources", StringComparison.OrdinalIgnoreCase))
         {
-            foreach (var ore in _oreService.AllOres)
+            foreach (string ore in _oreService.AllOres)
             {
                 list.Add(
                     new CompletionItem
