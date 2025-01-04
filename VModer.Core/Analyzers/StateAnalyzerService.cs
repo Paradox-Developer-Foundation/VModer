@@ -33,9 +33,9 @@ public sealed class StateAnalyzerService
         }
 
         //TODO: 当修改时怎么办? 删除文件时怎么处理
-        AnalyzeId(filePath, stateNode, list);
-
-        AnalyzeProvinces(filePath, stateNode, list);
+        // AnalyzeId(filePath, stateNode, list);
+        
+        // AnalyzeProvinces(filePath, stateNode, list);
 
         if (!stateNode.TryGetNode("history", out var historyNode))
         {
