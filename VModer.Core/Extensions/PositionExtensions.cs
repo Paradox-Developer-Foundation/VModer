@@ -10,7 +10,7 @@ public static class PositionExtensions
     /// <param name="position"></param>
     /// <returns>AST 中的位置信息</returns>
     /// <remarks>
-    /// 因为 VS Code 中的位置是以 0 开始,而 AST 中的位置是以 1 开始
+    /// 因为 VS Code 中的位置是以 0 开始,而解析器中的位置是以 1 开始
     /// </remarks>
     public static Position ToLocalPosition(this Position position)
     {

@@ -1,5 +1,10 @@
-﻿using VModer.Core.Extensions;
+﻿using EmmyLua.LanguageServer.Framework.Protocol.Message.Client.PublishDiagnostics;
+using EmmyLua.LanguageServer.Framework.Protocol.Model.Diagnostic;
+using ParadoxPower.Process;
+using VModer.Core.Analyzers;
+using VModer.Core.Extensions;
 using VModer.Core.Infrastructure.Parser;
+using VModer.Core.Models;
 
 namespace VModer.Core.Services;
 
@@ -7,11 +12,17 @@ public sealed class AnalyzeService
 {
     private readonly GameFilesService _gameFilesService;
     private readonly EditorDiagnosisService _editorDiagnosisService;
+    private readonly StateAnalyzerService _stateAnalyzerService;
 
-    public AnalyzeService(GameFilesService gameFilesService, EditorDiagnosisService editorDiagnosisService)
+    public AnalyzeService(
+        GameFilesService gameFilesService,
+        EditorDiagnosisService editorDiagnosisService,
+        StateAnalyzerService stateAnalyzerService
+    )
     {
         _gameFilesService = gameFilesService;
         _editorDiagnosisService = editorDiagnosisService;
+        _stateAnalyzerService = stateAnalyzerService;
     }
 
     public Task AnalyzeFileAsync(Uri fileUri)
@@ -22,11 +33,28 @@ public sealed class AnalyzeService
         }
 
         string filePath = fileUri.ToSystemPath();
-        if (TextParser.TryParse(filePath, fileText, out _, out var error))
+
+        if (!TextParser.TryParse(filePath, fileText, out var node, out var error))
         {
-            return _editorDiagnosisService.ClearDiagnoseAsync(fileUri);
+            return _editorDiagnosisService.AddDiagnoseAsync(error, fileUri);
         }
 
-        return _editorDiagnosisService.AddDiagnoseAsync(error, fileUri);
+        var gameFileType = GameFileType.FromFilePath(filePath);
+
+        var diagnoses = AnalyzeFile(node, filePath, gameFileType);
+        return _editorDiagnosisService.AddDiagnoseAsync(
+            new PublishDiagnosticsParams { Diagnostics = diagnoses, Uri = fileUri }
+        );
     }
+
+    private List<Diagnostic> AnalyzeFile(Node node, string filePath, GameFileType gameFileType)
+    {
+        return gameFileType.Name switch
+        {
+            nameof(GameFileType.State) => _stateAnalyzerService.Analyze(node, filePath),
+            _ => EmptyDiagnoses
+        };
+    }
+
+    private static readonly List<Diagnostic> EmptyDiagnoses = [];
 }

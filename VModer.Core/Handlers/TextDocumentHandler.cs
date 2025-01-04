@@ -13,13 +13,12 @@ namespace VModer.Core.Handlers;
 public sealed class TextDocumentHandler : TextDocumentHandlerBase, IHandler
 {
     private readonly GameFilesService _filesService;
-    private readonly AnalyzeService _analyzeService;
+    private AnalyzeService _analyzeService = null!;
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
     public TextDocumentHandler()
     {
         _filesService = App.Services.GetRequiredService<GameFilesService>();
-        _analyzeService = App.Services.GetRequiredService<AnalyzeService>();
     }
 
     protected override Task Handle(DidOpenTextDocumentParams request, CancellationToken token)
@@ -72,6 +71,6 @@ public sealed class TextDocumentHandler : TextDocumentHandlerBase, IHandler
 
     public void Initialize()
     {
-        
+        _analyzeService = App.Services.GetRequiredService<AnalyzeService>();
     }
 }

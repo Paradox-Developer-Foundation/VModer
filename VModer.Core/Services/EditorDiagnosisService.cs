@@ -31,7 +31,7 @@ public sealed class EditorDiagnosisService
                 [
                     new Diagnostic
                     {
-                        Code = "VM1000",
+                        Code = ErrorCode.VM1000,
                         Range = range,
                         Message = error.ErrorMessage,
                         Severity = DiagnosticSeverity.Error

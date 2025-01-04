@@ -15,7 +15,7 @@ public sealed class CountryTagService : CommonResourcesService<CountryTagService
     private readonly ResetLazy<string[]> _countryTagsLazy;
 
     public CountryTagService()
-        : base(Path.Combine(Keywords.Common, "country_tags"), WatcherFilter.Text)
+        : base(Path.Combine([Keywords.Common, "country_tags"]), WatcherFilter.Text)
     {
         _countryTagsLazy = new ResetLazy<string[]>(
             () => Resources.Values.SelectMany(set => set.Items).ToArray()

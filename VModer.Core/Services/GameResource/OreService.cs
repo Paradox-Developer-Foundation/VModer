@@ -22,7 +22,7 @@ public sealed class OreService : CommonResourcesService<OreService, string[]>
     private readonly LocalizationService _localizationService;
 
     public OreService(LocalizationService localizationService)
-        : base(Path.Combine(Keywords.Common, ResourcesKeyword), WatcherFilter.Text)
+        : base(Path.Combine([Keywords.Common, ResourcesKeyword]), WatcherFilter.Text)
     {
         _localizationService = localizationService;
         _oresLazy = new ResetLazy<string[]>(() => Ores.SelectMany(s => s).ToArray());

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
 using VModer.Core;
+using VModer.Core.Analyzers;
 using VModer.Core.Services;
 using VModer.Core.Services.GameResource;
 using VModer.Core.Services.GameResource.Base;
@@ -41,12 +42,14 @@ builder.Services.AddSingleton<GameFilesService>();
 builder.Services.AddSingleton<GameResourcesWatcherService>();
 
 builder.Services.AddSingleton<AnalyzeService>();
+builder.Services.AddSingleton<StateAnalyzerService>();
 builder.Services.AddSingleton<CompletionService>();
 builder.Services.AddSingleton<EditorDiagnosisService>();
 
 builder.Services.AddSingleton<LocalizationService>();
 builder.Services.AddSingleton<CountryTagService>();
 builder.Services.AddSingleton<OreService>();
+builder.Services.AddSingleton<BuildingsService>();
 
 builder.Services.AddHostedService<LanguageServerHostedService>();
 

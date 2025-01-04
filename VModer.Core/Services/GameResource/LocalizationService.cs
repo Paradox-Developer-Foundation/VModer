@@ -19,8 +19,12 @@ public sealed class LocalizationService
     public LocalizationService()
         : base(
             Path.Combine(
-                "localisation",
-                App.Services.GetRequiredService<SettingsService>().GameLanguage.ToGameLocalizationLanguage()
+                [
+                    "localisation",
+                    App
+                        .Services.GetRequiredService<SettingsService>()
+                        .GameLanguage.ToGameLocalizationLanguage()
+                ]
             ),
             WatcherFilter.LocalizationFiles,
             PathType.Folder

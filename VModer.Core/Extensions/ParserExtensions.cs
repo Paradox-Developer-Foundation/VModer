@@ -1,10 +1,11 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using EmmyLua.LanguageServer.Framework.Protocol.Model;
 using Microsoft.FSharp.Collections;
 using ParadoxPower.Parser;
 using ParadoxPower.Process;
-using ParadoxPower.Utilities;
 using VModer.Core.Models;
+using Position = ParadoxPower.Utilities.Position;
 
 namespace VModer.Core.Extensions;
 
@@ -159,5 +160,17 @@ public static class ParserExtensions
 
         node = null;
         return false;
+    }
+
+    public static DocumentRange ToDocumentRange(this Position.Range position)
+    {
+        return new DocumentRange(
+            new EmmyLua.LanguageServer.Framework.Protocol.Model.Position(
+                // VS Code 以 0 开始, 解析器 以 1 开始
+                position.StartLine - 1,
+                position.StartColumn
+            ),
+            new EmmyLua.LanguageServer.Framework.Protocol.Model.Position(position.EndLine - 1, position.EndColumn)
+        );
     }
 }
