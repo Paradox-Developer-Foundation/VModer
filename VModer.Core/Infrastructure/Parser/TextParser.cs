@@ -49,19 +49,9 @@ public class TextParser
         [NotNullWhen(false)] out ParserError? error
     )
     {
-        var parser = new TextParser(filePath);
-        if (parser.IsFailure)
-        {
-            rootNode = null;
-            error = parser.GetError();
-            return false;
-        }
-
-        rootNode = parser.GetResult();
-        error = null;
-        return true;
+        return TryParse(filePath, File.ReadAllText(filePath), out rootNode, out error);
     }
-    
+
     public static bool TryParse(
         string filePath,
         string fileText,
@@ -69,17 +59,26 @@ public class TextParser
         [NotNullWhen(false)] out ParserError? error
     )
     {
-        var parser = new TextParser(filePath, fileText);
-        if (parser.IsFailure)
+        try
+        {
+            var parser = new TextParser(filePath, fileText);
+            if (parser.IsFailure)
+            {
+                rootNode = null;
+                error = parser.GetError();
+                return false;
+            }
+
+            rootNode = parser.GetResult();
+            error = null;
+            return true;
+        }
+        catch (Exception e)
         {
             rootNode = null;
-            error = parser.GetError();
+            error = new ParserError(Path.GetFileName(filePath), 0, 0, e.Message);
             return false;
         }
-
-        rootNode = parser.GetResult();
-        error = null;
-        return true;
     }
 
     static TextParser()
