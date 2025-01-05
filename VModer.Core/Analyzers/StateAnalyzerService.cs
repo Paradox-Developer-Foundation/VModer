@@ -34,7 +34,7 @@ public sealed class StateAnalyzerService
 
         //TODO: 当修改时怎么办? 删除文件时怎么处理
         // AnalyzeId(filePath, stateNode, list);
-        
+
         // AnalyzeProvinces(filePath, stateNode, list);
 
         if (!stateNode.TryGetNode("history", out var historyNode))
@@ -56,45 +56,62 @@ public sealed class StateAnalyzerService
             return;
         }
 
-        foreach (var buildingLeaf in buildingsNode.Leaves)
+        foreach (var child in buildingsNode.AllArray)
         {
-            if (!buildingLeaf.Value.IsInt)
+            if (child.IsLeafChild)
             {
-                Log.Debug("num: {}", buildingLeaf.Key);
-                continue;
+                var buildingLeaf = child.leaf;
+                AnalyzeBuildingLeaf(buildingLeaf, list);
             }
-
-            string buildingName = buildingLeaf.Key;
-            if (!_buildingService.TryGetBuildingInfo(buildingName, out var buildingInfo))
+            // 是省份建筑
+            else if (child.IsNodeChild)
             {
-                continue;
-            }
-
-            if (buildingInfo.MaxLevel is null)
-            {
-                continue;
-            }
-
-            if (!int.TryParse(buildingLeaf.ValueText, out int currentBuildingLevel))
-            {
-                continue;
-            }
-
-            if (currentBuildingLevel > buildingInfo.MaxLevel.Value)
-            {
-                list.Add(
-                    new Diagnostic
-                    {
-                        Code = ErrorCode.VM1002,
-                        Range = buildingLeaf.Position.ToDocumentRange(),
-                        Message = $"建筑 {buildingLeaf.Key} 等级超过上限, 最大值为: {buildingInfo.MaxLevel.Value}",
-                        Severity = DiagnosticSeverity.Error,
-                    }
-                );
+                var provinceBuildingsNode = child.node;
+                foreach (var buildingLeaf in provinceBuildingsNode.Leaves)
+                {
+                    AnalyzeBuildingLeaf(buildingLeaf, list);
+                }
             }
         }
     }
-    //
+
+    private void AnalyzeBuildingLeaf(Leaf buildingLeaf, List<Diagnostic> list)
+    {
+        if (!buildingLeaf.Value.IsInt)
+        {
+            return;
+        }
+
+        string buildingName = buildingLeaf.Key;
+        if (!_buildingService.TryGetBuildingInfo(buildingName, out var buildingInfo))
+        {
+            return;
+        }
+
+        if (buildingInfo.MaxLevel is null)
+        {
+            return;
+        }
+
+        if (!long.TryParse(buildingLeaf.ValueText, out long currentBuildingLevel))
+        {
+            return;
+        }
+
+        if (currentBuildingLevel > buildingInfo.MaxLevel.Value)
+        {
+            list.Add(
+                new Diagnostic
+                {
+                    Code = ErrorCode.VM1002,
+                    Range = buildingLeaf.Position.ToDocumentRange(),
+                    Message = $"建筑 {buildingLeaf.Key} 等级超过上限, 最大值为: {buildingInfo.MaxLevel.Value}",
+                    Severity = DiagnosticSeverity.Error,
+                }
+            );
+        }
+    }
+
     // private void AnalyzeId(string filePath, Node stateNode, List<Diagnostic> list)
     // {
     //     if (!_idSet.TryAdd(stateNode, filePath, out var info))
@@ -133,7 +150,7 @@ public sealed class StateAnalyzerService
     //             );
     //             list.Add(new Diagnostic
     //             {
-    //                 
+    //
     //             });
     //         }
     //     }
