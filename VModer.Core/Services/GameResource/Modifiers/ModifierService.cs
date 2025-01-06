@@ -16,51 +16,7 @@ public sealed class ModifierService
     }
 
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-
-    // private static readonly ImmutableSolidColorBrush Yellow = new(Color.FromRgb(255, 189, 0));
-
-    // public IBrush GetModifierBrush(LeafModifier leafModifier, string modifierFormat)
-    // {
-    //     var value = double.Parse(leafModifier.Value);
-    //     if (value == 0.0)
-    //     {
-    //         return Yellow;
-    //     }
-    //
-    //     var modifierType = GetModifierType(leafModifier.Key, modifierFormat);
-    //     if (modifierType == ModifierEffectType.Unknown)
-    //     {
-    //         return Brushes.Black;
-    //     }
-    //
-    //     if (value > 0.0)
-    //     {
-    //         if (modifierType == ModifierEffectType.Positive)
-    //         {
-    //             return Brushes.Green;
-    //         }
-    //
-    //         if (modifierType == ModifierEffectType.Negative)
-    //         {
-    //             return Brushes.Red;
-    //         }
-    //     }
-    //     else
-    //     {
-    //         if (modifierType == ModifierEffectType.Positive)
-    //         {
-    //             return Brushes.Red;
-    //         }
-    //
-    //         if (modifierType == ModifierEffectType.Negative)
-    //         {
-    //             return Brushes.Green;
-    //         }
-    //     }
-    //
-    //     return Brushes.Black;
-    // }
-
+    
     public bool TryGetLocalizationName(string modifierKey, [NotNullWhen(true)] out string? value)
     {
         if (_localizationService.TryGetValueInAll(modifierKey, out value))
@@ -177,10 +133,10 @@ public sealed class ModifierService
 
     private static char GetDisplayDigits(string modifierDescription)
     {
-        var displayDigits = '1';
-        for (var i = modifierDescription.Length - 1; i >= 0; i--)
+        char displayDigits = '1';
+        for (int i = modifierDescription.Length - 1; i >= 0; i--)
         {
-            var c = modifierDescription[i];
+            char c = modifierDescription[i];
             if (char.IsDigit(c))
             {
                 displayDigits = c;

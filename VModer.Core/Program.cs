@@ -24,6 +24,10 @@ settings.EnvironmentName = "Production";
 
 var builder = Host.CreateApplicationBuilder(settings);
 
+Stream? inputStream;
+Stream? outputStream;
+
+#if DEBUG
 using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 var ipAddress = new IPAddress([127, 0, 0, 1]);
 var endPoint = new IPEndPoint(ipAddress, 1231);
@@ -33,8 +37,14 @@ Debug.WriteLine("等待连接...");
 Console.WriteLine("等待连接...");
 var languageClientSocket = await socket.AcceptAsync().ConfigureAwait(false);
 await using var _networkStream = new NetworkStream(languageClientSocket);
+inputStream = _networkStream;
+outputStream = _networkStream;
+#else
+inputStream = Console.OpenStandardInput();
+outputStream = Console.OpenStandardOutput();
+#endif
 
-var server = LanguageServer.From(_networkStream, _networkStream);
+var server = LanguageServer.From(inputStream, outputStream);
 
 builder.Services.AddSingleton(server);
 builder.Services.AddSingleton<SettingsService>();

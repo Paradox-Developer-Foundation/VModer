@@ -1,6 +1,10 @@
-﻿namespace VModer.Core.Infrastructure;
+﻿using System.Diagnostics.CodeAnalysis;
 
-public sealed class ResetLazy<T>(Func<T> valueFactory)
+namespace VModer.Core.Infrastructure;
+
+public sealed class ResetLazy<
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T
+>(Func<T> valueFactory)
 {
     public T Value => _lazy.Value;
 

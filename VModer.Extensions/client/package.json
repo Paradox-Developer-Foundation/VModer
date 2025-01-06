@@ -2,7 +2,7 @@
 	"name": "VModer",
 	"description": "A HOI4 language server",
 	"author": "textGamex",
-	"license": "MIT",
+	"license": "Apache-2.0",
 	"version": "0.1.0",
 	"repository": {
 		"type": "git",
@@ -11,7 +11,8 @@
 	"publisher": "textGamex",
 	"categories": [],
 	"keywords": [
-		"multi-root ready"
+		"hoi4",
+		"language server"
 	],
 	"engines": {
 		"vscode": "^1.75.0"
@@ -25,17 +26,6 @@
 			"type": "object",
 			"title": "VModer configuration",
 			"properties": {
-				"languageServerExample.trace.server": {
-					"scope": "window",
-					"type": "string",
-					"enum": [
-						"off",
-						"messages",
-						"verbose"
-					],
-					"default": "off",
-					"description": "Traces the communication between VS Code and the language server."
-				},
 				"VModer.GameRootPath" : {
 					"scope": "resource",
 					"type": "string",

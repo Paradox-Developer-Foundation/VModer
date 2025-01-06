@@ -3,78 +3,97 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-// import * as path from 'path';
-import { workspace, ExtensionContext } from 'vscode';
+import { workspace, ExtensionContext, ExtensionMode } from 'vscode';
 import * as net from "net";
+import * as fs from 'fs';
+import * as os from 'os';
 import {
 	LanguageClient,
 	LanguageClientOptions,
-	// ServerOptions,
+	ServerOptions,
 	StreamInfo,
+	TransportKind,
 	// TransportKind,
 } from 'vscode-languageclient/node';
+import * as path from 'path';
 
 let client: LanguageClient;
 
-export function activate(_context: ExtensionContext) {
-	// The server is implemented in node
-	// const serverModule = context.asAbsolutePath(
-	// 	path.join('server', 'out', 'server.js')
-	// );
+export function activate(context: ExtensionContext) {
+	let serverOptions: ServerOptions;
 
-	// The server is a started as a separate app and listens on port 5007
-	const connectionInfo = {
-		port: 1231
-	};
-	const serverOptions = () => {
-		// Connect to language server via socket
-		const socket = net.connect(connectionInfo);
-		const result: StreamInfo = {
-			writer: socket,
-			reader: socket as NodeJS.ReadableStream
+	if (context.extensionMode == ExtensionMode.Development) {
+		const connectionInfo = {
+			port: 1231
 		};
-		socket.on("close", () => {
-			console.log("client connect error!");
-		});
-		return Promise.resolve(result);
-	};
-	// If the extension is launched in debug mode then the debug server options are used
-	// Otherwise the run options are used
-	// const serverOptions: ServerOptions = {
-	// 	run: {
-	// 		command: 'dotnet',
-	// 		args: [
-	// 			'D:\\Code\\Project\\Rid_C#\\VModer\\VModer.Client\\bin\\Debug\\net9.0\\VModer.Client.dll',
-	// 		],
-	// 		transport: {kind: TransportKind.socket, port: 1231},
-	// 	},
-	// 	debug: {
-	// 		command: 'dotnet',
-	// 		args: [
-	// 			'D:\\Code\\Project\\Rid_C#\\VModer\\VModer.Client\\bin\\Debug\\net9.0\\VModer.Client.dll',
-	// 		],
-	// 		transport: {kind: TransportKind.socket, port: 1231},
-	// 	},
-	// };
+		serverOptions = () => {
+			// Connect to language server via socket
+			const socket = net.connect(connectionInfo);
+			const result: StreamInfo = {
+				writer: socket,
+				reader: socket as NodeJS.ReadableStream
+			};
+			socket.on("close", () => {
+				console.log("client connect error!");
+			});
+			return Promise.resolve(result);
+		};
+	}
+	else {
+		const platform: string = os.platform();
+
+		let command = "";
+		switch (platform) {
+			case "win32":
+				command = path.join(
+					context.extensionPath,
+					'server',
+					'win-x64',
+					'VModer.Core.exe'
+				);
+				break;
+			case "linux":
+				command = path.join(
+					context.extensionPath,
+					'server',
+					'linux-x64',
+					'VModer.Core'
+				);
+				fs.chmodSync(command, '777');
+				break;
+			case "darwin":
+				command = path.join(
+					context.extensionPath,
+					'server',
+					'osx-x64',
+					'VModer.Core'
+				);
+				break;
+		}
+		console.log("command: " + command);
+
+		serverOptions = {
+			run: { command: command, args: [], transport: TransportKind.stdio },
+			debug: { command: command, args: [] }
+		};
+	}
 
 	// 控制语言客户端的选项
 	const clientOptions: LanguageClientOptions = {
 		// 为纯文本文档注册服务器
-		documentSelector: [{ scheme: 'file', language: 'plaintext' }, { scheme: 'file', language: 'hoi4' }],
+		documentSelector: [{ scheme: 'file', language: 'hoi4' }],
 		synchronize: {
-			// Notify the server about file changes to '.clientrc files contained in the workspace
-			fileEvents: [workspace.createFileSystemWatcher('**/.clientrc'), workspace.createFileSystemWatcher('**/*.txt')],
+			fileEvents: [workspace.createFileSystemWatcher('**/*.txt')],
 		},
 		initializationOptions: {
 			"GameRootFolderPath": workspace.getConfiguration().get<string>("VModer.GameRootPath")
 		}
 	};
 
-	// Create the language client and start the client.
 	// 创建语言客户端并启动客户端。
 	client = new LanguageClient(
-		'languageServerExample',
-		'Language Server Example',
+		'vmoder',
+		'VModer Server',
 		serverOptions,
 		clientOptions
 	);
