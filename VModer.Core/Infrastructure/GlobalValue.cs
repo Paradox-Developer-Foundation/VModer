@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
-using EmmyLua.LanguageServer.Framework.Protocol.Model;
 using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Parser;
 using ParadoxPower.Process;

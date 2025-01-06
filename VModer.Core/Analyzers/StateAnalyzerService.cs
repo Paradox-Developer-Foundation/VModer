@@ -5,7 +5,6 @@ using NLog;
 using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
 using VModer.Core.Extensions;
-using VModer.Core.Infrastructure;
 using VModer.Core.Services.GameResource;
 
 namespace VModer.Core.Analyzers;

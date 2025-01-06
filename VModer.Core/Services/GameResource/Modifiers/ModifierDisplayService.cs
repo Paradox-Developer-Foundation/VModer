@@ -1,6 +1,4 @@
 ﻿using System.Text;
-using FParsec;
-using Markdig.Helpers;
 using NLog;
 using VModer.Core.Models;
 using VModer.Core.Models.Character;
@@ -72,7 +70,7 @@ public sealed class ModifierDisplayService
                     {
                         var sb = new StringBuilder();
                         string name = _localizationService.GetValue(leafModifier.Value);
-                        foreach (var colorTextInfo in _localisationFormatService.GetColorText(name))
+                        foreach (var colorTextInfo in _localisationFormatService.GetFormatText(name))
                         {
                             sb.Append(colorTextInfo.DisplayText);
                         }
@@ -112,27 +110,30 @@ public sealed class ModifierDisplayService
         string modifierKey = _localisationKeyMappingService.TryGetValue(modifier.Key, out string? mappingKey)
             ? mappingKey
             : modifier.Key;
-        string modifierName = GetModifierColorTextFromText(modifierKey);
+        string modifierName = GetModifierFormatTextFromText(modifierKey);
 
         if (modifier.ValueType is GameValueType.Int or GameValueType.Float)
         {
             string modifierFormat = _modifierService.TryGetLocalizationFormat(modifierKey, out string? result)
                 ? result
                 : string.Empty;
-            return $"{modifierName}: {_modifierService.GetDisplayValue(modifier, modifierFormat)}";
+            string colon = modifierName.EndsWith(':') || modifierName.EndsWith('：')
+                ? string.Empty
+                : ": ";
+            return $"{modifierName}{colon}{_modifierService.GetDisplayValue(modifier, modifierFormat)}";
         }
 
         return $"{modifierName}: {modifier.Value}";
     }
 
-    private string GetModifierColorTextFromText(string modifierKey)
+    private string GetModifierFormatTextFromText(string modifierKey)
     {
         string modifierName = _modifierService.GetLocalizationName(modifierKey);
 
         var sb = new StringBuilder();
-        foreach (var colorTextInfo in _localisationFormatService.GetColorText(modifierName))
+        foreach (var textInfo in _localisationFormatService.GetFormatText(modifierName))
         {
-            sb.Append(colorTextInfo.DisplayText);
+            sb.Append(textInfo.DisplayText);
         }
         return sb.ToString();
     }

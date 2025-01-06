@@ -1,6 +1,7 @@
 ﻿using EmmyLua.LanguageServer.Framework.Protocol.Message.Hover;
 using EmmyLua.LanguageServer.Framework.Protocol.Model;
 using EmmyLua.LanguageServer.Framework.Protocol.Model.Markup;
+using MethodTimer;
 using ParadoxPower.Process;
 using VModer.Core.Extensions;
 using VModer.Core.Infrastructure.Parser;
@@ -20,6 +21,7 @@ public sealed class HoverService
         _modifierDisplayService = modifierDisplayService;
     }
 
+    [Time]
     public Task<HoverResponse?> GetHoverResponseAsync(HoverParams request)
     {
         string filePath = request.TextDocument.Uri.Uri.ToSystemPath();

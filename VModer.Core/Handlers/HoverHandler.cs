@@ -1,7 +1,6 @@
 ﻿using EmmyLua.LanguageServer.Framework.Protocol.Capabilities.Client.ClientCapabilities;
 using EmmyLua.LanguageServer.Framework.Protocol.Capabilities.Server;
 using EmmyLua.LanguageServer.Framework.Protocol.Message.Hover;
-using EmmyLua.LanguageServer.Framework.Protocol.Model.Markup;
 using EmmyLua.LanguageServer.Framework.Server.Handler;
 using Microsoft.Extensions.DependencyInjection;
 using VModer.Core.Services;

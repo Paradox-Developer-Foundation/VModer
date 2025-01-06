@@ -4,14 +4,22 @@ using VModer.Core.Models;
 
 namespace VModer.Core.Services.GameResource.Localization;
 
-public sealed class LocalizationFormatService(LocalizationTextColorsService localizationTextColorsService)
+public sealed class LocalizationFormatService(
+    LocalizationTextColorsService localizationTextColorsService,
+    LocalizationService localizationService
+)
 {
     /// <summary>
-    /// 从文本中获取颜色信息, 返回的集合中不包含 <see cref="LocalizationFormatType.Placeholder"/> 类型的文本, 如果解析失败, 则统一使用黑色
+    /// 获取格式化后的文本, 如果解析文本颜色失败, 则统一使用黑色
     /// </summary>
     /// <param name="text">文本</param>
-    /// <returns>一个集合, 包含非占位符的所有文本颜色信息</returns>
-    public IReadOnlyCollection<ColorTextInfo> GetColorText(string text)
+    /// <returns>一个集合, 包含格式化后的文本</returns>
+    /// <remarks>
+    /// 现支持
+    /// 1. 文本颜色格式
+    /// 2. 对其他本地化键的引用
+    /// </remarks>
+    public IReadOnlyCollection<ColorTextInfo> GetFormatText(string text)
     {
         var result = new List<ColorTextInfo>(4);
 
@@ -19,7 +27,17 @@ public sealed class LocalizationFormatService(LocalizationTextColorsService loca
         {
             foreach (var format in formats)
             {
-                if (format.Type != LocalizationFormatType.Placeholder)
+                if (format.Type == LocalizationFormatType.Placeholder)
+                {
+                    // 一般来说, 包含管道符的为格式说明字符串, 不需要处理
+                    if (format.Text.Contains('|'))
+                    {
+                        continue;
+                    }
+
+                    result.Add(new ColorTextInfo(localizationService.GetValue(format.Text), Color.Black));
+                }
+                else
                 {
                     result.Add(GetColorText(format));
                 }
