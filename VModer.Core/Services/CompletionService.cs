@@ -21,28 +21,28 @@ public sealed class CompletionService
     private static readonly CompletionResponse EmptyResponse = new([]);
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-    [Time]
-    public CompletionResponse Resolve(CompletionParams request)
-    {
-        if (!_filesService.TryGetFileText(request.TextDocument.Uri.Uri, out string? fileText))
-        {
-            return EmptyResponse;
-        }
-
-        string filePath = request.TextDocument.Uri.Uri.ToSystemPath();
-        var type = GameFileType.FromFilePath(filePath);
-        // TODO: 跟分析服务中的解析能否合并?
-        if (!TextParser.TryParse(filePath, fileText, out var rootNode, out _))
-        {
-            // 当输入未完成时, 无法解析为 AST, 则尝试获取光标前的字符串
-            return GetCompletionByStringBeforeCursor(fileText, request.Position);
-        }
-
-        var node = FindNodeByPosition(rootNode, request.Position.ToLocalPosition());
-        Log.Debug("Key: {P}, file type: {}", node.Key, type);
-
-        return GetCompletion(node, type);
-    }
+    // [Time]
+    // public CompletionResponse Resolve(CompletionParams request)
+    // {
+    //     if (!_filesService.TryGetFileText(request.TextDocument.Uri.Uri, out string? fileText))
+    //     {
+    //         return EmptyResponse;
+    //     }
+    //
+    //     string filePath = request.TextDocument.Uri.Uri.ToSystemPath();
+    //     var type = GameFileType.FromFilePath(filePath);
+    //     // TODO: 跟分析服务中的解析能否合并?
+    //     if (!TextParser.TryParse(filePath, fileText, out var rootNode, out _))
+    //     {
+    //         // 当输入未完成时, 无法解析为 AST, 则尝试获取光标前的字符串
+    //         return GetCompletionByStringBeforeCursor(fileText, request.Position);
+    //     }
+    //
+    //     var node = FindNodeByPosition(rootNode, request.Position.ToLocalPosition());
+    //     Log.Debug("Key: {P}, file type: {}", node.Key, type);
+    //
+    //     return GetCompletion(node, type);
+    // }
 
     private CompletionResponse GetCompletionByStringBeforeCursor(string fileText, Position cursorPosition)
     {
@@ -129,45 +129,7 @@ public sealed class CompletionService
         return startIndex;
     }
 
-    /// <summary>
-    /// 获取离光标最近的 <see cref="Node"/>
-    /// </summary>
-    /// <param name="node">节点</param>
-    /// <param name="cursorPosition">光标位置(以 1 开始)</param>
-    /// <returns>离光标最近的 <see cref="Node"/></returns>
-    private static Node FindNodeByPosition(Node node, Position cursorPosition)
-    {
-        foreach (var child in node.Nodes)
-        {
-            var childPosition = child.Position;
-            Log.Trace(
-                "Child: {P}, cursor:{CursorPosition}, Key: {}",
-                child.Position,
-                cursorPosition,
-                child.Key
-            );
-            if (
-                (
-                    cursorPosition.Line == childPosition.StartLine
-                    && cursorPosition.Character > childPosition.StartColumn
-                )
-                || (
-                    cursorPosition.Line == childPosition.EndLine
-                    && cursorPosition.Character < childPosition.EndColumn
-                )
-            )
-            {
-                return child;
-            }
-
-            if (cursorPosition.Line > childPosition.StartLine && cursorPosition.Line < childPosition.EndLine)
-            {
-                return FindNodeByPosition(child, cursorPosition);
-            }
-        }
-
-        return node;
-    }
+    
 
     private CompletionResponse GetCompletion(Node node, GameFileType fileType)
     {

@@ -2,6 +2,7 @@ using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
 using VModer.Core.Infrastructure;
 using VModer.Core.Services.GameResource.Base;
+using VModer.Core.Services.GameResource.Localization;
 
 namespace VModer.Core.Services.GameResource;
 

@@ -7,28 +7,28 @@ using ParadoxPower.Localisation;
 using VModer.Core.Extensions;
 using VModer.Core.Services.GameResource.Base;
 
-namespace VModer.Core.Services.GameResource;
+namespace VModer.Core.Services.GameResource.Localization;
 
 public sealed class LocalizationService
     : ResourcesService<LocalizationService, FrozenDictionary<string, string>, YAMLLocalisationParser.LocFile>
 {
     private Dictionary<string, FrozenDictionary<string, string>>.ValueCollection Localisations =>
         Resources.Values;
+    private readonly LocalizationKeyMappingService _localizationKeyMapping;
 
     [Time("加载本地化文件")]
-    public LocalizationService()
+    public LocalizationService(LocalizationKeyMappingService localizationKeyMapping)
         : base(
             Path.Combine(
-                [
-                    "localisation",
-                    App
-                        .Services.GetRequiredService<SettingsService>()
-                        .GameLanguage.ToGameLocalizationLanguage()
-                ]
+                "localisation",
+                App.Services.GetRequiredService<SettingsService>().GameLanguage.ToGameLocalizationLanguage()
             ),
             WatcherFilter.LocalizationFiles,
             PathType.Folder
-        ) { }
+        )
+    {
+        _localizationKeyMapping = localizationKeyMapping;
+    }
 
     /// <summary>
     /// 如果本地化文本不存在, 则返回<c>key</c>
@@ -36,14 +36,14 @@ public sealed class LocalizationService
     /// <returns></returns>
     public string GetValue(string key)
     {
-        return TryGetValue(key, out string? value) ? value : key;
+        return TryGetValue(key, out var value) ? value : key;
     }
 
     public bool TryGetValue(string key, [NotNullWhen(true)] out string? value)
     {
         foreach (var localisation in Localisations)
         {
-            if (localisation.TryGetValue(key, out string? result))
+            if (localisation.TryGetValue(key, out var result))
             {
                 value = result;
                 return true;
@@ -52,6 +52,32 @@ public sealed class LocalizationService
 
         value = null;
         return false;
+    }
+
+    public string GetValueInAll(string key)
+    {
+        if (TryGetValueInAll(key, out var value))
+        {
+            return value;
+        }
+
+        return key;
+    }
+
+    /// <summary>
+    /// 查找本地化字符串, 先尝试在 <see cref="LocalizationKeyMappingService"/> 中查找 Key 是否有替换的 Key
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    public bool TryGetValueInAll(string key, [NotNullWhen(true)] out string? value)
+    {
+        if (_localizationKeyMapping.TryGetValue(key, out var mappingKey))
+        {
+            key = mappingKey;
+        }
+
+        return TryGetValue(key, out value);
     }
 
     protected override FrozenDictionary<string, string> ParseFileToContent(

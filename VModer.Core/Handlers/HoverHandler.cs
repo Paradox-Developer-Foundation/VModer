@@ -3,30 +3,31 @@ using EmmyLua.LanguageServer.Framework.Protocol.Capabilities.Server;
 using EmmyLua.LanguageServer.Framework.Protocol.Message.Hover;
 using EmmyLua.LanguageServer.Framework.Protocol.Model.Markup;
 using EmmyLua.LanguageServer.Framework.Server.Handler;
+using Microsoft.Extensions.DependencyInjection;
+using VModer.Core.Services;
 
 namespace VModer.Core.Handlers;
 
-public class HoverHandler : HoverHandlerBase, IHandler
+public sealed class HoverHandler : HoverHandlerBase, IHandler
 {
+    
+    private HoverService _hoverService = null!;
+
     protected override Task<HoverResponse?> Handle(HoverParams request, CancellationToken token)
     {
-        return Task.FromResult<HoverResponse?>(new HoverResponse
-        {
-            Contents = new MarkupContent
-            {
-                Kind = MarkupKind.PlainText,
-                Value = "Hello World!"
-            }
-        });
+        return _hoverService.GetHoverResponseAsync(request);
     }
 
-    public override void RegisterCapability(ServerCapabilities serverCapabilities, ClientCapabilities clientCapabilities)
+    public override void RegisterCapability(
+        ServerCapabilities serverCapabilities,
+        ClientCapabilities clientCapabilities
+    )
     {
         serverCapabilities.HoverProvider = true;
     }
 
     public void Initialize()
     {
-        
+        _hoverService = App.Services.GetRequiredService<HoverService>();
     }
 }

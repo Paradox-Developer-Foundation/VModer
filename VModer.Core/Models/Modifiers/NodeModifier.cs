@@ -1,4 +1,6 @@
-﻿namespace VModer.Core.Models.Modifiers;
+﻿using ParadoxPower.Process;
+
+namespace VModer.Core.Models.Modifiers;
 
 public sealed class NodeModifier : IModifier
 {
@@ -10,5 +12,10 @@ public sealed class NodeModifier : IModifier
     {
         Key = key;
         Modifiers = modifiers.ToArray();
+    }
+    
+    public static NodeModifier FromNode(Node node)
+    {
+        return new NodeModifier(node.Key, node.Leaves.Select(LeafModifier.FromLeaf));
     }
 }

@@ -22,6 +22,7 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
+      <PackageReference Include="Markdig" Version="0.39.1" />
       <PackageReference Include="MethodTimer.Fody" Version="3.2.2" />
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
       <PackageReference Include="NLog" Version="5.3.4" />

@@ -11,6 +11,8 @@ using VModer.Core.Analyzers;
 using VModer.Core.Services;
 using VModer.Core.Services.GameResource;
 using VModer.Core.Services.GameResource.Base;
+using VModer.Core.Services.GameResource.Localization;
+using VModer.Core.Services.GameResource.Modifiers;
 
 var settings = new HostApplicationBuilderSettings { Args = args, ApplicationName = "VModer" };
 
@@ -42,6 +44,7 @@ builder.Services.AddSingleton<GameFilesService>();
 builder.Services.AddSingleton<GameResourcesWatcherService>();
 
 builder.Services.AddSingleton<AnalyzeService>();
+builder.Services.AddSingleton<HoverService>();
 builder.Services.AddSingleton<StateAnalyzerService>();
 builder.Services.AddSingleton<CompletionService>();
 builder.Services.AddSingleton<EditorDiagnosisService>();
@@ -50,6 +53,13 @@ builder.Services.AddSingleton<LocalizationService>();
 builder.Services.AddSingleton<CountryTagService>();
 builder.Services.AddSingleton<OreService>();
 builder.Services.AddSingleton<BuildingsService>();
+builder.Services.AddSingleton<LocalizationKeyMappingService>();
+builder.Services.AddSingleton<LocalizationFormatService>();
+builder.Services.AddSingleton<TerrainService>();
+builder.Services.AddSingleton<ModifierDisplayService>();
+builder.Services.AddSingleton<ModifierService>();
+builder.Services.AddSingleton<LocalizationTextColorsService>();
+builder.Services.AddSingleton<CharacterSkillService>();
 
 builder.Services.AddHostedService<LanguageServerHostedService>();
 

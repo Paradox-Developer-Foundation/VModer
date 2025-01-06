@@ -13,8 +13,8 @@ namespace VModer.Core.Analyzers;
 public sealed class StateAnalyzerService
 {
     private readonly BuildingsService _buildingService;
-    private readonly GlobalValue _provinces = new("province");
-    private readonly GlobalValue _idSet = new("id");
+    // private readonly GlobalValue _provinces = new("province");
+    // private readonly GlobalValue _idSet = new("id");
 
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 

@@ -2,6 +2,7 @@
 using System.Text;
 using EmmyLua.LanguageServer.Framework.Protocol.Message.TextDocument;
 using EmmyLua.LanguageServer.Framework.Protocol.Model;
+using MethodTimer;
 using NLog;
 
 namespace VModer.Core.Services;
@@ -11,6 +12,59 @@ public sealed class GameFilesService
     private readonly Dictionary<Uri, StringBuilder> _openedFiles = new(8);
 
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+
+    [Time("获取光标指向文字")]
+    public string GetTextAtPosition(Uri filePathUri, Position position)
+    {
+        if (!_openedFiles.TryGetValue(filePathUri, out var fileTextBuilder))
+        {
+            return string.Empty;
+        }
+
+        string fileText = fileTextBuilder.ToString();
+
+        int line = 0;
+        ReadOnlySpan<char> currentLineText = null;
+        foreach (var lineText in fileText.AsSpan().EnumerateLines())
+        {
+            if (line == position.Line)
+            {
+                currentLineText = lineText;
+                break;
+            }
+            ++line;
+        }
+
+        if (currentLineText.IsEmpty)
+        {
+            return string.Empty;
+        }
+
+        int start = 0;
+        int end = 0;
+        ReadOnlySpan<char> excludedChars = ['=', ' ', '{', '}', '\t', '"'];
+        int adjustedPosition = Math.Min(position.Character, currentLineText.Length - 1);
+        for (int offset = adjustedPosition; offset >= 0; offset--)
+        {
+            if (excludedChars.Contains(currentLineText[offset]))
+            {
+                break;
+            }
+            start = offset;
+        }
+
+        for (int offset = adjustedPosition; offset < currentLineText.Length; offset++)
+        {
+            if (excludedChars.Contains(currentLineText[offset]))
+            {
+                break;
+            }
+            end = offset;
+        }
+
+        int length = start == 0 && end == 0 ? 0 : end - start + 1;
+        return currentLineText.Slice(start, length).ToString();
+    }
 
     public void OnFileChanged(DidChangeTextDocumentParams request)
     {
