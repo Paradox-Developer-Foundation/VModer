@@ -30,6 +30,7 @@ var endPoint = new IPEndPoint(ipAddress, 1231);
 socket.Bind(endPoint);
 socket.Listen(1);
 Debug.WriteLine("等待连接...");
+Console.WriteLine("等待连接...");
 var languageClientSocket = await socket.AcceptAsync().ConfigureAwait(false);
 await using var _networkStream = new NetworkStream(languageClientSocket);
 

@@ -7,6 +7,11 @@
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
         <WarningsAsErrors>nullable</WarningsAsErrors>
+        <SelfContained>true</SelfContained>
+        <PublishSingleFile>true</PublishSingleFile>
+        <PublishTrimmed>true</PublishTrimmed>
+        <TrimMode>full</TrimMode>
+        <PublishReadyToRun>true</PublishReadyToRun>
     </PropertyGroup>
 
     <ItemGroup>
@@ -22,8 +27,9 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <PackageReference Include="Markdig" Version="0.39.1" />
-      <PackageReference Include="MethodTimer.Fody" Version="3.2.2" />
+      <PackageReference Include="MethodTimer.Fody" Version="3.2.2">
+          <PrivateAssets>all</PrivateAssets>
+      </PackageReference>
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
       <PackageReference Include="NLog" Version="5.3.4" />
       <PackageReference Include="NLog.Extensions.Logging" Version="5.3.15" />
