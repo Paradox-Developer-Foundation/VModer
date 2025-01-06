@@ -2,6 +2,7 @@
 using EmmyLua.LanguageServer.Framework.Protocol.Model;
 using EmmyLua.LanguageServer.Framework.Protocol.Model.Markup;
 using MethodTimer;
+using NLog;
 using ParadoxPower.Process;
 using VModer.Core.Extensions;
 using VModer.Core.Infrastructure.Parser;
@@ -13,7 +14,9 @@ namespace VModer.Core.Services;
 public sealed class HoverService
 {
     private readonly GameFilesService _gameFilesService;
-    private ModifierDisplayService _modifierDisplayService;
+    private readonly ModifierDisplayService _modifierDisplayService;
+
+    private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
     public HoverService(GameFilesService gameFilesService, ModifierDisplayService modifierDisplayService)
     {
@@ -48,6 +51,7 @@ public sealed class HoverService
     {
         var localPosition = request.Position.ToLocalPosition();
         var node = FindNodeByPosition(rootNode, localPosition);
+        Log.Debug("光标所在 Node, Key:{Key}, Pos: {Pos}", node.Key, localPosition);
         if (!node.Key.Equals("modifier", StringComparison.OrdinalIgnoreCase))
         {
             return string.Empty;
@@ -100,9 +104,21 @@ public sealed class HoverService
 
         foreach (var child in node.AllArray)
         {
+            var childPosition = child.Position;
+            if (cursorPosition.Line > childPosition.StartLine && cursorPosition.Line < childPosition.EndLine)
+            {
+                return child;
+            }
+
             if (
-                child.Position.StartLine == cursorPosition.Line
-                || child.Position.EndLine == cursorPosition.Line
+                (
+                    cursorPosition.Line == childPosition.StartLine
+                    && cursorPosition.Character >= childPosition.StartColumn
+                )
+                || (
+                    cursorPosition.Line == childPosition.EndLine
+                    && cursorPosition.Character <= childPosition.EndColumn
+                )
             )
             {
                 return child;
