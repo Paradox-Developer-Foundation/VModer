@@ -36,14 +36,14 @@ public sealed class LocalizationService
     /// <returns></returns>
     public string GetValue(string key)
     {
-        return TryGetValue(key, out var value) ? value : key;
+        return TryGetValue(key, out string? value) ? value : key;
     }
 
     public bool TryGetValue(string key, [NotNullWhen(true)] out string? value)
     {
         foreach (var localisation in Localisations)
         {
-            if (localisation.TryGetValue(key, out var result))
+            if (localisation.TryGetValue(key, out string? result))
             {
                 value = result;
                 return true;
@@ -56,7 +56,7 @@ public sealed class LocalizationService
 
     public string GetValueInAll(string key)
     {
-        if (TryGetValueInAll(key, out var value))
+        if (TryGetValueInAll(key, out string? value))
         {
             return value;
         }
@@ -72,7 +72,7 @@ public sealed class LocalizationService
     /// <returns></returns>
     public bool TryGetValueInAll(string key, [NotNullWhen(true)] out string? value)
     {
-        if (_localizationKeyMapping.TryGetValue(key, out var mappingKey))
+        if (_localizationKeyMapping.TryGetValue(key, out string? mappingKey))
         {
             key = mappingKey;
         }
