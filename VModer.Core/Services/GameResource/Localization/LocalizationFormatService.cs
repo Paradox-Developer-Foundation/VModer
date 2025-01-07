@@ -37,7 +37,7 @@ public sealed class LocalizationFormatService(
 
                     result.Add(new ColorTextInfo(localizationService.GetValue(format.Text), Color.Black));
                 }
-                else
+                else if (format.Type != LocalizationFormatType.Icon)
                 {
                     result.Add(GetColorText(format));
                 }

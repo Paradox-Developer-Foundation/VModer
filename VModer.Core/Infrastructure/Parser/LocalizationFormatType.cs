@@ -4,5 +4,6 @@ public enum LocalizationFormatType : byte
 {
     Placeholder,
     TextWithColor,
-    Text
+    Text,
+    Icon
 }
