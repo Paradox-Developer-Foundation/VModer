@@ -94,15 +94,9 @@ public sealed class ModifierService
 
     private static ModifierEffectType GetModifierType(string modifierName, string modifierFormat)
     {
-        // TODO: 重新支持从数据库中定义修饰符
-        // if (_modifierTypes.TryGetValue(modifierName, out var modifierType))
-        // {
-        //     return modifierType;
-        // }
-
-        for (var index = modifierFormat.Length - 1; index >= 0; index--)
+        for (int index = modifierFormat.Length - 1; index >= 0; index--)
         {
-            var c = modifierFormat[index];
+            char c = modifierFormat[index];
             switch (c)
             {
                 case '+':

@@ -111,19 +111,19 @@ public sealed class ModifierDisplayService
             ? mappingKey
             : modifier.Key;
         string modifierName = GetModifierFormatTextFromText(modifierKey);
+        string colon = modifierName.EndsWith(':') || modifierName.EndsWith('：') ? string.Empty : ": ";
+        string number = modifier.Value;
 
         if (modifier.ValueType is GameValueType.Int or GameValueType.Float)
         {
             string modifierFormat = _modifierService.TryGetLocalizationFormat(modifierKey, out string? result)
                 ? result
                 : string.Empty;
-            string colon = modifierName.EndsWith(':') || modifierName.EndsWith('：')
-                ? string.Empty
-                : ": ";
-            return $"{modifierName}{colon}{_modifierService.GetDisplayValue(modifier, modifierFormat)}";
+
+            number = _modifierService.GetDisplayValue(modifier, modifierFormat);
         }
 
-        return $"{modifierName}: {modifier.Value}";
+        return $"{modifierName}{colon}{number}";
     }
 
     /// <summary>
@@ -175,7 +175,7 @@ public sealed class ModifierDisplayService
 
     private List<string> GetDescriptionForUnknownNode(NodeModifier nodeModifier)
     {
-        Log.Warn("未知的节点修饰符: {Name}", nodeModifier.Key);
+        Log.Info("未知的节点修饰符: {Name}", nodeModifier.Key);
         return GetDescriptionForNode(
             nodeModifier,
             leafModifier => $"{NodeModifierChildrenPrefix}{GetDescriptionForLeaf(leafModifier)}"
