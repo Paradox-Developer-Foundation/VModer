@@ -9,14 +9,19 @@ namespace VModer.Core.Services.GameResource.Modifiers;
 public sealed class ModifierService
 {
     private readonly LocalizationService _localizationService;
+    private readonly ModiferLocalizationFormatService _modifierLocalizationFormatService;
 
-    public ModifierService(LocalizationService localizationService)
+    public ModifierService(
+        LocalizationService localizationService,
+        ModiferLocalizationFormatService modifierLocalizationFormatService
+    )
     {
         _localizationService = localizationService;
+        _modifierLocalizationFormatService = modifierLocalizationFormatService;
     }
 
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-    
+
     public bool TryGetLocalizationName(string modifierKey, [NotNullWhen(true)] out string? value)
     {
         if (_localizationService.TryGetValueInAll(modifierKey, out value))
@@ -64,7 +69,7 @@ public sealed class ModifierService
 
     public string GetLocalizationName(string modifierKey)
     {
-        if (TryGetLocalizationName(modifierKey, out var value))
+        if (TryGetLocalizationName(modifierKey, out string? value))
         {
             return value;
         }
@@ -74,6 +79,11 @@ public sealed class ModifierService
 
     public bool TryGetLocalizationFormat(string modifier, [NotNullWhen(true)] out string? result)
     {
+        if (_modifierLocalizationFormatService.TryGetLocalizationFormat(modifier, out result))
+        {
+            return true;
+        }
+
         if (_localizationService.TryGetValue($"{modifier}_tt", out result))
         {
             return true;

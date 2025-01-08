@@ -23,6 +23,7 @@ public sealed class LocalizationFormatService(
     {
         var result = new List<ColorTextInfo>(4);
 
+        // TODO: 修饰符显示内置的 icon
         if (LocalizationFormatParser.TryParse(text, out var formats))
         {
             foreach (var format in formats)

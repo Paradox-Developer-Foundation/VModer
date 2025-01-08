@@ -1,0 +1,6 @@
+﻿Raw Key,Mapping Key,Remarks(不处理 可为空)
+breakthrough_factor,MODIFIER_BREAKTHROUGH,突破
+shore_bombardment_bonus,MODIFIER_SHORE_BOMBARDMENT,对岸炮击加成
+monthly_population,MODIFIER_GLOBAL_MONTHLY_POPULATION,每月人口
+conscription,MODIFIER_CONSCRIPTION_FACTOR,适役人口
+refit_ic_cost,MODIFIER_INDUSTRIAL_REFIT_IC_COST_FACTOR,舰艇改装花费

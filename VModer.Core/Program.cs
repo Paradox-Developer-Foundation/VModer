@@ -71,6 +71,7 @@ builder.Services.AddSingleton<ModifierDisplayService>();
 builder.Services.AddSingleton<ModifierService>();
 builder.Services.AddSingleton<LocalizationTextColorsService>();
 builder.Services.AddSingleton<CharacterSkillService>();
+builder.Services.AddSingleton<ModiferLocalizationFormatService>();
 
 builder.Services.AddHostedService<LanguageServerHostedService>();
 

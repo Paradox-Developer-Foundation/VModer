@@ -126,6 +126,11 @@ public sealed class ModifierDisplayService
         return $"{modifierName}: {modifier.Value}";
     }
 
+    /// <summary>
+    /// 获取修饰符应用格式化后的本地化文本
+    /// </summary>
+    /// <param name="modifierKey"></param>
+    /// <returns></returns>
     private string GetModifierFormatTextFromText(string modifierKey)
     {
         string modifierName = _modifierService.GetLocalizationName(modifierKey);
