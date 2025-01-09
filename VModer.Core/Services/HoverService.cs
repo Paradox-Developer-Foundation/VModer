@@ -6,10 +6,12 @@ using MethodTimer;
 using NLog;
 using ParadoxPower.Process;
 using VModer.Core.Extensions;
+using VModer.Core.Infrastructure.Markdown;
 using VModer.Core.Infrastructure.Parser;
 using VModer.Core.Models;
 using VModer.Core.Models.Character;
 using VModer.Core.Models.Modifiers;
+using VModer.Core.Services.GameResource;
 using VModer.Core.Services.GameResource.Localization;
 using VModer.Core.Services.GameResource.Modifiers;
 
@@ -20,6 +22,7 @@ public sealed class HoverService
     private readonly GameFilesService _gameFilesService;
     private readonly ModifierDisplayService _modifierDisplayService;
     private readonly LocalizationService _localizationService;
+    private readonly CharacterTraitsService _characterTraitsService;
 
     private static readonly string[] GeneralKeywords = ["field_marshal", "corps_commander", "navy_leader"];
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
@@ -27,12 +30,14 @@ public sealed class HoverService
     public HoverService(
         GameFilesService gameFilesService,
         ModifierDisplayService modifierDisplayService,
-        LocalizationService localizationService
+        LocalizationService localizationService,
+        CharacterTraitsService characterTraitsService
     )
     {
         _gameFilesService = gameFilesService;
         _modifierDisplayService = modifierDisplayService;
         _localizationService = localizationService;
+        _characterTraitsService = characterTraitsService;
     }
 
     [Time]
@@ -134,10 +139,22 @@ public sealed class HoverService
         {
             return;
         }
+
+        var traits = node.LeafValues.Select(trait => trait.Key);
         builder.AppendHeader("特质:", 3);
-        builder.AppendList(
-            node.LeafValues.Select(trait => _localizationService.GetValue(trait.Key)).ToArray()
-        );
+
+        foreach (string traitKey in traits)
+        {
+            builder.AppendParagraph($"- {_localizationService.GetValue(traitKey)}");
+            if (_characterTraitsService.TryGetTrait(traitKey, out var trait))
+            {
+                var info = _modifierDisplayService.GetDescription(trait.AllModifiers);
+                foreach (string infoLine in info)
+                {
+                    builder.AppendListItem(infoLine, infoLine.StartsWith("  ") ? 2 : 1);
+                }
+            }
+        }
         builder.AppendHorizontalRule();
     }
 

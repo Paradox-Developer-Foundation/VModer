@@ -45,9 +45,9 @@ public sealed class LocalizationKeyMappingService
         // 添加特性中技能的本地化映射
         // 6种技能类型, attack, defense, planning, logistics, maneuvering, coordination
         foreach (
-            string name in SkillType.List.Where(skillType =>
-                !skillType.Value.Equals("level", StringComparison.OrdinalIgnoreCase)
-            )
+            string name in SkillType
+                .List.Where(skillType => !skillType.Value.Equals("level", StringComparison.OrdinalIgnoreCase))
+                .Select(skillType => skillType.Name)
         )
         {
             AddKeyMapping($"{name}_skill", $"trait_bonus_{name}");
