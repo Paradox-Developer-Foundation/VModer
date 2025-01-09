@@ -1,6 +1,7 @@
 ﻿using EmmyLua.LanguageServer.Framework.Protocol.Message.Hover;
 using EmmyLua.LanguageServer.Framework.Protocol.Model;
 using EmmyLua.LanguageServer.Framework.Protocol.Model.Markup;
+using Markdown;
 using MethodTimer;
 using NLog;
 using ParadoxPower.Process;
@@ -61,7 +62,7 @@ public sealed class HoverService
         return Task.FromResult<HoverResponse?>(
             new HoverResponse
             {
-                Contents = new MarkupContent { Kind = MarkupKind.PlainText, Value = hoverText }
+                Contents = new MarkupContent { Kind = MarkupKind.Markdown, Value = hoverText }
             }
         );
     }
@@ -79,15 +80,15 @@ public sealed class HoverService
             )
         )
         {
-            result = string.Join('\n', GetCharacterDisplayTextCore(node));
+            result = GetCharacterDisplayTextCore(node);
         }
 
         return result;
     }
 
-    private List<string> GetCharacterDisplayTextCore(Node node)
+    private string GetCharacterDisplayTextCore(Node node)
     {
-        var list = new List<string>();
+        var builder = new MarkdownDocument();
         var skillSet = SkillType.List.ToDictionary(
             type => type.Value,
             _ => (ushort)0,
@@ -106,32 +107,38 @@ public sealed class HoverService
             }
             else if (child.IsNodeChild)
             {
-                AddTraitsDescriptionToList(child.node, list);
+                AddTraitsDescriptionToList(child.node, builder);
             }
         }
 
         var skillType = SkillCharacterType.FromCharacterType(node.Key);
-        list.AddRange(
-            skillSet.SelectMany(kvp =>
+        foreach (
+            string skillInfo in skillSet.SelectMany(kvp =>
                 _modifierDisplayService.GetSkillModifierDescription(
                     SkillType.FromValue(kvp.Key),
                     skillType,
                     kvp.Value
                 )
             )
-        );
+        )
+        {
+            builder.AppendParagraph(skillInfo);
+        }
 
-        return list;
+        return builder.ToString();
     }
 
-    private void AddTraitsDescriptionToList(Node node, List<string> list)
+    private void AddTraitsDescriptionToList(Node node, MarkdownDocument builder)
     {
         if (!node.Key.Equals("traits", StringComparison.OrdinalIgnoreCase))
         {
             return;
         }
-        list.Add("特质:");
-        list.AddRange(node.LeafValues.Select(trait => $"  - {_localizationService.GetValue(trait.Key)}"));
+        builder.AppendHeader("特质:", 3);
+        builder.AppendList(
+            node.LeafValues.Select(trait => _localizationService.GetValue(trait.Key)).ToArray()
+        );
+        builder.AppendHorizontalRule();
     }
 
     private string GetModifierDisplayText(Node rootNode, HoverParams request)
@@ -155,7 +162,13 @@ public sealed class HoverService
             modifiers = [LeafModifier.FromLeaf(child.leaf)];
         }
 
-        return string.Join('\n', _modifierDisplayService.GetDescription(modifiers));
+        var builder = new MarkdownDocument();
+        foreach (string modifierInfo in _modifierDisplayService.GetDescription(modifiers))
+        {
+            builder.AppendParagraph(modifierInfo);
+        }
+
+        return builder.ToString();
     }
 
     private static List<IModifier> GetModifiersForNode(Node node)

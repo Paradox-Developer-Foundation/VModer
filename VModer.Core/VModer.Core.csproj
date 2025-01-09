@@ -28,6 +28,7 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
+      <PackageReference Include="MarkdownBuilder" Version="0.2.0" />
       <PackageReference Include="MethodTimer.Fody" Version="3.2.2">
           <PrivateAssets>all</PrivateAssets>
       </PackageReference>
