@@ -48,7 +48,7 @@ public sealed class ModifierDisplayService
 
         if (skillModifier is null || skillModifier.Modifiers.Count == 0)
         {
-            return ["None"];
+            return [];
         }
 
         return GetDescription(skillModifier.Modifiers);

@@ -8,6 +8,7 @@ public sealed class GameFileType(string name, string value) : SmartEnum<GameFile
 {
     public static readonly GameFileType Unknown = new(nameof(Unknown), string.Empty);
     public static readonly GameFileType State = new(nameof(State), "**/history/states/*.txt");
+    public static readonly GameFileType Character = new(nameof(Character), "**/common/characters/*.txt");
 
     private static readonly Dictionary<string, Glob> Globs = new();
 
@@ -16,7 +17,6 @@ public sealed class GameFileType(string name, string value) : SmartEnum<GameFile
         GlobOptions.Default.Evaluation.CaseInsensitive = true;
     }
 
-    [Time]
     public static GameFileType FromFilePath(string filePath)
     {
         foreach (var fileType in List.Where(type => type != Unknown))

@@ -6,7 +6,10 @@ using NLog;
 using ParadoxPower.Process;
 using VModer.Core.Extensions;
 using VModer.Core.Infrastructure.Parser;
+using VModer.Core.Models;
+using VModer.Core.Models.Character;
 using VModer.Core.Models.Modifiers;
+using VModer.Core.Services.GameResource.Localization;
 using VModer.Core.Services.GameResource.Modifiers;
 
 namespace VModer.Core.Services;
@@ -15,13 +18,20 @@ public sealed class HoverService
 {
     private readonly GameFilesService _gameFilesService;
     private readonly ModifierDisplayService _modifierDisplayService;
+    private readonly LocalizationService _localizationService;
 
+    private static readonly string[] GeneralKeywords = ["field_marshal", "corps_commander", "navy_leader"];
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-    public HoverService(GameFilesService gameFilesService, ModifierDisplayService modifierDisplayService)
+    public HoverService(
+        GameFilesService gameFilesService,
+        ModifierDisplayService modifierDisplayService,
+        LocalizationService localizationService
+    )
     {
         _gameFilesService = gameFilesService;
         _modifierDisplayService = modifierDisplayService;
+        _localizationService = localizationService;
     }
 
     [Time]
@@ -37,20 +47,97 @@ public sealed class HoverService
             return Task.FromResult<HoverResponse?>(null);
         }
 
-        string value = GetModifierDisplayText(rootNode, request);
+        string hoverText;
+        var fileType = GameFileType.FromFilePath(filePath);
+        if (fileType == GameFileType.Character)
+        {
+            hoverText = GetCharacterDisplayText(rootNode, request);
+        }
+        else
+        {
+            hoverText = GetModifierDisplayText(rootNode, request);
+        }
 
         return Task.FromResult<HoverResponse?>(
             new HoverResponse
             {
-                Contents = new MarkupContent { Kind = MarkupKind.PlainText, Value = value }
+                Contents = new MarkupContent { Kind = MarkupKind.PlainText, Value = hoverText }
             }
         );
+    }
+
+    private string GetCharacterDisplayText(Node rootNode, HoverParams request)
+    {
+        var localPosition = request.Position.ToLocalPosition();
+        var node = FindAdjacentNodeByPosition(rootNode, localPosition);
+        string result = string.Empty;
+
+        if (
+            Array.Exists(
+                GeneralKeywords,
+                keyword => keyword.Equals(node.Key, StringComparison.OrdinalIgnoreCase)
+            )
+        )
+        {
+            result = string.Join('\n', GetCharacterDisplayTextCore(node));
+        }
+
+        return result;
+    }
+
+    private List<string> GetCharacterDisplayTextCore(Node node)
+    {
+        var list = new List<string>();
+        var skillSet = SkillType.List.ToDictionary(
+            type => type.Value,
+            _ => (ushort)0,
+            StringComparer.OrdinalIgnoreCase
+        );
+
+        foreach (var child in node.AllArray)
+        {
+            if (child.IsLeafChild)
+            {
+                var leaf = child.leaf;
+                if (skillSet.ContainsKey(leaf.Key) && ushort.TryParse(leaf.ValueText, out ushort value))
+                {
+                    skillSet[leaf.Key] = value;
+                }
+            }
+            else if (child.IsNodeChild)
+            {
+                AddTraitsDescriptionToList(child.node, list);
+            }
+        }
+
+        var skillType = SkillCharacterType.FromCharacterType(node.Key);
+        list.AddRange(
+            skillSet.SelectMany(kvp =>
+                _modifierDisplayService.GetSkillModifierDescription(
+                    SkillType.FromValue(kvp.Key),
+                    skillType,
+                    kvp.Value
+                )
+            )
+        );
+
+        return list;
+    }
+
+    private void AddTraitsDescriptionToList(Node node, List<string> list)
+    {
+        if (!node.Key.Equals("traits", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+        list.Add("特质:");
+        list.AddRange(node.LeafValues.Select(trait => $"  - {_localizationService.GetValue(trait.Key)}"));
     }
 
     private string GetModifierDisplayText(Node rootNode, HoverParams request)
     {
         var localPosition = request.Position.ToLocalPosition();
-        var node = FindNodeByPosition(rootNode, localPosition);
+        var node = FindAdjacentNodeByPosition(rootNode, localPosition);
         Log.Debug("光标所在 Node, Key:{Key}, Pos: {Pos}", node.Key, localPosition);
         if (!node.Key.Equals("modifier", StringComparison.OrdinalIgnoreCase))
         {
@@ -90,10 +177,32 @@ public sealed class HoverService
     }
 
     /// <summary>
+    /// 获取光标所在的顶部 <see cref="Node"/>
+    /// </summary>
+    /// <param name="node">应传入根节点的子节点</param>
+    /// <param name="cursorPosition">光标位置(以 1 开始)</param>
+    /// <returns>未找到时返回<c>node</c></returns>
+    private static Node FindTopNodeByPosition(Node node, Position cursorPosition)
+    {
+        foreach (var childNode in node.Nodes)
+        {
+            if (
+                childNode.Position.StartLine <= cursorPosition.Line
+                && childNode.Position.EndLine >= cursorPosition.Line
+            )
+            {
+                return childNode;
+            }
+        }
+
+        return node;
+    }
+
+    /// <summary>
     /// 获取光标指向的 <see cref="Child"/>
     /// </summary>
-    /// <param name="node">光标所在的 <see cref="Node"/>, 使用 <see cref="FindNodeByPosition"/> 方法获取</param>
-    /// <param name="cursorPosition"></param>
+    /// <param name="node">光标所在的 <see cref="Node"/>, 使用 <see cref="FindAdjacentNodeByPosition"/> 方法获取</param>
+    /// <param name="cursorPosition">光标位置(以 1 开始)</param>
     /// <returns></returns>
     private static Child FindChildByPosition(Node node, Position cursorPosition)
     {
@@ -129,16 +238,16 @@ public sealed class HoverService
     }
 
     /// <summary>
-    /// 获取离光标最近的 <see cref="Node"/> (即容纳光标的上级节点)
+    /// 获取离光标最近的 <see cref="Node"/> (即容纳光标的上级节点, 当光标放在节点上时返回此节点)
     /// </summary>
     /// <param name="node">节点</param>
     /// <param name="cursorPosition">光标位置(以 1 开始)</param>
     /// <returns>离光标最近的 <see cref="Node"/></returns>
-    private static Node FindNodeByPosition(Node node, Position cursorPosition)
+    private static Node FindAdjacentNodeByPosition(Node node, Position cursorPosition)
     {
-        foreach (var child in node.Nodes)
+        foreach (var childNode in node.Nodes)
         {
-            var childPosition = child.Position;
+            var childPosition = childNode.Position;
             if (
                 (
                     cursorPosition.Line == childPosition.StartLine
@@ -150,12 +259,12 @@ public sealed class HoverService
                 )
             )
             {
-                return child;
+                return childNode;
             }
 
             if (cursorPosition.Line > childPosition.StartLine && cursorPosition.Line < childPosition.EndLine)
             {
-                return FindNodeByPosition(child, cursorPosition);
+                return FindAdjacentNodeByPosition(childNode, cursorPosition);
             }
         }
 

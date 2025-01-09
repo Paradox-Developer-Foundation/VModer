@@ -45,19 +45,19 @@ public sealed class LocalizationKeyMappingService
         // 添加特性中技能的本地化映射
         // 6种技能类型, attack, defense, planning, logistics, maneuvering, coordination
         foreach (
-            string skillType in Enums
-                .GetNames<SkillType>()
-                .Where(name => !name.Equals("level", StringComparison.OrdinalIgnoreCase))
+            string name in SkillType.List.Where(skillType =>
+                !skillType.Value.Equals("level", StringComparison.OrdinalIgnoreCase)
+            )
         )
         {
-            AddKeyMapping($"{skillType}_skill", $"trait_bonus_{skillType}");
+            AddKeyMapping($"{name}_skill", $"trait_bonus_{name}");
 
             AddKeyMapping(
-                $"{skillType}_skill_factor",
+                $"{name}_skill_factor",
                 // FACTOR 中是 Defence, 技能加成中就是 Defense, 不理解为什么要这样写
-                skillType == "Defense"
+                name == "Defense"
                     ? "BOOST_DEFENCE_FACTOR"
-                    : $"boost_{skillType}_factor"
+                    : $"boost_{name}_factor"
             );
         }
     }
