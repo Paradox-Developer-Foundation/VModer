@@ -12,13 +12,13 @@ using VModer.Core.Services.GameResource.Localization;
 namespace VModer.Core.Services.GameResource;
 
 public sealed class CharacterTraitsService
-    : CommonResourcesService<CharacterTraitsService, FrozenDictionary<string, Trait>>
+    : CommonResourcesService<CharacterTraitsService, FrozenDictionary<string, CharacterTrait>>
 {
-    public IEnumerable<Trait> GetAllTraits() => _allTraitsLazy.Value;
+    public IEnumerable<CharacterTrait> GetAllTraits() => _allTraitsLazy.Value;
 
-    private Lazy<IEnumerable<Trait>> _allTraitsLazy;
+    private Lazy<IEnumerable<CharacterTrait>> _allTraitsLazy;
     private readonly LocalizationService _localizationService;
-    private Dictionary<string, FrozenDictionary<string, Trait>>.ValueCollection Traits => Resources.Values;
+    private Dictionary<string, FrozenDictionary<string, CharacterTrait>>.ValueCollection Traits => Resources.Values;
 
     /// <summary>
     /// 特质修饰符节点名称
@@ -63,10 +63,10 @@ public sealed class CharacterTraitsService
         OnResourceChanged += (_, _) => _allTraitsLazy = GetAllTraitsLazy();
     }
 
-    private Lazy<IEnumerable<Trait>> GetAllTraitsLazy() =>
+    private Lazy<IEnumerable<CharacterTrait>> GetAllTraitsLazy() =>
         new(() => Traits.SelectMany(trait => trait.Values).ToArray());
 
-    public bool TryGetTrait(string name, [NotNullWhen(true)] out Trait? trait)
+    public bool TryGetTrait(string name, [NotNullWhen(true)] out CharacterTrait? trait)
     {
         foreach (var traitMap in Traits)
         {
@@ -80,12 +80,12 @@ public sealed class CharacterTraitsService
         return false;
     }
 
-    public string GetLocalizationName(Trait trait)
+    public string GetLocalizationName(CharacterTrait characterTrait)
     {
-        return _localizationService.GetValue(trait.Name);
+        return _localizationService.GetValue(characterTrait.Name);
     }
 
-    protected override FrozenDictionary<string, Trait>? ParseFileToContent(Node rootNode)
+    protected override FrozenDictionary<string, CharacterTrait>? ParseFileToContent(Node rootNode)
     {
         // Character Traits 和 技能等级修正 在同一个文件夹中, 这里我们只处理 Character Traits 文件
         var traitsNodes = Array.FindAll(
@@ -99,7 +99,7 @@ public sealed class CharacterTraitsService
         }
 
         // 在 1.14 版本中, 人物特质文件中大约有 145 个特质
-        var dictionary = new Dictionary<string, Trait>(163, StringComparer.OrdinalIgnoreCase);
+        var dictionary = new Dictionary<string, CharacterTrait>(163, StringComparer.OrdinalIgnoreCase);
         foreach (var traitsChild in traitsNodes)
         {
             foreach (var traits in ParseTraitsNode(traitsChild.node))
@@ -116,9 +116,9 @@ public sealed class CharacterTraitsService
     /// </summary>
     /// <param name="traitsNode">文件中的 leader_traits 节点</param>
     /// <returns></returns>
-    private ReadOnlySpan<Trait> ParseTraitsNode(Node traitsNode)
+    private ReadOnlySpan<CharacterTrait> ParseTraitsNode(Node traitsNode)
     {
-        var traits = new List<Trait>(traitsNode.AllArray.Length);
+        var traits = new List<CharacterTrait>(traitsNode.AllArray.Length);
 
         foreach (var child in traitsNode.AllArray)
         {
@@ -164,7 +164,7 @@ public sealed class CharacterTraitsService
 
             if (skillModifiers.Count != 0)
             {
-                modifiers.Add(new ModifierCollection(Trait.TraitSkillModifiersKey, skillModifiers));
+                modifiers.Add(new ModifierCollection(CharacterTrait.TraitSkillModifiersKey, skillModifiers));
             }
 
             if (customModifiersTooltip.Count != 0)
@@ -173,7 +173,7 @@ public sealed class CharacterTraitsService
                     new ModifierCollection(LeafModifier.CustomEffectTooltipKey, customModifiersTooltip)
                 );
             }
-            traits.Add(new Trait(traitName, traitType, modifiers));
+            traits.Add(new CharacterTrait(traitName, traitType, modifiers));
         }
 
         return CollectionsMarshal.AsSpan(traits);

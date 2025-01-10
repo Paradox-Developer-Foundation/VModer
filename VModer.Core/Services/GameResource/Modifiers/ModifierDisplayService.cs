@@ -54,6 +54,11 @@ public sealed class ModifierDisplayService
         return GetDescription(skillModifier.Modifiers);
     }
 
+    /// <summary>
+    /// 获取修饰符的描述, 每个元素对应一行
+    /// </summary>
+    /// <param name="modifiers"></param>
+    /// <returns></returns>
     public IReadOnlyCollection<string> GetDescription(IEnumerable<IModifier> modifiers)
     {
         var inlines = new List<string>(8);

@@ -6,7 +6,6 @@ using MethodTimer;
 using NLog;
 using ParadoxPower.Process;
 using VModer.Core.Extensions;
-using VModer.Core.Infrastructure.Markdown;
 using VModer.Core.Infrastructure.Parser;
 using VModer.Core.Models;
 using VModer.Core.Models.Character;
@@ -23,6 +22,7 @@ public sealed class HoverService
     private readonly ModifierDisplayService _modifierDisplayService;
     private readonly LocalizationService _localizationService;
     private readonly CharacterTraitsService _characterTraitsService;
+    private readonly LeaderTraitsService _leaderTraitsService;
 
     private static readonly string[] GeneralKeywords = ["field_marshal", "corps_commander", "navy_leader"];
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
@@ -31,13 +31,15 @@ public sealed class HoverService
         GameFilesService gameFilesService,
         ModifierDisplayService modifierDisplayService,
         LocalizationService localizationService,
-        CharacterTraitsService characterTraitsService
+        CharacterTraitsService characterTraitsService,
+        LeaderTraitsService leaderTraitsService
     )
     {
         _gameFilesService = gameFilesService;
         _modifierDisplayService = modifierDisplayService;
         _localizationService = localizationService;
         _characterTraitsService = characterTraitsService;
+        _leaderTraitsService = leaderTraitsService;
     }
 
     [Time]
@@ -85,13 +87,17 @@ public sealed class HoverService
             )
         )
         {
-            result = GetCharacterDisplayTextCore(node);
+            result = GetGeneralDisplayText(node);
+        }
+        else if (node.Key.Equals("advisor", StringComparison.OrdinalIgnoreCase))
+        {
+            result = GetAdvisorDisplayText(node);
         }
 
         return result;
     }
 
-    private string GetCharacterDisplayTextCore(Node node)
+    private string GetGeneralDisplayText(Node node)
     {
         var builder = new MarkdownDocument();
         var skillSet = SkillType.List.ToDictionary(
@@ -112,7 +118,7 @@ public sealed class HoverService
             }
             else if (child.IsNodeChild)
             {
-                AddTraitsDescriptionToList(child.node, builder);
+                AddGeneralTraits(child.node, builder);
             }
         }
 
@@ -133,7 +139,37 @@ public sealed class HoverService
         return builder.ToString();
     }
 
-    private void AddTraitsDescriptionToList(Node node, MarkdownDocument builder)
+    private void AddLeaderTraits(Node node, MarkdownDocument builder)
+    {
+        AddTraitsDescription(
+            node,
+            builder,
+            traitKey =>
+            {
+                _leaderTraitsService.TryGetValue(traitKey, out var trait);
+                return trait?.Modifiers;
+            }
+        );
+    }
+
+    private void AddGeneralTraits(Node node, MarkdownDocument builder)
+    {
+        AddTraitsDescription(
+            node,
+            builder,
+            traitKey =>
+            {
+                _characterTraitsService.TryGetTrait(traitKey, out var trait);
+                return trait?.AllModifiers;
+            }
+        );
+    }
+
+    private void AddTraitsDescription(
+        Node node,
+        MarkdownDocument builder,
+        Func<string, IEnumerable<IModifier>?> modifiersFactory
+    )
     {
         if (!node.Key.Equals("traits", StringComparison.OrdinalIgnoreCase))
         {
@@ -145,17 +181,41 @@ public sealed class HoverService
 
         foreach (string traitKey in traits)
         {
-            builder.AppendParagraph($"- {_localizationService.GetValue(traitKey)}");
-            if (_characterTraitsService.TryGetTrait(traitKey, out var trait))
+            builder.AppendListItem(_localizationService.GetValue(traitKey));
+            var modifiers = modifiersFactory(traitKey);
+            if (modifiers is not null)
             {
-                var info = _modifierDisplayService.GetDescription(trait.AllModifiers);
-                foreach (string infoLine in info)
+                var infos = _modifierDisplayService.GetDescription(modifiers);
+                foreach (string info in infos)
                 {
-                    builder.AppendListItem(infoLine, infoLine.StartsWith("  ") ? 2 : 1);
+                    builder.AppendListItem(info, info.StartsWith("  ") ? 2 : 1);
                 }
             }
         }
         builder.AppendHorizontalRule();
+    }
+
+    private string GetAdvisorDisplayText(Node node)
+    {
+        var builder = new MarkdownDocument();
+
+        foreach (var child in node.AllArray)
+        {
+            if (child.IsNodeChild)
+            {
+                AddLeaderTraits(child.node, builder);
+            }
+            else if (child.IsLeafChild)
+            {
+                var leaf = child.leaf;
+                if (leaf.Key.Equals("slot", StringComparison.OrdinalIgnoreCase))
+                {
+                    builder.AppendParagraph($"类别: {_localizationService.GetValue(leaf.ValueText)}");
+                }
+            }
+        }
+
+        return builder.ToString();
     }
 
     private string GetModifierDisplayText(Node rootNode, HoverParams request)
@@ -204,28 +264,6 @@ public sealed class HoverService
         }
 
         return modifiers;
-    }
-
-    /// <summary>
-    /// 获取光标所在的顶部 <see cref="Node"/>
-    /// </summary>
-    /// <param name="node">应传入根节点的子节点</param>
-    /// <param name="cursorPosition">光标位置(以 1 开始)</param>
-    /// <returns>未找到时返回<c>node</c></returns>
-    private static Node FindTopNodeByPosition(Node node, Position cursorPosition)
-    {
-        foreach (var childNode in node.Nodes)
-        {
-            if (
-                childNode.Position.StartLine <= cursorPosition.Line
-                && childNode.Position.EndLine >= cursorPosition.Line
-            )
-            {
-                return childNode;
-            }
-        }
-
-        return node;
     }
 
     /// <summary>

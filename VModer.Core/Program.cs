@@ -73,6 +73,7 @@ builder.Services.AddSingleton<LocalizationTextColorsService>();
 builder.Services.AddSingleton<CharacterSkillService>();
 builder.Services.AddSingleton<ModiferLocalizationFormatService>();
 builder.Services.AddSingleton<CharacterTraitsService>();
+builder.Services.AddSingleton<LeaderTraitsService>();
 
 builder.Services.AddHostedService<LanguageServerHostedService>();
 
