@@ -1,5 +1,6 @@
 ﻿using System.Collections.Frozen;
 using NLog;
+using VModer.Core.Extensions;
 using VModer.Core.Infrastructure.Parser;
 
 namespace VModer.Core.Services;
@@ -35,18 +36,17 @@ public sealed class GameModDescriptorService
             return;
         }
 
-        var parser = new TextParser(descriptorFilePath);
-        if (parser.IsFailure)
+        if (!TextParser.TryParse(descriptorFilePath, out var rootNode, out var error))
         {
             _replacePaths = FrozenSet<string>.Empty;
             logger.Warn("Mod descriptor.mod file read is failure");
+            logger.LogParseError(error);
             return;
         }
 
         var replacePathList = new List<string>();
-        var root = parser.GetResult();
 
-        foreach (var item in root.Leaves)
+        foreach (var item in rootNode.Leaves)
         {
             switch (item.Key)
             {

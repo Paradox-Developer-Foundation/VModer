@@ -1,11 +1,12 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using ParadoxPower.CSharp;
+using ParadoxPower.Parser;
 using ParadoxPower.Process;
 
 namespace VModer.Core.Infrastructure.Parser;
 
-public class TextParser
+public sealed class TextParser
 {
     public string FilePath { get; }
 
@@ -23,10 +24,10 @@ public class TextParser
     /// <param name="filePath"></param>
     /// <exception cref="FileNotFoundException">如果文件不存在</exception>
     /// <exception cref="IOException"></exception>
-    public TextParser(string filePath)
+    private TextParser(string filePath)
         : this(filePath, File.ReadAllText(filePath)) { }
 
-    public TextParser(string filePath, string fileText)
+    private TextParser(string filePath, string fileText)
     {
         FilePath = File.Exists(filePath)
             ? filePath
@@ -70,6 +71,8 @@ public class TextParser
             }
 
             rootNode = parser.GetResult();
+            ProcessConstants(rootNode);
+
             error = null;
             return true;
         }
@@ -78,6 +81,51 @@ public class TextParser
             rootNode = null;
             error = new ParserError(Path.GetFileName(filePath), 0, 0, e.Message);
             return false;
+        }
+    }
+
+    private static void ProcessConstants(Node rootNode)
+    {
+        var constants = FindAllDefinedConstants(rootNode);
+        ReplaceConstants(rootNode, constants);
+    }
+
+    private static Dictionary<string, Types.Value> FindAllDefinedConstants(Node rootNode)
+    {
+        var constants = new Dictionary<string, Types.Value>();
+        foreach (var child in rootNode.AllArray)
+        {
+            if (child.IsLeafChild)
+            {
+                var leaf = child.leaf;
+                if (leaf.Key.StartsWith('@'))
+                {
+                    constants[leaf.Key] = leaf.Value;
+                }
+            }
+        }
+
+        return constants;
+    }
+
+    private static void ReplaceConstants(Node node, Dictionary<string, Types.Value> constants)
+    {
+        foreach (var child in node.AllArray)
+        {
+            if (child.IsLeafChild && constants.TryGetValue(child.leaf.ValueText, out var constant))
+            {
+                child.leaf.Value = constant;
+            }
+            else if (
+                child.IsLeafValueChild && constants.TryGetValue(child.leafValue.ValueText, out var constant1)
+            )
+            {
+                child.leaf.Value = constant1;
+            }
+            else if (child.IsNodeChild)
+            {
+                ReplaceConstants(child.node, constants);
+            }
         }
     }
 
