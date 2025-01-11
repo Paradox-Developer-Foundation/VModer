@@ -35,7 +35,7 @@
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
       <PackageReference Include="NLog" Version="5.3.4" />
       <PackageReference Include="NLog.Extensions.Logging" Version="5.3.15" />
-      <PackageReference Include="ParadoxPower" Version="0.6.3-beta" />
+      <PackageReference Include="ParadoxPower" Version="0.7.0-beta" />
       <PackageReference Include="ParadoxPower.CSharpExtensions" Version="0.2.3-beta" />
       <PackageReference Include="Pidgin" Version="3.3.0" />
     </ItemGroup>
@@ -50,5 +50,9 @@
       <None Update="Assets\**">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\VModer.Languages\VModer.Languages.csproj" />
     </ItemGroup>
 </Project>

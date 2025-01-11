@@ -22,11 +22,9 @@ public sealed class EditorDiagnosisService
     public Task AddDiagnoseAsync(ParserError error, Uri filePath)
     {
         var range = GetRange(error, 0);
-        // Log.Debug("position: {@}", range);
         return AddDiagnoseAsync(
             new PublishDiagnosticsParams
             {
-                // TODO: Markup?
                 Diagnostics =
                 [
                     new Diagnostic

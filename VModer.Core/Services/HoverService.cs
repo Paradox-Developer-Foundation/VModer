@@ -13,6 +13,7 @@ using VModer.Core.Models.Modifiers;
 using VModer.Core.Services.GameResource;
 using VModer.Core.Services.GameResource.Localization;
 using VModer.Core.Services.GameResource.Modifiers;
+using VModer.Languages;
 
 namespace VModer.Core.Services;
 
@@ -24,6 +25,7 @@ public sealed class HoverService
     private readonly CharacterTraitsService _characterTraitsService;
     private readonly LeaderTraitsService _leaderTraitsService;
 
+    private const int CharacterTypeLevel = 3;
     private static readonly string[] GeneralKeywords = ["field_marshal", "corps_commander", "navy_leader"];
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
@@ -77,9 +79,54 @@ public sealed class HoverService
     private string GetCharacterDisplayText(Node rootNode, HoverParams request)
     {
         var localPosition = request.Position.ToLocalPosition();
-        var node = FindAdjacentNodeByPosition(rootNode, localPosition);
-        string result = string.Empty;
+        var adjacentNode = FindAdjacentNodeByPosition(rootNode, localPosition);
 
+        string result;
+        if (IsCharacterNode(rootNode, adjacentNode))
+        {
+            var builder = new MarkdownDocument();
+            builder.AppendHeader(_localizationService.GetValue(adjacentNode.Key), 2);
+            builder.AppendHorizontalRule();
+
+            foreach (var node in adjacentNode.Nodes)
+            {
+                string text = GetDisplayText(node);
+                if (string.IsNullOrEmpty(text))
+                {
+                    continue;
+                }
+
+                builder.AppendParagraph(text);
+                builder.AppendHorizontalRule();
+            }
+
+            if (builder.Length != 0 && builder.ElementAt(builder.Length - 1) is MarkdownHorizontalRule)
+            {
+                builder.Remove(builder.Length - 1);
+            }
+            result = builder.ToString();
+        }
+        else
+        {
+            result = GetDisplayText(adjacentNode);
+        }
+
+        return result;
+    }
+
+    private static bool IsCharacterNode(Node rootNode, Node node)
+    {
+        var charactersNodes = rootNode.Nodes.Where(n =>
+            n.Key.Equals("characters", StringComparison.OrdinalIgnoreCase)
+        );
+        return charactersNodes.Any(charactersNode =>
+            charactersNode.Nodes.Any(character => character.Position.Equals(node.Position))
+        );
+    }
+
+    private string GetDisplayText(Node node)
+    {
+        string result = string.Empty;
         if (
             Array.Exists(
                 GeneralKeywords,
@@ -100,6 +147,9 @@ public sealed class HoverService
     private string GetGeneralDisplayText(Node node)
     {
         var builder = new MarkdownDocument();
+
+        builder.AppendHeader(GetGeneralTypeName(node.Key), CharacterTypeLevel);
+
         var skillSet = SkillType.List.ToDictionary(
             type => type.Value,
             _ => (ushort)0,
@@ -137,6 +187,17 @@ public sealed class HoverService
         }
 
         return builder.ToString();
+    }
+
+    private static string GetGeneralTypeName(string nodeKey)
+    {
+        return nodeKey switch
+        {
+            "field_marshal" => Resources.Character_field_marshal,
+            "corps_commander" => Resources.Character_corps_commander,
+            "navy_leader" => Resources.Character_navy_leader,
+            _ => string.Empty
+        };
     }
 
     private void AddLeaderTraits(Node node, MarkdownDocument builder)
@@ -177,7 +238,7 @@ public sealed class HoverService
         }
 
         var traits = node.LeafValues.Select(trait => trait.Key);
-        builder.AppendHeader("特质:", 3);
+        builder.AppendHeader($"{Resources.Traits}:", 4);
 
         foreach (string traitKey in traits)
         {
@@ -199,6 +260,7 @@ public sealed class HoverService
     {
         var builder = new MarkdownDocument();
 
+        builder.AppendHeader(Resources.Character_advisor, CharacterTypeLevel);
         foreach (var child in node.AllArray)
         {
             if (child.IsNodeChild)
@@ -210,7 +272,9 @@ public sealed class HoverService
                 var leaf = child.leaf;
                 if (leaf.Key.Equals("slot", StringComparison.OrdinalIgnoreCase))
                 {
-                    builder.AppendParagraph($"类别: {_localizationService.GetValue(leaf.ValueText)}");
+                    builder.AppendParagraph(
+                        $"{Resources.Character_advisor_slot}: {_localizationService.GetValue(leaf.ValueText)}"
+                    );
                 }
             }
         }
