@@ -1,5 +1,6 @@
 ﻿using System.Collections.Frozen;
 using System.Diagnostics.CodeAnalysis;
+using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
 using VModer.Core.Models;
 using VModer.Core.Models.Modifiers;
@@ -59,9 +60,8 @@ public sealed class LeaderTraitsService()
         var modifiers = new List<IModifier>(4);
         foreach (var child in traitNode.AllArray)
         {
-            if (child.IsLeafChild)
+            if (child.TryGetLeaf(out var leaf))
             {
-                var leaf = child.leaf;
                 if (
                     Array.Exists(
                         TraitFeatureLeafKeywords,
@@ -74,9 +74,8 @@ public sealed class LeaderTraitsService()
 
                 modifiers.Add(LeafModifier.FromLeaf(leaf));
             }
-            else if (child.IsNodeChild)
+            else if (child.TryGetNode(out var node))
             {
-                var node = child.node;
                 if (
                     !Array.Exists(
                         TraitModifierNodeKeywords,

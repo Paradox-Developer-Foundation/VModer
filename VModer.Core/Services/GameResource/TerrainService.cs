@@ -1,5 +1,6 @@
 ﻿using System.Collections.Frozen;
 using MethodTimer;
+using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
 using VModer.Core.Services.GameResource.Base;
 
@@ -48,12 +49,11 @@ public sealed class TerrainService : CommonResourcesService<TerrainService, Froz
         var terrainSet = new HashSet<string>(16, StringComparer.OrdinalIgnoreCase);
         foreach (var child in rootNode.AllArray)
         {
-            if (!child.IsNodeChild)
+            if (!child.TryGetNode(out var node))
             {
                 continue;
             }
 
-            var node = child.node;
             if (StringComparer.OrdinalIgnoreCase.Equals(node.Key, "categories"))
             {
                 foreach (var terrainCategory in node.Nodes)

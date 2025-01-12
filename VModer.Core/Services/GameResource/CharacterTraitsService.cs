@@ -1,7 +1,9 @@
 using System.Collections.Frozen;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using MethodTimer;
+using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
 using VModer.Core.Extensions;
 using VModer.Core.Models.Character;
@@ -18,7 +20,8 @@ public sealed class CharacterTraitsService
 
     private Lazy<IEnumerable<CharacterTrait>> _allTraitsLazy;
     private readonly LocalizationService _localizationService;
-    private Dictionary<string, FrozenDictionary<string, CharacterTrait>>.ValueCollection Traits => Resources.Values;
+    private Dictionary<string, FrozenDictionary<string, CharacterTrait>>.ValueCollection Traits =>
+        Resources.Values;
 
     /// <summary>
     /// 特质修饰符节点名称
@@ -91,8 +94,10 @@ public sealed class CharacterTraitsService
         var traitsNodes = Array.FindAll(
             rootNode.AllArray,
             child =>
-                child.IsNodeChild && StringComparer.OrdinalIgnoreCase.Equals(child.node.Key, "leader_traits")
+                child.TryGetNode(out var node)
+                && StringComparer.OrdinalIgnoreCase.Equals(node.Key, "leader_traits")
         );
+
         if (traitsNodes.Length == 0)
         {
             return null;
@@ -102,7 +107,9 @@ public sealed class CharacterTraitsService
         var dictionary = new Dictionary<string, CharacterTrait>(163, StringComparer.OrdinalIgnoreCase);
         foreach (var traitsChild in traitsNodes)
         {
-            foreach (var traits in ParseTraitsNode(traitsChild.node))
+            traitsChild.TryGetNode(out var traitsNode);
+            Debug.Assert(traitsNode is not null);
+            foreach (var traits in ParseTraitsNode(traitsNode))
             {
                 dictionary[traits.Name] = traits;
             }
@@ -122,13 +129,12 @@ public sealed class CharacterTraitsService
 
         foreach (var child in traitsNode.AllArray)
         {
-            if (!child.IsNodeChild)
+            if (!child.TryGetNode(out var traitNode))
             {
                 continue;
             }
 
-            var traitNode = child.node;
-            var traitName = traitNode.Key;
+            string traitName = traitNode.Key;
 
             var modifiers = new List<ModifierCollection>(4);
             var skillModifiers = new List<LeafModifier>();
@@ -136,29 +142,32 @@ public sealed class CharacterTraitsService
             var traitType = TraitType.None;
             foreach (var traitAttribute in traitNode.AllArray)
             {
-                var key = traitAttribute.GetKeyOrNull();
+                string? key = traitAttribute.GetKeyOrNull();
                 // type 可以为 Leaf 或 Node
                 if (StringComparer.OrdinalIgnoreCase.Equals(key, "type"))
                 {
                     traitType = GetTraitType(traitAttribute);
                 }
                 else if (
-                    traitAttribute.IsNodeChild
-                    && Array.Exists(ModifierNodeKeys, s => StringComparer.OrdinalIgnoreCase.Equals(s, key))
+                    traitAttribute.TryGetNode(out var node)
+                    && Array.Exists(
+                        ModifierNodeKeys,
+                        keyword => StringComparer.OrdinalIgnoreCase.Equals(keyword, key)
+                    )
                 )
                 {
-                    modifiers.Add(ParseModifier(traitAttribute.node));
+                    modifiers.Add(ParseModifier(node));
                 }
                 else if (
-                    traitAttribute.IsLeafChild
+                    traitAttribute.TryGetLeaf(out var leaf)
                     && StringComparer.OrdinalIgnoreCase.Equals(LeafModifier.CustomEffectTooltipKey, key)
                 )
                 {
-                    customModifiersTooltip.Add(LeafModifier.FromLeaf(traitAttribute.leaf));
+                    customModifiersTooltip.Add(LeafModifier.FromLeaf(leaf));
                 }
-                else if (IsSkillModifier(traitAttribute))
+                else if (IsSkillModifier(traitAttribute, out leaf))
                 {
-                    skillModifiers.Add(LeafModifier.FromLeaf(traitAttribute.leaf));
+                    skillModifiers.Add(LeafModifier.FromLeaf(leaf));
                 }
             }
 
@@ -182,7 +191,7 @@ public sealed class CharacterTraitsService
     private TraitType GetTraitType(Child traitAttribute)
     {
         var traitType = TraitType.None;
-        foreach (var traitTypeString in GetTraitTypes(traitAttribute))
+        foreach (string traitTypeString in GetTraitTypes(traitAttribute))
         {
             traitType |= GetTraitType(traitTypeString);
         }
@@ -193,14 +202,14 @@ public sealed class CharacterTraitsService
     private static List<string> GetTraitTypes(Child traitTypeAttribute)
     {
         var list = new List<string>(1);
-        if (traitTypeAttribute.IsLeafChild)
+        if (traitTypeAttribute.TryGetLeaf(out var leaf))
         {
-            list.Add(traitTypeAttribute.leaf.ValueText);
+            list.Add(leaf.ValueText);
         }
 
-        if (traitTypeAttribute.IsNodeChild)
+        if (traitTypeAttribute.TryGetNode(out var node))
         {
-            list.AddRange(traitTypeAttribute.node.LeafValues.Select(trait => trait.ValueText));
+            list.AddRange(node.LeafValues.Select(trait => trait.ValueText));
         }
 
         return list;
@@ -247,17 +256,19 @@ public sealed class CharacterTraitsService
         return TraitType.None;
     }
 
-    private static bool IsSkillModifier(Child traitAttribute)
+    private static bool IsSkillModifier(Child traitAttribute, [NotNullWhen(true)] out Leaf? leaf)
     {
-        return traitAttribute.IsLeafChild
+        bool isSkillModifier = traitAttribute.TryGetLeaf(out leaf);
+        var traitLeaf = leaf;
+        return isSkillModifier
             && (
                 Array.Exists(
                     SkillModifierKeywords,
-                    s => StringComparer.OrdinalIgnoreCase.Equals(s, traitAttribute.leaf.Key)
+                    keyword => StringComparer.OrdinalIgnoreCase.Equals(keyword, traitLeaf?.Key)
                 )
                 || Array.Exists(
                     SkillFactorModifierKeywords,
-                    s => StringComparer.OrdinalIgnoreCase.Equals(s, traitAttribute.leaf.Key)
+                    keyword => StringComparer.OrdinalIgnoreCase.Equals(keyword, traitLeaf?.Key)
                 )
             );
     }
@@ -267,14 +278,13 @@ public sealed class CharacterTraitsService
         var list = new List<IModifier>(modifierNode.AllArray.Length);
         foreach (var child in modifierNode.AllArray)
         {
-            if (child.IsLeafChild)
+            if (child.TryGetLeaf(out var leaf))
             {
-                var modifier = LeafModifier.FromLeaf(child.leaf);
+                var modifier = LeafModifier.FromLeaf(leaf);
                 list.Add(modifier);
             }
-            else if (child.IsNodeChild)
+            else if (child.TryGetNode(out var node))
             {
-                var node = child.node;
                 var modifier = new NodeModifier(node.Key, node.Leaves.Select(LeafModifier.FromLeaf));
                 list.Add(modifier);
             }

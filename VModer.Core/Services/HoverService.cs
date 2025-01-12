@@ -4,6 +4,7 @@ using EmmyLua.LanguageServer.Framework.Protocol.Model.Markup;
 using Markdown;
 using MethodTimer;
 using NLog;
+using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
 using VModer.Core.Extensions;
 using VModer.Core.Infrastructure.Parser;
@@ -158,17 +159,16 @@ public sealed class HoverService
 
         foreach (var child in node.AllArray)
         {
-            if (child.IsLeafChild)
+            if (child.TryGetLeaf(out var leaf))
             {
-                var leaf = child.leaf;
                 if (skillSet.ContainsKey(leaf.Key) && ushort.TryParse(leaf.ValueText, out ushort value))
                 {
                     skillSet[leaf.Key] = value;
                 }
             }
-            else if (child.IsNodeChild)
+            else if (child.TryGetNode(out var childNode))
             {
-                AddGeneralTraits(child.node, builder);
+                AddGeneralTraits(childNode, builder);
             }
         }
 
@@ -263,13 +263,12 @@ public sealed class HoverService
         builder.AppendHeader(Resources.Character_advisor, CharacterTypeLevel);
         foreach (var child in node.AllArray)
         {
-            if (child.IsNodeChild)
+            if (child.TryGetNode(out var childNode))
             {
-                AddLeaderTraits(child.node, builder);
+                AddLeaderTraits(childNode, builder);
             }
-            else if (child.IsLeafChild)
+            else if (child.TryGetLeaf(out var leaf))
             {
-                var leaf = child.leaf;
                 if (leaf.Key.Equals("slot", StringComparison.OrdinalIgnoreCase))
                 {
                     builder.AppendParagraph(
@@ -294,13 +293,13 @@ public sealed class HoverService
 
         var child = FindChildByPosition(node, localPosition);
         IEnumerable<IModifier> modifiers = [];
-        if (child.IsNodeChild)
+        if (child.TryGetNode(out var childNode))
         {
-            modifiers = GetModifiersForNode(child.node);
+            modifiers = GetModifiersForNode(childNode);
         }
-        else if (child.IsLeafChild)
+        else if (child.TryGetLeaf(out var leaf))
         {
-            modifiers = [LeafModifier.FromLeaf(child.leaf)];
+            modifiers = [LeafModifier.FromLeaf(leaf)];
         }
 
         var builder = new MarkdownDocument();
@@ -317,13 +316,13 @@ public sealed class HoverService
         var modifiers = new List<IModifier>();
         foreach (var child in node.AllArray)
         {
-            if (child.IsLeafChild)
+            if (child.TryGetLeaf(out var leaf))
             {
-                modifiers.Add(LeafModifier.FromLeaf(child.leaf));
+                modifiers.Add(LeafModifier.FromLeaf(leaf));
             }
-            else if (child.IsNodeChild)
+            else if (child.TryGetNode(out var childNode))
             {
-                modifiers.Add(NodeModifier.FromNode(child.node));
+                modifiers.Add(NodeModifier.FromNode(childNode));
             }
         }
 
@@ -340,7 +339,7 @@ public sealed class HoverService
     {
         if (node.Position.StartLine == cursorPosition.Line)
         {
-            return Child.NewNodeChild(node);
+            return Child.Create(node);
         }
 
         foreach (var child in node.AllArray)
@@ -366,7 +365,7 @@ public sealed class HoverService
             }
         }
 
-        return Child.NewNodeChild(node);
+        return Child.Create(node);
     }
 
     /// <summary>

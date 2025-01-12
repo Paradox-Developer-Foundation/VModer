@@ -57,15 +57,13 @@ public sealed class StateAnalyzerService
 
         foreach (var child in buildingsNode.AllArray)
         {
-            if (child.IsLeafChild)
+            if (child.TryGetLeaf(out var leaf))
             {
-                var buildingLeaf = child.leaf;
-                AnalyzeBuildingLeaf(buildingLeaf, list);
+                AnalyzeBuildingLeaf(leaf, list);
             }
             // 是省份建筑
-            else if (child.IsNodeChild)
+            else if (child.TryGetNode(out var provinceBuildingsNode))
             {
-                var provinceBuildingsNode = child.node;
                 foreach (var buildingLeaf in provinceBuildingsNode.Leaves)
                 {
                     AnalyzeBuildingLeaf(buildingLeaf, list);

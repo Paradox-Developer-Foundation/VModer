@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using ParadoxPower.CSharp;
+using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Parser;
 using ParadoxPower.Process;
 
@@ -95,9 +96,8 @@ public sealed class TextParser
         var constants = new Dictionary<string, Types.Value>();
         foreach (var child in rootNode.AllArray)
         {
-            if (child.IsLeafChild)
+            if (child.TryGetLeaf(out var leaf))
             {
-                var leaf = child.leaf;
                 if (leaf.Key.StartsWith('@'))
                 {
                     constants[leaf.Key] = leaf.Value;
@@ -112,19 +112,19 @@ public sealed class TextParser
     {
         foreach (var child in node.AllArray)
         {
-            if (child.IsLeafChild && constants.TryGetValue(child.leaf.ValueText, out var constant))
+            if (child.TryGetLeaf(out var leaf) && constants.TryGetValue(leaf.ValueText, out var constant))
             {
-                child.leaf.Value = constant;
+                leaf.Value = constant;
             }
             else if (
-                child.IsLeafValueChild && constants.TryGetValue(child.leafValue.ValueText, out var constant1)
+                child.TryGetLeafValue(out var leafValue) && constants.TryGetValue(leafValue.ValueText, out constant)
             )
             {
-                child.leaf.Value = constant1;
+                leafValue.Value = constant;
             }
-            else if (child.IsNodeChild)
+            else if (child.TryGetNode(out var n))
             {
-                ReplaceConstants(child.node, constants);
+                ReplaceConstants(n, constants);
             }
         }
     }
