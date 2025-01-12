@@ -36,4 +36,7 @@
     <data name="Character.advisor_slot" xml:space="preserve">
         <value>类别</value>
     </data>
+    <data name="MissingTargetCountry" xml:space="preserve">
+        <value>缺失目标国家:</value>
+    </data>
 </root>

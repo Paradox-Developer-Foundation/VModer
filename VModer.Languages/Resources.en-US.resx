@@ -29,4 +29,7 @@
     <data name="Character.advisor_slot" xml:space="preserve">
         <value>Slot</value>
     </data>
+    <data name="MissingTargetCountry" xml:space="preserve">
+        <value>Missing Target Country:</value>
+    </data>
 </root>

@@ -105,6 +105,15 @@ namespace VModer.Languages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 缺失目标国家:.
+        /// </summary>
+        public static string MissingTargetCountry {
+            get {
+                return ResourceManager.GetString("MissingTargetCountry", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 特质.
         /// </summary>
         public static string Traits {

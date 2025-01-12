@@ -4,6 +4,7 @@ using VModer.Core.Models;
 using VModer.Core.Models.Character;
 using VModer.Core.Models.Modifiers;
 using VModer.Core.Services.GameResource.Localization;
+using VModer.Languages;
 
 namespace VModer.Core.Services.GameResource.Modifiers;
 
@@ -174,7 +175,7 @@ public sealed class ModifierDisplayService
             ?.Value;
 
         descriptions.Add(
-            countryTag is null ? "缺失目标国家:" : $"对 {_localizationService.GetCountryNameByTag(countryTag)}:"
+            countryTag is null ? Resources.MissingTargetCountry : $"{_localizationService.GetCountryNameByTag(countryTag)}:"
         );
         foreach (
             var modifier in nodeModifier.Modifiers.Where(modifier =>
