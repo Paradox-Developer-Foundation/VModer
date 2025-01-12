@@ -30,6 +30,21 @@ public sealed class LocalizationService
         _localizationKeyMapping = localizationKeyMapping;
     }
 
+    public string GetCountryNameByTag(string tag)
+    {
+        if (TryGetValue(tag, out string? countryName))
+        {
+            return countryName;
+        }
+
+        if (TryGetValue($"{tag}_DEF", out countryName))
+        {
+            return countryName;
+        }
+
+        return tag;
+    }
+
     /// <summary>
     /// 如果本地化文本不存在, 则返回<c>key</c>
     /// </summary>

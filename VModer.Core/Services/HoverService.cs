@@ -249,7 +249,7 @@ public sealed class HoverService
                 var infos = _modifierDisplayService.GetDescription(modifiers);
                 foreach (string info in infos)
                 {
-                    builder.AppendListItem(info, info.StartsWith("  ") ? 2 : 1);
+                    builder.AppendListItem(info, info.StartsWith(ModifierDisplayService.NodeModifierChildrenPrefix) ? 2 : 1);
                 }
             }
         }

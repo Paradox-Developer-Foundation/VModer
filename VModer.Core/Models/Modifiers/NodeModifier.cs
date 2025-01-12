@@ -1,7 +1,9 @@
-﻿using ParadoxPower.Process;
+﻿using System.Diagnostics;
+using ParadoxPower.Process;
 
 namespace VModer.Core.Models.Modifiers;
 
+[DebuggerDisplay("{Key}")]
 public sealed class NodeModifier : IModifier
 {
     public string Key { get; }

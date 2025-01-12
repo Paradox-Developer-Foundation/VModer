@@ -9,6 +9,8 @@ namespace VModer.Core.Services.GameResource.Modifiers;
 
 public sealed class ModifierDisplayService
 {
+    public const string NodeModifierChildrenPrefix = "  ";
+
     private readonly LocalizationFormatService _localisationFormatService;
     private readonly LocalizationService _localizationService;
     private readonly ModifierService _modifierService;
@@ -16,7 +18,6 @@ public sealed class ModifierDisplayService
     private readonly LocalizationKeyMappingService _localisationKeyMappingService;
     private readonly CharacterSkillService _characterSkillService;
 
-    private const string NodeModifierChildrenPrefix = "  ";
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
     public ModifierDisplayService(
@@ -155,7 +156,51 @@ public sealed class ModifierDisplayService
             return GetTerrainModifierDescription(nodeModifier);
         }
 
+        if (nodeModifier.Key.Equals("targeted_modifier", StringComparison.OrdinalIgnoreCase))
+        {
+            return GetTargetedModifierDescription(nodeModifier);
+        }
+
         return GetDescriptionForUnknownNode(nodeModifier);
+    }
+
+    private List<string> GetTargetedModifierDescription(NodeModifier nodeModifier)
+    {
+        var descriptions = new List<string>();
+        string? countryTag = nodeModifier
+            .Modifiers.FirstOrDefault(modifier =>
+                modifier.Key.Equals("tag", StringComparison.OrdinalIgnoreCase)
+            )
+            ?.Value;
+
+        descriptions.Add(
+            countryTag is null ? "缺失目标国家:" : $"对 {_localizationService.GetCountryNameByTag(countryTag)}:"
+        );
+        foreach (
+            var modifier in nodeModifier.Modifiers.Where(modifier =>
+                !modifier.Key.Equals("tag", StringComparison.OrdinalIgnoreCase)
+            )
+        )
+        {
+            string description;
+            // generate_wargoal_tension_against 在 targeted_modifier 中的本地化键不一样
+            if (modifier.Key.Equals("generate_wargoal_tension_against", StringComparison.OrdinalIgnoreCase))
+            {
+                description = GetDescriptionForLeaf(
+                    new LeafModifier(
+                        "MODIFIER_GENERATE_WARGOAL_TENSION_LIMIT_AGAINST_COUNTRY",
+                        modifier.Value,
+                        modifier.ValueType
+                    )
+                );
+            }
+            else
+            {
+                description = GetDescriptionForLeaf(modifier);
+            }
+            descriptions.Add($"{NodeModifierChildrenPrefix}{description}");
+        }
+        return descriptions;
     }
 
     /// <summary>
@@ -187,14 +232,17 @@ public sealed class ModifierDisplayService
         );
     }
 
-    private List<string> GetDescriptionForNode(NodeModifier nodeModifier, Func<LeafModifier, string> func)
+    private List<string> GetDescriptionForNode(
+        NodeModifier nodeModifier,
+        Func<LeafModifier, string> converter
+    )
     {
         var list = new List<string>(nodeModifier.Modifiers.Count * 2)
         {
             $"{_localizationService.GetValue(nodeModifier.Key)}:"
         };
 
-        list.AddRange(nodeModifier.Modifiers.Select(func));
+        list.AddRange(nodeModifier.Modifiers.Select(converter));
 
         return list;
     }
