@@ -30,7 +30,7 @@
 					"scope": "resource",
 					"type": "string",
 					"default": "",
-					"description": "The root path of HOI4 game folder."
+					"description": "%VModer.GameRootPath%"
 				}
 			}
 		}

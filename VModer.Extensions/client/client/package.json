@@ -1,8 +1,8 @@
 {
-	"name": "lsp-sample-client",
-	"description": "VSCode part of a language server",
-	"author": "Microsoft Corporation",
-	"license": "MIT",
+	"name": "VModer",
+	"description": "A HOI4 language server",
+	"author": "textGamex",
+	"license": "Apache-2.0",
 	"version": "0.0.1",
 	"publisher": "vscode",
 	"repository": {
