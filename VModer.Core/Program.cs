@@ -1,10 +1,12 @@
 ﻿using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using EmmyLua.LanguageServer.Framework.Protocol.Message.Client.ShowMessage;
 using EmmyLua.LanguageServer.Framework.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NLog;
 using NLog.Extensions.Logging;
 using VModer.Core;
 using VModer.Core.Analyzers;
@@ -80,9 +82,23 @@ builder.Services.AddHostedService<LanguageServerHostedService>();
 
 builder.Logging.ClearProviders();
 builder.Logging.AddNLog(builder.Configuration);
-NLog.LogManager.Configuration = new NLogLoggingConfiguration(builder.Configuration.GetSection("NLog"));
+LogManager.Configuration = new NLogLoggingConfiguration(builder.Configuration.GetSection("NLog"));
+
+var logger = LogManager.GetCurrentClassLogger();
 
 var host = builder.Build();
 App.Services = host.Services;
 
-await host.RunAsync().ConfigureAwait(false);
+try
+{
+    await host.RunAsync().ConfigureAwait(false);
+}
+catch (Exception e)
+{
+    await server.Client.ShowMessage(new ShowMessageParams
+    {
+        Type = MessageType.Error,
+        Message = "VModer 运行时错误"
+    }).ConfigureAwait(false);
+    logger.Error(e);
+}
