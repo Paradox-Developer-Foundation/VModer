@@ -18,4 +18,8 @@ public static class ErrorCode
     /// province 重复使用
     /// </summary>
     public const string VM1003 = nameof(VM1003);
+    /// <summary>
+    /// 人物技能等级超过上限
+    /// </summary>
+    public const string VM1004 = nameof(VM1004);
 }

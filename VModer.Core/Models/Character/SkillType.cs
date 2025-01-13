@@ -7,7 +7,7 @@ namespace VModer.Core.Models.Character;
 /// </summary>
 public sealed class SkillType(string name, string value) : SmartEnum<SkillType, string>(name, value)
 {
-    public static readonly SkillType Level = new(nameof(Level), "level");
+    public static readonly SkillType Level = new(nameof(Level), "skill");
     public static readonly SkillType Attack = new(nameof(Attack), "attack_skill");
     public static readonly SkillType Defense = new(nameof(Defense), "defense_skill");
     public static readonly SkillType Planning = new(nameof(Planning), "planning_skill");

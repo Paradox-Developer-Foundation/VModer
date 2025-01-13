@@ -46,7 +46,7 @@ public sealed class LocalizationKeyMappingService
         // 6种技能类型, attack, defense, planning, logistics, maneuvering, coordination
         foreach (
             string name in SkillType
-                .List.Where(skillType => !skillType.Value.Equals("level", StringComparison.OrdinalIgnoreCase))
+                .List.Where(skillType => skillType != SkillType.Level)
                 .Select(skillType => skillType.Name)
         )
         {

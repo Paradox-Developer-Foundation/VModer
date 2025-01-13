@@ -27,7 +27,6 @@ public sealed class HoverService
     private readonly LeaderTraitsService _leaderTraitsService;
 
     private const int CharacterTypeLevel = 3;
-    private static readonly string[] GeneralKeywords = ["field_marshal", "corps_commander", "navy_leader"];
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
     public HoverService(
@@ -130,7 +129,7 @@ public sealed class HoverService
         string result = string.Empty;
         if (
             Array.Exists(
-                GeneralKeywords,
+                Keywords.GeneralKeywords,
                 keyword => keyword.Equals(node.Key, StringComparison.OrdinalIgnoreCase)
             )
         )

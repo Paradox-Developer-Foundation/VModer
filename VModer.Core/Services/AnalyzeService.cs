@@ -13,16 +13,19 @@ public sealed class AnalyzeService
     private readonly GameFilesService _gameFilesService;
     private readonly EditorDiagnosisService _editorDiagnosisService;
     private readonly StateAnalyzerService _stateAnalyzerService;
+    private readonly CharacterAnalyzerService _characterAnalyzerService;
 
     public AnalyzeService(
         GameFilesService gameFilesService,
         EditorDiagnosisService editorDiagnosisService,
-        StateAnalyzerService stateAnalyzerService
+        StateAnalyzerService stateAnalyzerService,
+        CharacterAnalyzerService characterAnalyzerService
     )
     {
         _gameFilesService = gameFilesService;
         _editorDiagnosisService = editorDiagnosisService;
         _stateAnalyzerService = stateAnalyzerService;
+        _characterAnalyzerService = characterAnalyzerService;
     }
 
     public Task AnalyzeFileAsync(Uri fileUri)
@@ -52,6 +55,7 @@ public sealed class AnalyzeService
         return gameFileType.Name switch
         {
             nameof(GameFileType.State) => _stateAnalyzerService.Analyze(node, filePath),
+            nameof(GameFileType.Character) => _characterAnalyzerService.Analyze(node),
             _ => EmptyDiagnoses
         };
     }

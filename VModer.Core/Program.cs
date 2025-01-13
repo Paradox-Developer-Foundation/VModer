@@ -57,6 +57,7 @@ builder.Services.AddSingleton<GameResourcesWatcherService>();
 builder.Services.AddSingleton<AnalyzeService>();
 builder.Services.AddSingleton<HoverService>();
 builder.Services.AddSingleton<StateAnalyzerService>();
+builder.Services.AddSingleton<CharacterAnalyzerService>();
 builder.Services.AddSingleton<CompletionService>();
 builder.Services.AddSingleton<EditorDiagnosisService>();
 

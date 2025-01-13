@@ -125,8 +125,8 @@ public sealed class ModifierService
             char displayDigits = GetDisplayDigits(modifierDisplayFormat);
             bool isPercentage =
                 string.IsNullOrEmpty(modifierDisplayFormat)
-                || leafModifier.Key.EndsWith("factor")
-                || modifierDisplayFormat.Contains('%');
+                || modifierDisplayFormat.Contains('%')
+                || leafModifier.Key.EndsWith("factor");
             char format = isPercentage ? 'P' : 'F';
 
             return $"{sign}{value.ToString($"{format}{displayDigits}")}";
