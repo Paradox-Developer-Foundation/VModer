@@ -19,9 +19,9 @@ public sealed class LocalizationFormatService(
     /// 1. 文本颜色格式
     /// 2. 对其他本地化键的引用
     /// </remarks>
-    public IReadOnlyCollection<ColorTextInfo> GetFormatText(string text)
+    public IReadOnlyCollection<TextFormatInfo> GetFormatText(string text)
     {
-        var result = new List<ColorTextInfo>(4);
+        var result = new List<TextFormatInfo>(4);
 
         // TODO: 修饰符显示内置的 icon
         if (LocalizationFormatParser.TryParse(text, out var formats))
@@ -36,7 +36,8 @@ public sealed class LocalizationFormatService(
                         continue;
                     }
 
-                    result.Add(new ColorTextInfo(localizationService.GetValue(format.Text), Color.Black));
+                    // 尝试当成本地化键处理
+                    result.Add(new TextFormatInfo(localizationService.GetValue(format.Text), Color.Black));
                 }
                 else if (format.Type != LocalizationFormatType.Icon)
                 {
@@ -46,24 +47,24 @@ public sealed class LocalizationFormatService(
         }
         else
         {
-            result.Add(new ColorTextInfo(text, Color.Black));
+            result.Add(new TextFormatInfo(text, Color.Black));
         }
 
         return result;
     }
 
     /// <summary>
-    /// 尝试将文本解析为 <see cref="ColorTextInfo"/>, 并使用 <see cref="LocalizationFormatInfo"/> 中指定的颜色, 如果颜色不存在, 则使用默认颜色
+    /// 尝试将文本解析为 <see cref="TextFormatInfo"/>, 并使用 <see cref="LocalizationFormatInfo"/> 中指定的颜色, 如果颜色不存在, 则使用默认颜色
     /// </summary>
     /// <param name="format">文本格式信息</param>
     /// <returns></returns>
-    public ColorTextInfo GetColorText(LocalizationFormatInfo format)
+    public TextFormatInfo GetColorText(LocalizationFormatInfo format)
     {
         if (format.Type == LocalizationFormatType.TextWithColor)
         {
             if (string.IsNullOrEmpty(format.Text))
             {
-                return new ColorTextInfo(string.Empty, Color.Black);
+                return new TextFormatInfo(string.Empty, Color.Black);
             }
 
             if (localizationTextColorsService.TryGetColor(format.Text[0], out var colorInfo))
@@ -72,11 +73,11 @@ public sealed class LocalizationFormatService(
                 {
                     _colorBrushes.Add(format.Text[0], brush);
                 }
-                return new ColorTextInfo(format.Text[1..], brush);
+                return new TextFormatInfo(format.Text[1..], brush);
             }
         }
 
-        return new ColorTextInfo(format.Text, Color.Black);
+        return new TextFormatInfo(format.Text, Color.Black);
     }
 
     private readonly Dictionary<char, Color> _colorBrushes = [];

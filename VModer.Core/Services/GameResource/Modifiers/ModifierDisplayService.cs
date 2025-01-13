@@ -67,43 +67,49 @@ public sealed class ModifierDisplayService
 
         foreach (var modifier in modifiers)
         {
-            IEnumerable<string> addedInlines;
-            switch (modifier.Type)
-            {
-                case ModifierType.Leaf:
-                {
-                    var leafModifier = (LeafModifier)modifier;
-                    if (IsCustomToolTip(leafModifier.Key))
-                    {
-                        var sb = new StringBuilder();
-                        string name = _localizationService.GetValue(leafModifier.Value);
-                        foreach (var colorTextInfo in _localisationFormatService.GetFormatText(name))
-                        {
-                            sb.Append(colorTextInfo.DisplayText);
-                        }
-                        addedInlines = [sb.ToString()];
-                    }
-                    else
-                    {
-                        addedInlines = [GetDescriptionForLeaf(leafModifier)];
-                    }
-
-                    break;
-                }
-                case ModifierType.Node:
-                {
-                    var nodeModifier = (NodeModifier)modifier;
-                    addedInlines = GetModifierDescriptionForNode(nodeModifier);
-                    break;
-                }
-                default:
-                    continue;
-            }
-
-            inlines.AddRange(addedInlines);
+            inlines.AddRange(GetDescription(modifier));
         }
 
         return inlines;
+    }
+
+    private IEnumerable<string> GetDescription(IModifier modifier)
+    {
+        IEnumerable<string> addedInlines;
+        switch (modifier.Type)
+        {
+            case ModifierType.Leaf:
+            {
+                var leafModifier = (LeafModifier)modifier;
+                if (IsCustomToolTip(leafModifier.Key))
+                {
+                    var sb = new StringBuilder();
+                    string name = _localizationService.GetValue(leafModifier.Value);
+                    foreach (var colorTextInfo in _localisationFormatService.GetFormatText(name))
+                    {
+                        sb.Append(colorTextInfo.DisplayText);
+                    }
+                    addedInlines = [sb.ToString()];
+                }
+                else
+                {
+                    addedInlines = [GetDescriptionForLeaf(leafModifier)];
+                }
+
+                break;
+            }
+            case ModifierType.Node:
+            {
+                var nodeModifier = (NodeModifier)modifier;
+                addedInlines = GetModifierDescriptionForNode(nodeModifier);
+                break;
+            }
+            default:
+                addedInlines = [];
+                break;
+        }
+
+        return addedInlines;
     }
 
     private static bool IsCustomToolTip(string modifierKey)
@@ -162,25 +168,60 @@ public sealed class ModifierDisplayService
             return GetTargetedModifierDescription(nodeModifier);
         }
 
+        if (nodeModifier.Key.Equals("equipment_bonus", StringComparison.OrdinalIgnoreCase))
+        {
+            return GetEquipmentModifierDescription(nodeModifier);
+        }
+
         return GetDescriptionForUnknownNode(nodeModifier);
+    }
+
+    private List<string> GetEquipmentModifierDescription(NodeModifier nodeModifier)
+    {
+        var descriptions = new List<string>();
+        foreach (var equipmentModifierNode in nodeModifier.Nodes)
+        {
+            AddEquipmentNameToList(descriptions, equipmentModifierNode);
+            foreach (var modifier in equipmentModifierNode.Leaves)
+            {
+                descriptions.Add($"{NodeModifierChildrenPrefix}{GetDescriptionForLeaf(modifier)}");
+            }
+        }
+        return descriptions;
+    }
+
+    private void AddEquipmentNameToList(List<string> descriptions, NodeModifier equipmentModifierNode)
+    {
+        // 装备代码本地化值对应一个本地化键引用, 需要解引用
+        string equipmentKeyword = _localizationService.GetValue(equipmentModifierNode.Key);
+        var equipmentNames = _localisationFormatService.GetFormatText(equipmentKeyword);
+        descriptions.Add(
+            $"{string.Join(string.Empty, equipmentNames.Select(formatInfo => formatInfo.DisplayText))}:"
+        );
     }
 
     private List<string> GetTargetedModifierDescription(NodeModifier nodeModifier)
     {
         var descriptions = new List<string>();
-        string? countryTag = nodeModifier
-            .Modifiers.FirstOrDefault(modifier =>
-                modifier.Key.Equals("tag", StringComparison.OrdinalIgnoreCase)
-            )
-            ?.Value;
+        var countryTagLeaf = (LeafModifier?)
+            nodeModifier.Modifiers.FirstOrDefault(modifier =>
+                modifier.Type == ModifierType.Leaf
+                && modifier.Key.Equals("tag", StringComparison.OrdinalIgnoreCase)
+            );
 
+        string? countryTag = countryTagLeaf?.Value;
         descriptions.Add(
-            countryTag is null ? Resources.MissingTargetCountry : $"{_localizationService.GetCountryNameByTag(countryTag)}:"
+            countryTag is null
+                ? Resources.MissingTargetCountry
+                : $"{_localizationService.GetCountryNameByTag(countryTag)}:"
         );
         foreach (
-            var modifier in nodeModifier.Modifiers.Where(modifier =>
-                !modifier.Key.Equals("tag", StringComparison.OrdinalIgnoreCase)
-            )
+            var modifier in nodeModifier
+                .Modifiers.Where(modifier =>
+                    !modifier.Key.Equals("tag", StringComparison.OrdinalIgnoreCase)
+                    && modifier.Type == ModifierType.Leaf
+                )
+                .Cast<LeafModifier>()
         )
         {
             string description;
@@ -212,14 +253,14 @@ public sealed class ModifierDisplayService
     private List<string> GetTerrainModifierDescription(NodeModifier nodeModifier)
     {
         return GetDescriptionForNode(
-            nodeModifier,
-            leafModifier =>
+            nodeModifier.Key,
+            // 地形修饰符中仅有 Leaf 类型, 但以防万一
+            nodeModifier.Modifiers.Where(modifier => modifier.Type == ModifierType.Leaf),
+            modifier =>
             {
-                string modifierName = _localizationService.GetValue($"STAT_ADJUSTER_{leafModifier.Key}");
-                string modifierFormat = _localizationService.GetValue(
-                    $"STAT_ADJUSTER_{leafModifier.Key}_DIFF"
-                );
-                return $"{NodeModifierChildrenPrefix}{modifierName}{_modifierService.GetDisplayValue(leafModifier, modifierFormat)}";
+                string modifierName = _localizationService.GetValue($"STAT_ADJUSTER_{modifier.Key}");
+                string modifierFormat = _localizationService.GetValue($"STAT_ADJUSTER_{modifier.Key}_DIFF");
+                return $"{NodeModifierChildrenPrefix}{modifierName}{_modifierService.GetDisplayValue((LeafModifier)modifier, modifierFormat)}";
             }
         );
     }
@@ -228,22 +269,22 @@ public sealed class ModifierDisplayService
     {
         Log.Info("未知的节点修饰符: {Name}", nodeModifier.Key);
         return GetDescriptionForNode(
-            nodeModifier,
-            leafModifier => $"{NodeModifierChildrenPrefix}{GetDescriptionForLeaf(leafModifier)}"
+            nodeModifier.Key,
+            // 仅处理 Leaf, 省略 Node
+            nodeModifier.Modifiers.Where(modifier => modifier.Type == ModifierType.Leaf),
+            modifier => $"{NodeModifierChildrenPrefix}{GetDescriptionForLeaf((LeafModifier)modifier)}"
         );
     }
 
     private List<string> GetDescriptionForNode(
-        NodeModifier nodeModifier,
-        Func<LeafModifier, string> converter
+        string key,
+        IEnumerable<IModifier> modifiers,
+        Func<IModifier, string> converter
     )
     {
-        var list = new List<string>(nodeModifier.Modifiers.Count * 2)
-        {
-            $"{_localizationService.GetValue(nodeModifier.Key)}:"
-        };
+        var list = new List<string> { $"{_localizationService.GetValue(key)}:" };
 
-        list.AddRange(nodeModifier.Modifiers.Select(converter));
+        list.AddRange(modifiers.Select(converter));
 
         return list;
     }

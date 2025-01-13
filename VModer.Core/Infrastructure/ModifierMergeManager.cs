@@ -23,7 +23,7 @@ public sealed class ModifierMergeManager
         _nodeModifiers.Clear();
         _customEffectTooltipLocalizationKeys.Clear();
     }
-    
+
     public void Add(IModifier modifier)
     {
         if (modifier.Type == ModifierType.Leaf)
@@ -72,19 +72,32 @@ public sealed class ModifierMergeManager
         }
     }
 
-    private void RemoveNodeModifier(NodeModifier removedModifier)
+    private void RemoveNodeModifier(NodeModifier removedNodeModifier)
     {
-        if (_nodeModifiers.TryGetValue(removedModifier.Key, out var modifierMap))
+        if (!_nodeModifiers.TryGetValue(removedNodeModifier.Key, out var modifierMap))
         {
-            foreach (var removedLeafModifier in removedModifier.Modifiers)
-            {
-                RemoveLeafModifierInDictionary(modifierMap, removedLeafModifier);
-            }
+            return;
+        }
 
-            if (modifierMap.Count == 0)
+        foreach (var removedModifier in removedNodeModifier.Modifiers)
+        {
+            switch (removedModifier.Type)
             {
-                _nodeModifiers.Remove(removedModifier.Key);
+                case ModifierType.Leaf:
+                    RemoveLeafModifierInDictionary(modifierMap, (LeafModifier)removedModifier);
+                    break;
+                case ModifierType.Node:
+                    RemoveNodeModifier((NodeModifier)removedModifier);
+                    break;
+                default:
+                    Log.Warn("Unknown modifier type: {Type}", removedModifier.Type);
+                    break;
             }
+        }
+
+        if (modifierMap.Count == 0)
+        {
+            _nodeModifiers.Remove(removedNodeModifier.Key);
         }
     }
 
@@ -162,18 +175,41 @@ public sealed class ModifierMergeManager
     {
         if (_nodeModifiers.TryGetValue(modifier.Key, out var modifierMap))
         {
-            foreach (var leafModifier in modifier.Modifiers)
+            foreach (var childModifier in modifier.Modifiers)
             {
-                AddLeafModifierToDictionary(modifierMap, leafModifier);
+                switch (childModifier.Type)
+                {
+                    case ModifierType.Leaf:
+                        AddLeafModifierToDictionary(modifierMap, (LeafModifier)childModifier);
+                        break;
+                    case ModifierType.Node:
+                        AddNodeModifier((NodeModifier)childModifier);
+                        break;
+                    default:
+                        Log.Warn("Unknown modifier type: {Type}", childModifier.Type);
+                        break;
+                }
             }
         }
         else
         {
             var newModifierMap = new Dictionary<string, decimal>(modifier.Modifiers.Count);
-            foreach (var leafModifier in modifier.Modifiers)
+            foreach (var childModifier in modifier.Modifiers)
             {
-                decimal value = decimal.TryParse(leafModifier.Value, out decimal result) ? result : 0;
-                newModifierMap[leafModifier.Key] = value;
+                if (childModifier.Type == ModifierType.Leaf)
+                {
+                    var leafModifier = (LeafModifier)childModifier;
+                    decimal value = decimal.TryParse(leafModifier.Value, out decimal result) ? result : 0;
+                    newModifierMap[leafModifier.Key] = value;
+                }
+                else if (childModifier.Type == ModifierType.Node)
+                {
+                    AddNodeModifier((NodeModifier)childModifier);
+                }
+                else
+                {
+                    Log.Warn("Unknown modifier type: {Type}", childModifier.Type);
+                }
             }
             _nodeModifiers.Add(modifier.Key, newModifierMap);
         }
