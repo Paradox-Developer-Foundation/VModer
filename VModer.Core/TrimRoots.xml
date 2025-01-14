@@ -1,0 +1,7 @@
+﻿<linker>
+    <assembly fullname="VModer.Core">
+        <type fullname="VModer.Core.Models.LocalizationKeyMappingInfo" preserve="all"/>
+        <type fullname="VModer.Core.Models.ModifierLocalizationFormatInfo" preserve="all"/>
+    </assembly>
+    <assembly fullname="CsvHelper" preserve="all"/>
+</linker>

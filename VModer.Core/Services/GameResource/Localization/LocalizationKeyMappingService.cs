@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using CsvHelper;
-using EnumsNET;
 using NLog;
 using VModer.Core.Models;
 using VModer.Core.Models.Character;
