@@ -27,11 +27,7 @@ public sealed class LanguageServerHostedService : IHostedService
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        var handlers = new List<IHandler>
-        {
-            new TextDocumentHandler(),
-            new HoverHandler()
-        };
+        var handlers = new List<IHandler> { new TextDocumentHandler(), new HoverHandler() };
         foreach (var handler in handlers)
         {
             _server.AddHandler(handler);
@@ -39,20 +35,29 @@ public sealed class LanguageServerHostedService : IHostedService
         _server.OnInitialize(
             (c, s) =>
             {
-                _settings.GameRootFolderPath =
+                string gameRootPath =
                     c.InitializationOptions?.RootElement.GetProperty("GameRootFolderPath").GetString()
                     ?? string.Empty;
+                if (string.IsNullOrEmpty(gameRootPath))
+                {
+                    gameRootPath =
+                        c.InitializationOptions?.RootElement.GetProperty("cwtools.cache.hoi4").GetString()
+                        ?? string.Empty;
+                }
+
+                _settings.GameRootFolderPath = gameRootPath;
                 _settings.ModRootFolderPath = c.RootUri?.FileSystemPath ?? string.Empty;
                 s.Name = "VModer";
                 s.Version = "1.0.0";
 
                 foreach (var handler in handlers)
                 {
-                   handler.Initialize();
+                    handler.Initialize();
                 }
                 return Task.CompletedTask;
             }
         );
+        
         _server.OnInitialized(
             (c) =>
             {

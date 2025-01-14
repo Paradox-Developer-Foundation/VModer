@@ -1,9 +1,4 @@
-/* --------------------------------------------------------------------------------------------
- * Copyright (c) Microsoft Corporation. All rights reserved.
- * Licensed under the MIT License. See License.txt in the project root for license information.
- * ------------------------------------------------------------------------------------------ */
-
-import { workspace, ExtensionContext, ExtensionMode } from 'vscode';
+import { workspace, ExtensionContext, window, ExtensionMode, l10n } from 'vscode';
 import * as net from "net";
 import * as fs from 'fs';
 import * as os from 'os';
@@ -13,7 +8,6 @@ import {
 	ServerOptions,
 	StreamInfo,
 	TransportKind,
-	// TransportKind,
 } from 'vscode-languageclient/node';
 import * as path from 'path';
 
@@ -78,15 +72,33 @@ export function activate(context: ExtensionContext) {
 		};
 	}
 
+	const config = workspace.getConfiguration();
+	const gameRootFolderPath = config.get<string>("VModer.GameRootPath") || config.get<string>("cwtools.cache.hoi4");
+
+	if (gameRootFolderPath === undefined || gameRootFolderPath === "" || 1 === 1) {
+		window.showWarningMessage(l10n.t("SelectGameRootPath"), l10n.t("SelectFolder"))
+			.then(() => {
+				window.showOpenDialog({
+					canSelectFiles: false,
+					canSelectFolders: true,
+					canSelectMany: false,
+					openLabel: l10n.t("SelectFolder")
+				}).then((uri) => {
+					if (uri && uri[0]) {
+						config.update("VModer.GameRootPath", uri[0].fsPath, true);
+					}
+				}).then(() => window.showInformationMessage(l10n.t("MustRestart")));
+			});
+	}
 	// 控制语言客户端的选项
 	const clientOptions: LanguageClientOptions = {
-		// 为纯文本文档注册服务器
 		documentSelector: [{ scheme: 'file', language: 'hoi4' }],
 		synchronize: {
 			fileEvents: [workspace.createFileSystemWatcher('**/*.txt')],
 		},
 		initializationOptions: {
-			"GameRootFolderPath": workspace.getConfiguration().get<string>("VModer.GameRootPath")
+			"GameRootFolderPath": gameRootFolderPath,
+			"cwtools.cache.hoi4": config.get<string>("cwtools.cache.hoi4"),
 		}
 	};
 
@@ -97,7 +109,7 @@ export function activate(context: ExtensionContext) {
 		serverOptions,
 		clientOptions
 	);
-	// Start the client. This will also launch the server
+
 	client.start();
 }
 
