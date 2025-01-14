@@ -17,7 +17,6 @@ using VModer.Core.Services.GameResource.Localization;
 using VModer.Core.Services.GameResource.Modifiers;
 
 var settings = new HostApplicationBuilderSettings { Args = args, ApplicationName = "VModer" };
-
 #if DEBUG
 settings.EnvironmentName = "Development";
 #else
@@ -101,4 +100,8 @@ catch (Exception e)
         Message = "VModer 运行时错误"
     }).ConfigureAwait(false);
     logger.Error(e);
+}
+finally
+{
+    LogManager.Flush();
 }

@@ -1,8 +1,9 @@
-﻿using CsvHelper.Configuration.Attributes;
+﻿using System.Diagnostics.CodeAnalysis;
+using CsvHelper.Configuration.Attributes;
 
 namespace VModer.Core.Models;
 
-// ReSharper disable once ClassNeverInstantiated.Global
+[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
 public sealed class LocalizationKeyMappingInfo
 {
     [Name("Raw Key")]

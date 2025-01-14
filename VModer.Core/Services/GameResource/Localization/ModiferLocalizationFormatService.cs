@@ -20,6 +20,14 @@ public sealed class ModiferLocalizationFormatService
     public ModiferLocalizationFormatService()
     {
         string filePath = Path.Combine([App.AssetsFolder, FileName]);
+
+        if (!File.Exists(filePath))
+        {
+            Log.Warn($"找不到补全修饰符格式的配置文件 '{filePath}'");
+            _modifierLocalizationFormat = new Dictionary<string, string>().ToFrozenDictionary();
+            return;
+        }
+
         using var csv = new CsvReader(File.OpenText(filePath), CultureInfo.InvariantCulture);
         var formatMap = new Dictionary<string, string>(8);
         foreach (var record in csv.GetRecords<ModifierLocalizationFormatInfo>())

@@ -16,6 +16,7 @@ let client: LanguageClient;
 export function activate(context: ExtensionContext) {
 	let serverOptions: ServerOptions;
 
+	let command = "";
 	if (context.extensionMode == ExtensionMode.Development) {
 		const connectionInfo = {
 			port: 1231
@@ -36,7 +37,6 @@ export function activate(context: ExtensionContext) {
 	else {
 		const platform: string = os.platform();
 
-		let command = "";
 		switch (platform) {
 			case "win32":
 				command = path.join(
@@ -75,7 +75,7 @@ export function activate(context: ExtensionContext) {
 	const config = workspace.getConfiguration();
 	const gameRootFolderPath = config.get<string>("VModer.GameRootPath") || config.get<string>("cwtools.cache.hoi4");
 
-	if (gameRootFolderPath === undefined || gameRootFolderPath === "" || 1 === 1) {
+	if (gameRootFolderPath === undefined || gameRootFolderPath === "") {
 		window.showWarningMessage(l10n.t("SelectGameRootPath"), l10n.t("SelectFolder"))
 			.then(() => {
 				window.showOpenDialog({
@@ -90,6 +90,10 @@ export function activate(context: ExtensionContext) {
 				}).then(() => window.showInformationMessage(l10n.t("MustRestart")));
 			});
 	}
+
+	const extensionPath = path.dirname(command);
+	console.log("ExtensionPath:" + extensionPath);
+	
 	// 控制语言客户端的选项
 	const clientOptions: LanguageClientOptions = {
 		documentSelector: [{ scheme: 'file', language: 'hoi4' }],
@@ -98,7 +102,7 @@ export function activate(context: ExtensionContext) {
 		},
 		initializationOptions: {
 			"GameRootFolderPath": gameRootFolderPath,
-			"cwtools.cache.hoi4": config.get<string>("cwtools.cache.hoi4"),
+			"ExtensionPath": extensionPath
 		}
 	};
 

@@ -1,4 +1,6 @@
-﻿using EmmyLua.LanguageServer.Framework.Server;
+﻿using System.Diagnostics;
+using EmmyLua.LanguageServer.Framework.Protocol.Message.Initialize;
+using EmmyLua.LanguageServer.Framework.Server;
 using Microsoft.Extensions.Hosting;
 using NLog;
 using VModer.Core.Handlers;
@@ -38,12 +40,8 @@ public sealed class LanguageServerHostedService : IHostedService
                 string gameRootPath =
                     c.InitializationOptions?.RootElement.GetProperty("GameRootFolderPath").GetString()
                     ?? string.Empty;
-                if (string.IsNullOrEmpty(gameRootPath))
-                {
-                    gameRootPath =
-                        c.InitializationOptions?.RootElement.GetProperty("cwtools.cache.hoi4").GetString()
-                        ?? string.Empty;
-                }
+
+                ResetCurrentDirectory(c);
 
                 _settings.GameRootFolderPath = gameRootPath;
                 _settings.ModRootFolderPath = c.RootUri?.FileSystemPath ?? string.Empty;
@@ -57,7 +55,7 @@ public sealed class LanguageServerHostedService : IHostedService
                 return Task.CompletedTask;
             }
         );
-        
+
         _server.OnInitialized(
             (c) =>
             {
@@ -78,6 +76,24 @@ public sealed class LanguageServerHostedService : IHostedService
         );
         Log.Info("Language server started.");
         return Task.CompletedTask;
+    }
+
+    [Conditional("RELEASE")]
+    private static void ResetCurrentDirectory(InitializeParams c)
+    {
+        string extensionPath =
+            c.InitializationOptions?.RootElement.GetProperty("ExtensionPath").GetString()
+            ?? string.Empty;
+
+        if (string.IsNullOrEmpty(extensionPath))
+        {
+            Log.Error("扩展路径为 null.");
+        }
+        else
+        {
+            // 将当前目录重定向为扩展路径
+            Environment.CurrentDirectory = extensionPath;
+        }
     }
 
     public Task StopAsync(CancellationToken cancellationToken)

@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using CsvHelper;
 using EnumsNET;
+using NLog;
 using VModer.Core.Models;
 using VModer.Core.Models.Character;
 
@@ -19,12 +20,20 @@ public sealed class LocalizationKeyMappingService
         new(16, StringComparer.OrdinalIgnoreCase);
 
     private const string FileName = "ModiferLocalizationKeyMapping.csv";
+    private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
     public LocalizationKeyMappingService()
     {
         // TODO: 资源文件仅保留一份, 而不是三端都各有一份
         // 方便贡献, 冲突时可以处理, 因此不应该是二进制(可以生成二进制缓存文件, 第一次启动时生成二进制文件, 并记录Hash, 当更新时重新生成)
         string localizationKeyMappingFilePath = Path.Combine([App.AssetsFolder, FileName]);
+
+        if (!File.Exists(localizationKeyMappingFilePath))
+        {
+            Log.Warn($"{localizationKeyMappingFilePath} 文件不存在");
+            return;
+        }
+
         using var csv = new CsvReader(
             File.OpenText(localizationKeyMappingFilePath),
             CultureInfo.InvariantCulture

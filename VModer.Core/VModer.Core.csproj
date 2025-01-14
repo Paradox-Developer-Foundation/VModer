@@ -10,11 +10,11 @@
         <SelfContained>true</SelfContained>
         <PublishSingleFile>true</PublishSingleFile>
         <PublishTrimmed>true</PublishTrimmed>
-        <TrimMode>full</TrimMode>
+        <TrimMode>partial</TrimMode>
         <PublishReadyToRun>true</PublishReadyToRun>
         <ApplicationIcon>logo.ico</ApplicationIcon>
     </PropertyGroup>
-
+    
     <ItemGroup>
       <PackageReference Include="Ardalis.SmartEnum" Version="8.2.0" />
       <PackageReference Include="ConfigureAwaitChecker.Analyzer" Version="5.0.0.1">

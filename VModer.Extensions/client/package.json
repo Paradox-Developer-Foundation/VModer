@@ -1,9 +1,11 @@
 {
 	"name": "VModer",
+	"displayName": "VModer - HOI4 Language Server",
 	"description": "A HOI4 language server",
 	"author": "textGamex",
 	"license": "Apache-2.0",
-	"version": "0.1.0",
+	"version": "0.1.1",
+	"preview": true,
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/textGamex/VModer"
