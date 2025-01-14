@@ -8,8 +8,9 @@
 		"type": "git",
 		"url": "https://github.com/textGamex/VModer"
 	},
+	"icon": "./logo.png",
 	"publisher": "textGamex",
-	"categories": [],
+	"categories": ["Programming Languages"],
 	"l10n": "./l10n",
 	"keywords": [
 		"hoi4",
