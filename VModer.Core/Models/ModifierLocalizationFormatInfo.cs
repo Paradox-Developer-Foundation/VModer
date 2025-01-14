@@ -2,10 +2,12 @@
 
 namespace VModer.Core.Models;
 
-public sealed class ModifierLocalizationFormatInfo
+public sealed class ModifierLocalizationFormatInfo(
+    [Name("Key")] string key,
+    [Name("Format Info")] string formatInfo
+)
 {
-    public string Key { get; set; } = string.Empty;
+    public string Key { get; } = key;
 
-    [Name("Format Info")]
-    public string FormatInfo { get; set; } = string.Empty;
+    public string FormatInfo { get; } = formatInfo;
 }

@@ -2,11 +2,11 @@
 
 namespace VModer.Core.Models;
 
-public sealed class LocalizationKeyMappingInfo
+public sealed class LocalizationKeyMappingInfo(
+    [Name("Raw Key")] string rawKey,
+    [Name("Mapping Key")] string mappingKey)
 {
-    [Name("Raw Key")]
-    public string RawKey { get; set; } = string.Empty;
+    public string RawKey { get; } = rawKey;
 
-    [Name("Mapping Key")]
-    public string MappingKey { get; set; } = string.Empty;
+    public string MappingKey { get; } = mappingKey;
 }
