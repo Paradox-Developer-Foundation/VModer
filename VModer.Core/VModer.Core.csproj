@@ -39,7 +39,7 @@
       <PackageReference Include="MethodTimer.Fody" Version="3.2.2">
           <PrivateAssets>all</PrivateAssets>
       </PackageReference>
-      <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.1" />
       <PackageReference Include="NLog" Version="5.3.4" />
       <PackageReference Include="NLog.Extensions.Logging" Version="5.3.15" />
       <PackageReference Include="ParadoxPower" Version="0.8.1-beta" />
