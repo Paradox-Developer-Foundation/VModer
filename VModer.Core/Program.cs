@@ -55,13 +55,16 @@ builder.Services.AddSingleton<GameModDescriptorService>();
 builder.Services.AddSingleton<GameFilesService>();
 builder.Services.AddSingleton<GameResourcesWatcherService>();
 
+// 语言服务
 builder.Services.AddSingleton<AnalyzeService>();
 builder.Services.AddSingleton<HoverService>();
 builder.Services.AddSingleton<StateAnalyzerService>();
 builder.Services.AddSingleton<CharacterAnalyzerService>();
 builder.Services.AddSingleton<CompletionService>();
 builder.Services.AddSingleton<EditorDiagnosisService>();
+builder.Services.AddSingleton<DocumentColorService>();
 
+// 游戏资源服务
 builder.Services.AddSingleton<LocalizationService>();
 builder.Services.AddSingleton<CountryTagService>();
 builder.Services.AddSingleton<OreService>();

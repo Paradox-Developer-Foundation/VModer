@@ -29,7 +29,12 @@ public sealed class LanguageServerHostedService : IHostedService
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        var handlers = new List<IHandler> { new TextDocumentHandler(), new HoverHandler() };
+        var handlers = new List<IHandler>
+        {
+            new TextDocumentHandler(),
+            new HoverHandler(),
+            new DocumentColorHandler()
+        };
         foreach (var handler in handlers)
         {
             _server.AddHandler(handler);
@@ -82,8 +87,7 @@ public sealed class LanguageServerHostedService : IHostedService
     private static void ResetCurrentDirectory(InitializeParams c)
     {
         string extensionPath =
-            c.InitializationOptions?.RootElement.GetProperty("ExtensionPath").GetString()
-            ?? string.Empty;
+            c.InitializationOptions?.RootElement.GetProperty("ExtensionPath").GetString() ?? string.Empty;
 
         if (string.IsNullOrEmpty(extensionPath))
         {

@@ -9,6 +9,7 @@ public sealed class GameFileType(string name, string value) : SmartEnum<GameFile
     public static readonly GameFileType Unknown = new(nameof(Unknown), string.Empty);
     public static readonly GameFileType State = new(nameof(State), "**/history/states/*.txt");
     public static readonly GameFileType Character = new(nameof(Character), "**/common/characters/*.txt");
+    public static readonly GameFileType Countries = new(nameof(Countries), "**/common/countries/*.txt");
 
     private static readonly Dictionary<string, Glob> Globs = new();
 
