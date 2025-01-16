@@ -1,4 +1,5 @@
 ﻿using EmmyLua.LanguageServer.Framework.Protocol.Model.Diagnostic;
+using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
 using VModer.Core.Extensions;
 using VModer.Core.Models.Character;
@@ -51,7 +52,7 @@ public sealed class CharacterAnalyzerService
         var skillType = SkillCharacterType.FromCharacterType(generalNode.Key);
         foreach (var skillLeaf in generalNode.Leaves)
         {
-            if (!ushort.TryParse(skillLeaf.ValueText, out ushort value))
+            if (!skillLeaf.Value.TryGetInt(out int value))
             {
                 continue;
             }

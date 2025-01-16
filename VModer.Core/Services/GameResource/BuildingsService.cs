@@ -71,7 +71,7 @@ public sealed class BuildingsService
         Dictionary<string, BuildingInfo> buildings
     )
     {
-        ushort? maxLevel = null;
+        int? maxLevel = null;
         var levelCapNode = buildingNode.Nodes.FirstOrDefault(node =>
             StringComparer.OrdinalIgnoreCase.Equals(node.Key, "level_cap")
         );
@@ -88,7 +88,7 @@ public sealed class BuildingsService
                 || levelPropertyLeaf.Key.Equals("province_max", StringComparison.OrdinalIgnoreCase)
             )
             {
-                if (ushort.TryParse(levelPropertyLeaf.ValueText, out var value))
+                if (levelPropertyLeaf.Value.TryGetInt(out int value))
                 {
                     maxLevel = value;
                 }

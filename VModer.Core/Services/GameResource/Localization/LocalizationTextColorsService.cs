@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using MethodTimer;
+using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
 using VModer.Core.Models;
 using VModer.Core.Services.GameResource.Base;
@@ -51,12 +52,12 @@ public sealed class LocalizationTextColorsService
         var colors = new Dictionary<char, LocalizationTextColor>(textColorsNode.AllArray.Length);
         foreach (var textColorNode in textColorsNode.Nodes)
         {
-            var key = textColorNode.Key[0];
-            var colorBytes = new List<byte>(3);
+            char key = textColorNode.Key[0];
+            var colorBytes = new List<int>(3);
 
             foreach (var leafValue in textColorNode.LeafValues)
             {
-                if (byte.TryParse(leafValue.ValueText, out var colorByte))
+                if (leafValue.Value.TryGetInt(out int colorByte))
                 {
                     colorBytes.Add(colorByte);
                 }
