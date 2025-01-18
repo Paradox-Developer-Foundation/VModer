@@ -7,6 +7,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.csharpierrc = .csharpierrc
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
+		VModer.Extensions\client\CHANGELOG.md = VModer.Extensions\client\CHANGELOG.md
+		VModer.Extensions\client\README.md = VModer.Extensions\client\README.md
+		VModer.Extensions\client\docs\README_zh.md = VModer.Extensions\client\docs\README_zh.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VModer.Languages", "VModer.Languages\VModer.Languages.csproj", "{657D0034-AF8F-449D-A67C-D23D3FD4593F}"
