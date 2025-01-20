@@ -1,6 +1,9 @@
 # VModer
 
-为 Hearts of iron IV (钢铁雄心4) 提供 CWTools 缺失的功能
+English | [简体中文](VModer.Extensions/client/README.md)
+
+---
+Provides CWTools missing features for Hearts of iron IV
 
 ---
 
@@ -8,53 +11,53 @@
 [![star](https://img.shields.io/github/stars/textGamex/vmoder?style=for-the-badge)](https://github.com/textGamex/VModer)
 ![](https://img.shields.io/badge/Language-CSharp-blue?style=for-the-badge)
 
-[问题反馈/功能请求](https://github.com/textGamex/VModer/issues/new)
+[Issue feedback/feature request](https://github.com/textGamex/VModer/issues/new)
 
-## 使用指南
+## Usage Guidelines
 
-为启动扩展, 您需要确保您的语言模式为`hoi4`, [`CWTools`](https://marketplace.visualstudio.com/items?itemName=tboby.cwtools-vscode)
-或[`Paradox Highlight`](https://marketplace.visualstudio.com/items?itemName=dragon-archer.paradox-highlight)扩展提供此语言模式,
+To enable the extension, you need to make sure your language mode is `hoi4`, [`CWTools`](https://marketplace.visualstudio.com/items?itemName=tboby.cwtools-vscode)
+or[`Paradox Highlight`](https://marketplace.visualstudio.com/items?itemName=dragon-archer.paradox-highlight)Extensions provide this language mode,
 
-您也可以选择安装其他提供`hoi4`语言模式的扩展.
+You can also choose to install other extensions that provide `hoi4` language mode.
 
-## 功能
+## Function
 
-### Modifier 可视化
+### Modifier Visualization
 
-> Modifier 节点
+> Modifier Visualization
 > 
 >![ModifierNodeImg](https://www.helloimg.com/i/2025/01/18/678a838fd83d0.png)
 
->单修饰符词条
+> Single modifier terms
 > 
 >![ModifierLeafImg](https://www.helloimg.com/i/2025/01/18/678a838fdb9e0.png)
 
-### Character 内容可视化
+### Character Content Visualization
 
->将领
+>general
 > 
 >![General](https://www.helloimg.com/i/2025/01/18/678a83903e74b.png)
 
->内阁
+>cabinet
 > 
 >![](https://www.helloimg.com/i/2025/01/18/678a8390052ea.png)
 
-> Character 总览
+> Character Overview
 > 
 >![](https://www.helloimg.com/i/2025/01/18/678a83910610a.png)
 
-### 颜色选择器
+### Color Picker
 
 ![ColorPicker](https://www.helloimg.com/i/2025/01/18/678b34fe8e854.png)
 
-### 错误分析
+### Error Analysis
 
-- 建筑等级分析
-- Character 技能等级分析
+- Building grade analysis
+- Character Skill level analysis
 
-## 赞助
+## sponsor
 
-如果您觉得此扩展帮助了您, 可以通过爱发电请我喝一杯奶茶
-[爱发电链接](https://afdian.com/a/textGamex)
+If you feel this extension helps you, you can buy me a cup of milk tea through this
+[Sponsored Links](https://afdian.com/a/textGamex)
 
 ![QR](https://www.helloimg.com/i/2025/01/14/67860b62b54f5.jpg)
