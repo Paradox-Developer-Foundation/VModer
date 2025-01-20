@@ -24,7 +24,7 @@ You can also choose to install other extensions that provide `hoi4` language mod
 
 ### Modifier Visualization
 
-> Modifier Visualization
+> Modifier node
 > 
 >![ModifierNodeImg](https://www.helloimg.com/i/2025/01/18/678a838fd83d0.png)
 
