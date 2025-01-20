@@ -85,12 +85,12 @@ public sealed class HoverService
         if (IsCharacterNode(rootNode, adjacentNode))
         {
             var builder = new MarkdownDocument();
-            builder.AppendHeader(_localizationService.GetValue(adjacentNode.Key), 2);
-            builder.AppendHorizontalRule();
+
+            AddCharacterNameTitle(builder, adjacentNode);
 
             foreach (var node in adjacentNode.Nodes)
             {
-                string text = GetDisplayText(node);
+                string text = GetCharacterDisplayTextByType(node);
                 if (string.IsNullOrEmpty(text))
                 {
                     continue;
@@ -108,7 +108,7 @@ public sealed class HoverService
         }
         else
         {
-            result = GetDisplayText(adjacentNode);
+            result = GetCharacterDisplayTextByType(adjacentNode);
         }
 
         return result;
@@ -124,7 +124,20 @@ public sealed class HoverService
         );
     }
 
-    private string GetDisplayText(Node node)
+    private void AddCharacterNameTitle(MarkdownDocument builder, Node characterNode)
+    {
+        var name = characterNode.Leaves.FirstOrDefault(leaf =>
+            leaf.Key.Equals("name", StringComparison.OrdinalIgnoreCase)
+        );
+
+        string nameText = name is null
+            ? _localizationService.GetValue(characterNode.Key)
+            : _localizationService.GetValue(name.ValueText);
+        builder.AppendHeader(nameText, 2);
+        builder.AppendHorizontalRule();
+    }
+
+    private string GetCharacterDisplayTextByType(Node node)
     {
         string result = string.Empty;
         if (
@@ -248,7 +261,10 @@ public sealed class HoverService
                 var infos = _modifierDisplayService.GetDescription(modifiers);
                 foreach (string info in infos)
                 {
-                    builder.AppendListItem(info, info.StartsWith(ModifierDisplayService.NodeModifierChildrenPrefix) ? 2 : 1);
+                    builder.AppendListItem(
+                        info,
+                        info.StartsWith(ModifierDisplayService.NodeModifierChildrenPrefix) ? 2 : 1
+                    );
                 }
             }
         }
