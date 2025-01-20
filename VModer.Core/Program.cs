@@ -16,7 +16,12 @@ using VModer.Core.Services.GameResource.Base;
 using VModer.Core.Services.GameResource.Localization;
 using VModer.Core.Services.GameResource.Modifiers;
 
-var settings = new HostApplicationBuilderSettings { Args = args, ApplicationName = "VModer" };
+var settings = new HostApplicationBuilderSettings
+{
+    Args = args,
+    ApplicationName = "VModer",
+    ContentRootPath = AppContext.BaseDirectory
+};
 #if DEBUG
 settings.EnvironmentName = "Development";
 #else
