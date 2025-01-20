@@ -16,7 +16,6 @@ let client: LanguageClient;
 export function activate(context: ExtensionContext) {
 	let serverOptions: ServerOptions;
 
-	let command = "";
 	if (context.extensionMode == ExtensionMode.Development) {
 		const connectionInfo = {
 			port: 1231
@@ -37,6 +36,7 @@ export function activate(context: ExtensionContext) {
 	else {
 		const platform: string = os.platform();
 
+		let command = "";
 		switch (platform) {
 			case "win32":
 				command = path.join(
@@ -90,9 +90,6 @@ export function activate(context: ExtensionContext) {
 				}).then(() => window.showInformationMessage(l10n.t("MustRestart")));
 			});
 	}
-
-	const extensionPath = path.dirname(command);
-	console.log("ExtensionPath:" + extensionPath);
 	
 	// 控制语言客户端的选项
 	const clientOptions: LanguageClientOptions = {
@@ -101,8 +98,7 @@ export function activate(context: ExtensionContext) {
 			fileEvents: [workspace.createFileSystemWatcher('**/*.txt')],
 		},
 		initializationOptions: {
-			"GameRootFolderPath": gameRootFolderPath,
-			"ExtensionPath": extensionPath
+			"GameRootFolderPath": gameRootFolderPath
 		}
 	};
 

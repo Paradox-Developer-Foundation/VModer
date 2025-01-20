@@ -46,8 +46,6 @@ public sealed class LanguageServerHostedService : IHostedService
                     c.InitializationOptions?.RootElement.GetProperty("GameRootFolderPath").GetString()
                     ?? string.Empty;
 
-                ResetCurrentDirectory(c);
-
                 _settings.GameRootFolderPath = gameRootPath;
                 _settings.ModRootFolderPath = c.RootUri?.FileSystemPath ?? string.Empty;
                 s.Name = "VModer";
@@ -81,23 +79,6 @@ public sealed class LanguageServerHostedService : IHostedService
         );
         Log.Info("Language server started.");
         return Task.CompletedTask;
-    }
-
-    [Conditional("RELEASE")]
-    private static void ResetCurrentDirectory(InitializeParams c)
-    {
-        string extensionPath =
-            c.InitializationOptions?.RootElement.GetProperty("ExtensionPath").GetString() ?? string.Empty;
-
-        if (string.IsNullOrEmpty(extensionPath))
-        {
-            Log.Error("扩展路径为 null.");
-        }
-        else
-        {
-            // 将当前目录重定向为扩展路径
-            Environment.CurrentDirectory = extensionPath;
-        }
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
