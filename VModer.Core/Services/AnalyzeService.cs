@@ -14,18 +14,37 @@ public sealed class AnalyzeService
     private readonly EditorDiagnosisService _editorDiagnosisService;
     private readonly StateAnalyzerService _stateAnalyzerService;
     private readonly CharacterAnalyzerService _characterAnalyzerService;
+    private readonly SettingsService _settingsService;
 
     public AnalyzeService(
         GameFilesService gameFilesService,
         EditorDiagnosisService editorDiagnosisService,
         StateAnalyzerService stateAnalyzerService,
-        CharacterAnalyzerService characterAnalyzerService
+        CharacterAnalyzerService characterAnalyzerService,
+        SettingsService settingsService
     )
     {
         _gameFilesService = gameFilesService;
         _editorDiagnosisService = editorDiagnosisService;
         _stateAnalyzerService = stateAnalyzerService;
         _characterAnalyzerService = characterAnalyzerService;
+        _settingsService = settingsService;
+    }
+
+    public Task AnalyzeAllFilesAsync()
+    {
+        foreach (
+            var fileUri in Directory.EnumerateFiles(
+                _settingsService.ModRootFolderPath,
+                "*.txt",
+                SearchOption.AllDirectories
+            )
+        )
+        {
+            // _ = AnalyzeFileAsync(fileUri);
+        }
+
+        return Task.CompletedTask;
     }
 
     public Task AnalyzeFileAsync(Uri fileUri)

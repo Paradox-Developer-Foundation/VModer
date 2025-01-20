@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using EmmyLua.LanguageServer.Framework.Protocol.Message.Initialize;
-using EmmyLua.LanguageServer.Framework.Server;
+﻿using EmmyLua.LanguageServer.Framework.Server;
 using Microsoft.Extensions.Hosting;
 using NLog;
 using VModer.Core.Handlers;
@@ -13,18 +11,21 @@ public sealed class LanguageServerHostedService : IHostedService
     private readonly IHostApplicationLifetime _lifetime;
     private readonly SettingsService _settings;
     private readonly LanguageServer _server;
+    private readonly ServerLoggerService _logger;
 
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
     public LanguageServerHostedService(
         IHostApplicationLifetime lifetime,
         SettingsService settings,
-        LanguageServer server
+        LanguageServer server,
+        ServerLoggerService logger
     )
     {
         _lifetime = lifetime;
         _settings = settings;
         _server = server;
+        _logger = logger;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
@@ -64,6 +65,7 @@ public sealed class LanguageServerHostedService : IHostedService
             {
                 Log.Info("Game root path: {Path}", _settings.GameRootFolderPath);
                 Log.Info("Workspace root path: {Path}", _settings.ModRootFolderPath);
+                _logger.Log("Language server initialized.");
                 return Task.CompletedTask;
             }
         );

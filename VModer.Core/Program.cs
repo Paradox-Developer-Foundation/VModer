@@ -68,6 +68,7 @@ builder.Services.AddSingleton<CharacterAnalyzerService>();
 builder.Services.AddSingleton<CompletionService>();
 builder.Services.AddSingleton<EditorDiagnosisService>();
 builder.Services.AddSingleton<DocumentColorService>();
+builder.Services.AddSingleton<ServerLoggerService>();
 
 // 游戏资源服务
 builder.Services.AddSingleton<LocalizationService>();
@@ -102,11 +103,9 @@ try
 }
 catch (Exception e)
 {
-    await server.Client.ShowMessage(new ShowMessageParams
-    {
-        Type = MessageType.Error,
-        Message = "VModer 运行时错误"
-    }).ConfigureAwait(false);
+    await server
+        .Client.ShowMessage(new ShowMessageParams { Type = MessageType.Error, Message = "VModer 运行时错误" })
+        .ConfigureAwait(false);
     logger.Error(e);
 }
 finally
