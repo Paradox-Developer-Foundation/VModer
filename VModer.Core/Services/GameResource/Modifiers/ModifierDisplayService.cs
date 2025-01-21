@@ -85,7 +85,7 @@ public sealed class ModifierDisplayService
                 {
                     var sb = new StringBuilder();
                     string name = _localizationService.GetValue(leafModifier.Value);
-                    foreach (var colorTextInfo in _localisationFormatService.GetFormatText(name))
+                    foreach (var colorTextInfo in _localisationFormatService.GetFormatTextInfo(name))
                     {
                         sb.Append(colorTextInfo.DisplayText);
                     }
@@ -149,7 +149,7 @@ public sealed class ModifierDisplayService
         string modifierName = _modifierService.GetLocalizationName(modifierKey);
 
         var sb = new StringBuilder();
-        foreach (var textInfo in _localisationFormatService.GetFormatText(modifierName))
+        foreach (var textInfo in _localisationFormatService.GetFormatTextInfo(modifierName))
         {
             sb.Append(textInfo.DisplayText);
         }
@@ -194,7 +194,7 @@ public sealed class ModifierDisplayService
     {
         // 装备代码本地化值对应一个本地化键引用, 需要解引用
         string equipmentKeyword = _localizationService.GetValue(equipmentModifierNode.Key);
-        var equipmentNames = _localisationFormatService.GetFormatText(equipmentKeyword);
+        var equipmentNames = _localisationFormatService.GetFormatTextInfo(equipmentKeyword);
         descriptions.Add(
             $"{string.Join(string.Empty, equipmentNames.Select(formatInfo => formatInfo.DisplayText))}:"
         );

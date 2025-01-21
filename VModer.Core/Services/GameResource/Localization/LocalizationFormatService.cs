@@ -10,7 +10,17 @@ public sealed class LocalizationFormatService(
 )
 {
     /// <summary>
-    /// 获取格式化后的文本, 如果解析文本颜色失败, 则统一使用黑色
+    /// 获取格式化后的文本
+    /// </summary>
+    /// <param name="text"></param>
+    /// <returns>一个格式化后被拼接的文本</returns>
+    public string GetFormatText(string text)
+    {
+        return string.Join(string.Empty, GetFormatTextInfo(text).Select(info => info.DisplayText));
+    }
+
+    /// <summary>
+    /// 获取格式化后的文本信息, 如果解析文本颜色失败, 则统一使用黑色
     /// </summary>
     /// <param name="text">文本</param>
     /// <returns>一个集合, 包含格式化后的文本</returns>
@@ -19,7 +29,7 @@ public sealed class LocalizationFormatService(
     /// 1. 文本颜色格式
     /// 2. 对其他本地化键的引用
     /// </remarks>
-    public IReadOnlyCollection<TextFormatInfo> GetFormatText(string text)
+    public IReadOnlyCollection<TextFormatInfo> GetFormatTextInfo(string text)
     {
         var result = new List<TextFormatInfo>(4);
 

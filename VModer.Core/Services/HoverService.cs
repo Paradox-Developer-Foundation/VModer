@@ -25,6 +25,7 @@ public sealed class HoverService
     private readonly LocalizationService _localizationService;
     private readonly CharacterTraitsService _characterTraitsService;
     private readonly LeaderTraitsService _leaderTraitsService;
+    private readonly LocalizationFormatService _localizationFormatService;
 
     private const int CharacterTypeLevel = 3;
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
@@ -34,7 +35,8 @@ public sealed class HoverService
         ModifierDisplayService modifierDisplayService,
         LocalizationService localizationService,
         CharacterTraitsService characterTraitsService,
-        LeaderTraitsService leaderTraitsService
+        LeaderTraitsService leaderTraitsService,
+        LocalizationFormatService localizationFormatService
     )
     {
         _gameFilesService = gameFilesService;
@@ -42,6 +44,7 @@ public sealed class HoverService
         _localizationService = localizationService;
         _characterTraitsService = characterTraitsService;
         _leaderTraitsService = leaderTraitsService;
+        _localizationFormatService = localizationFormatService;
     }
 
     [Time]
@@ -133,7 +136,7 @@ public sealed class HoverService
         string nameText = name is null
             ? _localizationService.GetValue(characterNode.Key)
             : _localizationService.GetValue(name.ValueText);
-        builder.AppendHeader(nameText, 2);
+        builder.AppendHeader(_localizationFormatService.GetFormatText(nameText), 2);
         builder.AppendHorizontalRule();
     }
 
