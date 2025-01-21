@@ -1,3 +1,9 @@
+### 0.2.1
+
+- fix: 使日志组件正常工作
+- fix: 错误地使用 character key 而不是name来获取 character 本地化值
+- fix: character 本地化键不支持引用写法
+
 ### 0.2.0
 
 - feat: 支持颜色选择器功能
