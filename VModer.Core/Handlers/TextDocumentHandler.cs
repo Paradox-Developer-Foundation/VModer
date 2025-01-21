@@ -23,7 +23,7 @@ public sealed class TextDocumentHandler : TextDocumentHandlerBase, IHandler
 
     protected override Task Handle(DidOpenTextDocumentParams request, CancellationToken token)
     {
-        Log.Info($"Opened file: {request.TextDocument.Uri.Uri}");
+        Log.Debug($"Opened file: {request.TextDocument.Uri.Uri}");
         _filesService.AddFile(request.TextDocument.Uri.Uri, request.TextDocument.Text);
 
         return _analyzeService.AnalyzeFileAsync(request.TextDocument.Uri.Uri);
@@ -31,7 +31,7 @@ public sealed class TextDocumentHandler : TextDocumentHandlerBase, IHandler
 
     protected override Task Handle(DidCloseTextDocumentParams request, CancellationToken token)
     {
-        Log.Info($"Closed file: {request.TextDocument.Uri.Uri}");
+        Log.Debug($"Closed file: {request.TextDocument.Uri.Uri}");
         _filesService.RemoveFile(request.TextDocument.Uri.Uri);
 
         return Task.CompletedTask;

@@ -10,7 +10,7 @@ public static class MethodTimeLogger
     public static void Log(MethodBase methodBase, TimeSpan elapsed, string message)
     {
         Logger.Debug(
-            "{Name} {Message} 耗时: {Time:F3} ms",
+            "{Name} {Message} 耗时: {Time:F2} ms",
             methodBase.Name,
             message,
             elapsed.TotalMilliseconds
