@@ -15,6 +15,7 @@ using VModer.Core.Services.GameResource;
 using VModer.Core.Services.GameResource.Base;
 using VModer.Core.Services.GameResource.Localization;
 using VModer.Core.Services.GameResource.Modifiers;
+using VModer.Core.Services.Hovers;
 
 var settings = new HostApplicationBuilderSettings
 {
@@ -62,13 +63,18 @@ builder.Services.AddSingleton<GameResourcesWatcherService>();
 
 // 语言服务
 builder.Services.AddSingleton<AnalyzeService>();
-builder.Services.AddSingleton<HoverService>();
 builder.Services.AddSingleton<StateAnalyzerService>();
 builder.Services.AddSingleton<CharacterAnalyzerService>();
 builder.Services.AddSingleton<CompletionService>();
 builder.Services.AddSingleton<EditorDiagnosisService>();
 builder.Services.AddSingleton<DocumentColorService>();
 builder.Services.AddSingleton<ServerLoggerService>();
+
+// Hover服务
+builder.Services.AddSingleton<HoverService>();
+builder.Services.AddSingleton<HoverStrategyManager>();
+builder.Services.AddSingleton<IHoverStrategy, CharacterHoverStrategy>();
+builder.Services.AddSingleton<IHoverStrategy, ModifierHoverStrategy>();
 
 // 游戏资源服务
 builder.Services.AddSingleton<LocalizationService>();

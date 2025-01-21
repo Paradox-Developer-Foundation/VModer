@@ -1,13 +1,8 @@
 ﻿using EmmyLua.LanguageServer.Framework.Protocol.Message.Hover;
-using EmmyLua.LanguageServer.Framework.Protocol.Model;
-using EmmyLua.LanguageServer.Framework.Protocol.Model.Markup;
 using Markdown;
-using MethodTimer;
-using NLog;
 using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
 using VModer.Core.Extensions;
-using VModer.Core.Infrastructure.Parser;
 using VModer.Core.Models;
 using VModer.Core.Models.Character;
 using VModer.Core.Models.Modifiers;
@@ -16,73 +11,44 @@ using VModer.Core.Services.GameResource.Localization;
 using VModer.Core.Services.GameResource.Modifiers;
 using VModer.Languages;
 
-namespace VModer.Core.Services;
+namespace VModer.Core.Services.Hovers;
 
-public sealed class HoverService
+public sealed class CharacterHoverStrategy : IHoverStrategy
 {
-    private readonly GameFilesService _gameFilesService;
-    private readonly ModifierDisplayService _modifierDisplayService;
+    public GameFileType FileType => GameFileType.Character;
+
     private readonly LocalizationService _localizationService;
-    private readonly CharacterTraitsService _characterTraitsService;
-    private readonly LeaderTraitsService _leaderTraitsService;
     private readonly LocalizationFormatService _localizationFormatService;
+    private readonly ModifierDisplayService _modifierDisplayService;
+    private readonly LeaderTraitsService _leaderTraitsService;
+    private readonly CharacterTraitsService _characterTraitsService;
 
     private const int CharacterTypeLevel = 3;
-    private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-    public HoverService(
-        GameFilesService gameFilesService,
-        ModifierDisplayService modifierDisplayService,
+    public CharacterHoverStrategy(
         LocalizationService localizationService,
-        CharacterTraitsService characterTraitsService,
+        LocalizationFormatService localizationFormatService,
+        ModifierDisplayService modifierDisplayService,
         LeaderTraitsService leaderTraitsService,
-        LocalizationFormatService localizationFormatService
+        CharacterTraitsService characterTraitsService
     )
     {
-        _gameFilesService = gameFilesService;
-        _modifierDisplayService = modifierDisplayService;
         _localizationService = localizationService;
-        _characterTraitsService = characterTraitsService;
-        _leaderTraitsService = leaderTraitsService;
         _localizationFormatService = localizationFormatService;
+        _modifierDisplayService = modifierDisplayService;
+        _leaderTraitsService = leaderTraitsService;
+        _characterTraitsService = characterTraitsService;
     }
 
-    [Time]
-    public Task<HoverResponse?> GetHoverResponseAsync(HoverParams request)
+    public string GetHoverText(Node rootNode, HoverParams request)
     {
-        string filePath = request.TextDocument.Uri.Uri.ToSystemPath();
-        if (!_gameFilesService.TryGetFileText(request.TextDocument.Uri.Uri, out string? text))
-        {
-            return Task.FromResult<HoverResponse?>(null);
-        }
-        if (!TextParser.TryParse(filePath, text, out var rootNode, out _))
-        {
-            return Task.FromResult<HoverResponse?>(null);
-        }
-
-        string hoverText;
-        var fileType = GameFileType.FromFilePath(filePath);
-        if (fileType == GameFileType.Character)
-        {
-            hoverText = GetCharacterDisplayText(rootNode, request);
-        }
-        else
-        {
-            hoverText = GetModifierDisplayText(rootNode, request);
-        }
-
-        return Task.FromResult<HoverResponse?>(
-            new HoverResponse
-            {
-                Contents = new MarkupContent { Kind = MarkupKind.Markdown, Value = hoverText }
-            }
-        );
+        return GetCharacterDisplayText(rootNode, request);
     }
 
     private string GetCharacterDisplayText(Node rootNode, HoverParams request)
     {
         var localPosition = request.Position.ToLocalPosition();
-        var adjacentNode = FindAdjacentNodeByPosition(rootNode, localPosition);
+        var adjacentNode = rootNode.FindAdjacentNodeByPosition(localPosition);
 
         string result;
         if (IsCharacterNode(rootNode, adjacentNode))
@@ -297,126 +263,5 @@ public sealed class HoverService
         }
 
         return builder.ToString();
-    }
-
-    private string GetModifierDisplayText(Node rootNode, HoverParams request)
-    {
-        var localPosition = request.Position.ToLocalPosition();
-        var node = FindAdjacentNodeByPosition(rootNode, localPosition);
-        Log.Debug("光标所在 Node, Key:{Key}, Pos: {Pos}", node.Key, localPosition);
-        if (!node.Key.Equals("modifier", StringComparison.OrdinalIgnoreCase))
-        {
-            return string.Empty;
-        }
-
-        var child = FindChildByPosition(node, localPosition);
-        IEnumerable<IModifier> modifiers = [];
-        if (child.TryGetNode(out var childNode))
-        {
-            modifiers = GetModifiersForNode(childNode);
-        }
-        else if (child.TryGetLeaf(out var leaf))
-        {
-            modifiers = [LeafModifier.FromLeaf(leaf)];
-        }
-
-        var builder = new MarkdownDocument();
-        foreach (string modifierInfo in _modifierDisplayService.GetDescription(modifiers))
-        {
-            builder.AppendParagraph(modifierInfo);
-        }
-
-        return builder.ToString();
-    }
-
-    private static List<IModifier> GetModifiersForNode(Node node)
-    {
-        var modifiers = new List<IModifier>();
-        foreach (var child in node.AllArray)
-        {
-            if (child.TryGetLeaf(out var leaf))
-            {
-                modifiers.Add(LeafModifier.FromLeaf(leaf));
-            }
-            else if (child.TryGetNode(out var childNode))
-            {
-                modifiers.Add(NodeModifier.FromNode(childNode));
-            }
-        }
-
-        return modifiers;
-    }
-
-    /// <summary>
-    /// 获取光标指向的 <see cref="Child"/>
-    /// </summary>
-    /// <param name="node">光标所在的 <see cref="Node"/>, 使用 <see cref="FindAdjacentNodeByPosition"/> 方法获取</param>
-    /// <param name="cursorPosition">光标位置(以 1 开始)</param>
-    /// <returns></returns>
-    private static Child FindChildByPosition(Node node, Position cursorPosition)
-    {
-        if (node.Position.StartLine == cursorPosition.Line)
-        {
-            return Child.Create(node);
-        }
-
-        foreach (var child in node.AllArray)
-        {
-            var childPosition = child.Position;
-            if (cursorPosition.Line > childPosition.StartLine && cursorPosition.Line < childPosition.EndLine)
-            {
-                return child;
-            }
-
-            if (
-                (
-                    cursorPosition.Line == childPosition.StartLine
-                    && cursorPosition.Character >= childPosition.StartColumn
-                )
-                || (
-                    cursorPosition.Line == childPosition.EndLine
-                    && cursorPosition.Character <= childPosition.EndColumn
-                )
-            )
-            {
-                return child;
-            }
-        }
-
-        return Child.Create(node);
-    }
-
-    /// <summary>
-    /// 获取离光标最近的 <see cref="Node"/> (即容纳光标的上级节点, 当光标放在节点上时返回此节点)
-    /// </summary>
-    /// <param name="node">节点</param>
-    /// <param name="cursorPosition">光标位置(以 1 开始)</param>
-    /// <returns>离光标最近的 <see cref="Node"/></returns>
-    private static Node FindAdjacentNodeByPosition(Node node, Position cursorPosition)
-    {
-        foreach (var childNode in node.Nodes)
-        {
-            var childPosition = childNode.Position;
-            if (
-                (
-                    cursorPosition.Line == childPosition.StartLine
-                    && cursorPosition.Character > childPosition.StartColumn
-                )
-                || (
-                    cursorPosition.Line == childPosition.EndLine
-                    && cursorPosition.Character < childPosition.EndColumn
-                )
-            )
-            {
-                return childNode;
-            }
-
-            if (cursorPosition.Line > childPosition.StartLine && cursorPosition.Line < childPosition.EndLine)
-            {
-                return FindAdjacentNodeByPosition(childNode, cursorPosition);
-            }
-        }
-
-        return node;
     }
 }
