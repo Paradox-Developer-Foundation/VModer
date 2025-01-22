@@ -34,11 +34,7 @@ public sealed class ModifierHoverStrategy : IHoverStrategy
         var node = rootNode.FindAdjacentNodeByPosition(localPosition);
         Log.Debug("光标所在 Node, Key:{Key}, Pos: {Pos}", node.Key, localPosition);
 
-        if (
-            !node.Key.Equals("modifier", StringComparison.OrdinalIgnoreCase)
-            // ideologies 下会使用 modifiers 而不是 modifier
-            && !node.Key.Equals("modifiers", StringComparison.OrdinalIgnoreCase)
-        )
+        if (!IsModifierNode(node, request))
         {
             return string.Empty;
         }
@@ -61,6 +57,14 @@ public sealed class ModifierHoverStrategy : IHoverStrategy
         }
 
         return builder.ToString();
+    }
+
+    private static bool IsModifierNode(Node node, HoverParams request)
+    {
+        var fileType = GameFileType.FromFilePath(request.TextDocument.Uri.Uri.ToSystemPath());
+        return fileType == GameFileType.Modifiers
+            || node.Key.Equals("modifier", StringComparison.OrdinalIgnoreCase)
+            || node.Key.Equals("modifiers", StringComparison.OrdinalIgnoreCase);
     }
 
     private static List<IModifier> GetModifiersForNode(Node node)
