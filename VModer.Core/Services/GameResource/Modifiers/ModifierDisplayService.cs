@@ -83,13 +83,8 @@ public sealed class ModifierDisplayService
                 var leafModifier = (LeafModifier)modifier;
                 if (IsCustomToolTip(leafModifier.Key))
                 {
-                    var sb = new StringBuilder();
                     string name = _localizationService.GetValue(leafModifier.Value);
-                    foreach (var colorTextInfo in _localisationFormatService.GetFormatTextInfo(name))
-                    {
-                        sb.Append(colorTextInfo.DisplayText);
-                    }
-                    addedInlines = [sb.ToString()];
+                    addedInlines = [_localisationFormatService.GetFormatText(name)];
                 }
                 else
                 {
