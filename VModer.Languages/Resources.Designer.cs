@@ -87,6 +87,15 @@ namespace VModer.Languages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 领导人.
+        /// </summary>
+        public static string Character_country_leader {
+            get {
+                return ResourceManager.GetString("Character.country_leader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 元帅.
         /// </summary>
         public static string Character_field_marshal {
@@ -101,6 +110,15 @@ namespace VModer.Languages {
         public static string Character_navy_leader {
             get {
                 return ResourceManager.GetString("Character.navy_leader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 意识形态.
+        /// </summary>
+        public static string Ideology {
+            get {
+                return ResourceManager.GetString("Ideology", resourceCulture);
             }
         }
         

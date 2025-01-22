@@ -39,4 +39,10 @@
     <data name="MissingTargetCountry" xml:space="preserve">
         <value>缺失目标国家:</value>
     </data>
+    <data name="Ideology" xml:space="preserve">
+        <value>意识形态</value>
+    </data>
+    <data name="Character.country_leader" xml:space="preserve">
+        <value>领导人</value>
+    </data>
 </root>

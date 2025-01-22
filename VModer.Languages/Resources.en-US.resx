@@ -32,4 +32,10 @@
     <data name="MissingTargetCountry" xml:space="preserve">
         <value>Missing Target Country:</value>
     </data>
+    <data name="Ideology" xml:space="preserve">
+        <value>Ideology</value>
+    </data>
+    <data name="Character.country_leader" xml:space="preserve">
+        <value>Country Leader</value>
+    </data>
 </root>

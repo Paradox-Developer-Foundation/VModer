@@ -21,6 +21,8 @@
 
 ### Modifier 可视化
 
+支持所有 `modifier` 和 `modifiers` 语句的可视化
+
 > Modifier 节点
 > 
 >![ModifierNodeImg](https://www.helloimg.com/i/2025/01/18/678a838fd83d0.png)

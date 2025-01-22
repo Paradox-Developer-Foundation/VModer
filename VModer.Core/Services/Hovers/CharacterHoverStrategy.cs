@@ -51,6 +51,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         var adjacentNode = rootNode.FindAdjacentNodeByPosition(localPosition);
 
         string result;
+        // 当是人物节点时, 逐一进行分析并显示内容
         if (IsCharacterNode(rootNode, adjacentNode))
         {
             var builder = new MarkdownDocument();
@@ -122,6 +123,10 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         {
             result = GetAdvisorDisplayText(node);
         }
+        else if (node.Key.Equals("country_leader", StringComparison.OrdinalIgnoreCase))
+        {
+            result = GetCountryLeaderDisplayText(node);
+        }
 
         return result;
     }
@@ -179,19 +184,6 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
             "navy_leader" => Resources.Character_navy_leader,
             _ => string.Empty
         };
-    }
-
-    private void AddLeaderTraits(Node node, MarkdownDocument builder)
-    {
-        AddTraitsDescription(
-            node,
-            builder,
-            traitKey =>
-            {
-                _leaderTraitsService.TryGetValue(traitKey, out var trait);
-                return trait?.Modifiers;
-            }
-        );
     }
 
     private void AddGeneralTraits(Node node, MarkdownDocument builder)
@@ -260,6 +252,44 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
                     );
                 }
             }
+        }
+
+        return builder.ToString();
+    }
+
+    private void AddLeaderTraits(Node node, MarkdownDocument builder)
+    {
+        AddTraitsDescription(
+            node,
+            builder,
+            traitKey =>
+            {
+                _leaderTraitsService.TryGetValue(traitKey, out var trait);
+                return trait?.Modifiers;
+            }
+        );
+    }
+
+    private string GetCountryLeaderDisplayText(Node leaderNode)
+    {
+        var builder = new MarkdownDocument();
+
+        builder.AppendHeader(Resources.Character_country_leader, CharacterTypeLevel);
+        var ideology = leaderNode.Leaves.FirstOrDefault(leaf =>
+            leaf.Key.Equals("ideology", StringComparison.OrdinalIgnoreCase)
+        );
+        if (ideology is not null)
+        {
+            builder.AppendParagraph(
+                $"{Resources.Ideology}: {_localizationService.GetValue(ideology.ValueText)}");
+        }
+        
+        var traits =
+            leaderNode.Nodes.FirstOrDefault(node => node.Key.Equals("traits", StringComparison.OrdinalIgnoreCase));
+        
+        if (traits is not null)
+        {
+            AddLeaderTraits(traits, builder);
         }
 
         return builder.ToString();
