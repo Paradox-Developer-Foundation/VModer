@@ -33,7 +33,7 @@ public sealed class ModifierHoverStrategy : IHoverStrategy
         var localPosition = request.Position.ToLocalPosition();
         var node = rootNode.FindAdjacentNodeByPosition(localPosition);
         Log.Debug("光标所在 Node, Key:{Key}, Pos: {Pos}", node.Key, localPosition);
-        //TODO: 支持 %% 语法
+
         if (
             !node.Key.Equals("modifier", StringComparison.OrdinalIgnoreCase)
             // ideologies 下会使用 modifiers 而不是 modifier

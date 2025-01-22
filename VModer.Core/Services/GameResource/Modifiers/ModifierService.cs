@@ -117,6 +117,7 @@ public sealed class ModifierService
     /// <returns>应用<c>modifierDisplayFormat</c>格式的<c>LeafModifier.Value</c>的的显示值</returns>
     public string GetDisplayValue(LeafModifier leafModifier, string modifierDisplayFormat)
     {
+        string result = leafModifier.Value;
         if (leafModifier.ValueType is GameValueType.Int or GameValueType.Float)
         {
             double value = double.Parse(leafModifier.Value);
@@ -127,12 +128,19 @@ public sealed class ModifierService
                 string.IsNullOrEmpty(modifierDisplayFormat)
                 || modifierDisplayFormat.Contains('%')
                 || leafModifier.Key.EndsWith("factor");
+
+            string percentageSymbol = string.Empty;
+            if (modifierDisplayFormat.Contains("%%"))
+            {
+                isPercentage = false;
+                percentageSymbol = "%";
+            }
             char format = isPercentage ? 'P' : 'F';
 
-            return $"{sign}{value.ToString($"{format}{displayDigits}")}";
+            result = $"{sign}{value.ToString($"{format}{displayDigits}")}{percentageSymbol}";
         }
 
-        return leafModifier.Value;
+        return result;
     }
 
     private static char GetDisplayDigits(string modifierDescription)
