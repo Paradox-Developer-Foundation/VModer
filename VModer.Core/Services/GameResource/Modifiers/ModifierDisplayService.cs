@@ -83,8 +83,7 @@ public sealed class ModifierDisplayService
                 var leafModifier = (LeafModifier)modifier;
                 if (IsCustomToolTip(leafModifier.Key))
                 {
-                    string name = _localizationService.GetValue(leafModifier.Value);
-                    addedInlines = [_localisationFormatService.GetFormatText(name)];
+                    addedInlines = [_localizationService.GetFormatText(leafModifier.Value)];
                 }
                 else
                 {

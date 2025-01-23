@@ -20,7 +20,7 @@ public sealed class LocalizationFormatService(
     }
 
     /// <summary>
-    /// 获取格式化后的文本信息, 如果解析文本颜色失败, 则统一使用黑色
+    /// 获取格式化后的文本信息, 不包含 Icon, 如果解析文本颜色失败, 则统一使用黑色
     /// </summary>
     /// <param name="text">文本</param>
     /// <returns>一个集合, 包含格式化后的文本</returns>
@@ -40,8 +40,8 @@ public sealed class LocalizationFormatService(
             {
                 if (format.Type == LocalizationFormatType.Placeholder)
                 {
-                    // 一般来说, 包含管道符的为格式说明字符串, 不需要处理
-                    if (format.Text.Contains('|'))
+                    // 一般来说, 包含管道符或文本为 VALUE | VAL 的为格式说明字符串, 不需要处理
+                    if (format.Text.Contains('|') || format.Text == "VALUE" || format.Text == "VAL")
                     {
                         continue;
                     }

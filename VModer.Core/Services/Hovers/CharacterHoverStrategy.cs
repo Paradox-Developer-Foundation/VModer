@@ -18,7 +18,6 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
     public GameFileType FileType => GameFileType.Character;
 
     private readonly LocalizationService _localizationService;
-    private readonly LocalizationFormatService _localizationFormatService;
     private readonly ModifierDisplayService _modifierDisplayService;
     private readonly LeaderTraitsService _leaderTraitsService;
     private readonly CharacterTraitsService _characterTraitsService;
@@ -27,14 +26,12 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
 
     public CharacterHoverStrategy(
         LocalizationService localizationService,
-        LocalizationFormatService localizationFormatService,
         ModifierDisplayService modifierDisplayService,
         LeaderTraitsService leaderTraitsService,
         CharacterTraitsService characterTraitsService
     )
     {
         _localizationService = localizationService;
-        _localizationFormatService = localizationFormatService;
         _modifierDisplayService = modifierDisplayService;
         _leaderTraitsService = leaderTraitsService;
         _characterTraitsService = characterTraitsService;
@@ -101,9 +98,9 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         );
 
         string nameText = name is null
-            ? _localizationService.GetValue(characterNode.Key)
-            : _localizationService.GetValue(name.ValueText);
-        builder.AppendHeader(_localizationFormatService.GetFormatText(nameText), 2);
+            ? _localizationService.GetFormatText(characterNode.Key)
+            : _localizationService.GetFormatText(name.ValueText);
+        builder.AppendHeader(nameText, 2);
         builder.AppendHorizontalRule();
     }
 
@@ -215,7 +212,8 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
 
         foreach (string traitKey in traits)
         {
-            builder.AppendListItem(_localizationService.GetValue(traitKey));
+            // 有可能需要解引用
+            builder.AppendListItem(_localizationService.GetFormatText(traitKey));
             var modifiers = modifiersFactory(traitKey);
             if (modifiers is not null)
             {
@@ -281,12 +279,14 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         if (ideology is not null)
         {
             builder.AppendParagraph(
-                $"{Resources.Ideology}: {_localizationService.GetValue(ideology.ValueText)}");
+                $"{Resources.Ideology}: {_localizationService.GetValue(ideology.ValueText)}"
+            );
         }
-        
-        var traits =
-            leaderNode.Nodes.FirstOrDefault(node => node.Key.Equals("traits", StringComparison.OrdinalIgnoreCase));
-        
+
+        var traits = leaderNode.Nodes.FirstOrDefault(node =>
+            node.Key.Equals("traits", StringComparison.OrdinalIgnoreCase)
+        );
+
         if (traits is not null)
         {
             AddLeaderTraits(traits, builder);
