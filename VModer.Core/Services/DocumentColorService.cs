@@ -184,14 +184,16 @@ public sealed class DocumentColorService(GameFilesService gameFilesService)
         }
 
         string fileName = Path.GetFileName(filePath);
-        var colorsInfo = fileName.Equals("colors.txt", StringComparison.OrdinalIgnoreCase)
-            ? GetColorInColorsFile(node)
-            : GetColorInCountryFile(node);
+        var colorsInfo =
+            fileName.Equals("colors.txt", StringComparison.OrdinalIgnoreCase)
+            || fileName.Equals("cosmetic.txt", StringComparison.OrdinalIgnoreCase)
+                ? GetColorInNodeColorFile(node)
+                : GetColorInLeafColorFile(node);
 
         return new DocumentColorResponse(colorsInfo);
     }
 
-    private static List<ColorInformation> GetColorInColorsFile(Node rootNode)
+    private static List<ColorInformation> GetColorInNodeColorFile(Node rootNode)
     {
         var colorsInfo = new List<ColorInformation>();
 
@@ -215,7 +217,7 @@ public sealed class DocumentColorService(GameFilesService gameFilesService)
         return colorsInfo;
     }
 
-    private static List<ColorInformation> GetColorInCountryFile(Node node)
+    private static List<ColorInformation> GetColorInLeafColorFile(Node node)
     {
         var colorsInfo = new List<ColorInformation>();
 
