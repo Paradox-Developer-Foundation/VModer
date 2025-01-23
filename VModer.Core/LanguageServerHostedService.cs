@@ -1,4 +1,7 @@
-﻿using EmmyLua.LanguageServer.Framework.Server;
+﻿using System.Diagnostics;
+using System.Text.Json;
+using EmmyLua.LanguageServer.Framework.Protocol.JsonRpc;
+using EmmyLua.LanguageServer.Framework.Server;
 using Microsoft.Extensions.Hosting;
 using NLog;
 using VModer.Core.Handlers;
@@ -12,6 +15,7 @@ public sealed class LanguageServerHostedService : IHostedService
     private readonly SettingsService _settings;
     private readonly LanguageServer _server;
     private readonly ServerLoggerService _logger;
+    private readonly Process _currentProcess = Process.GetCurrentProcess();
 
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
@@ -26,6 +30,20 @@ public sealed class LanguageServerHostedService : IHostedService
         _settings = settings;
         _server = server;
         _logger = logger;
+
+        _server.AddRequestHandler("getRuntimeInfo", GetRuntimeInfoAsync);
+    }
+
+    private Task<JsonDocument?> GetRuntimeInfoAsync(
+        RequestMessage request,
+        CancellationToken cancellationToken
+    )
+    {
+        _currentProcess.Refresh();
+
+        long memoryUsedBytes = _currentProcess.PrivateMemorySize64;
+        var document = JsonDocument.Parse($"{{\"memoryUsedBytes\": {memoryUsedBytes}}}");
+        return Task.FromResult<JsonDocument?>(document);
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
@@ -85,6 +103,7 @@ public sealed class LanguageServerHostedService : IHostedService
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
+        _currentProcess.Dispose();
         return Task.CompletedTask;
     }
 }

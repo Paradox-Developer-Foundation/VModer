@@ -1,4 +1,4 @@
-import { workspace, ExtensionContext, window, ExtensionMode, l10n } from 'vscode';
+import { workspace, ExtensionContext, window, ExtensionMode, l10n, StatusBarAlignment, StatusBarItem } from 'vscode';
 import * as net from "net";
 import * as fs from 'fs';
 import * as os from 'os';
@@ -14,6 +14,10 @@ import * as path from 'path';
 let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
+
+	const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Right, 100000);
+	context.subscriptions.push(statusBarItem);
+
 	let serverOptions: ServerOptions;
 
 	if (context.extensionMode == ExtensionMode.Development) {
@@ -90,7 +94,7 @@ export function activate(context: ExtensionContext) {
 				}).then(() => window.showInformationMessage(l10n.t("MustRestart")));
 			});
 	}
-	
+
 	// 控制语言客户端的选项
 	const clientOptions: LanguageClientOptions = {
 		documentSelector: [{ scheme: 'file', language: 'hoi4' }],
@@ -111,6 +115,42 @@ export function activate(context: ExtensionContext) {
 	);
 
 	client.start();
+	statusBarItem.show();
+	updateStatusBarItem(statusBarItem, client);
+	context.subscriptions.push(client.onDidChangeState(() => updateStatusBarItem(statusBarItem, client)));
+	setInterval(() => {
+		updateStatusBarServerInfo(statusBarItem, client);
+	}, 1500);
+}
+
+async function updateStatusBarItem(statusBarItem: StatusBarItem, client: LanguageClient): Promise<void> {
+	if (client.isRunning()) {
+		statusBarItem.text = "$(notebook-state-success) VModer";
+		statusBarItem.tooltip = "VModer is running";
+	}
+	else {
+		statusBarItem.text = "$(extensions-warning-message) VModer";
+		statusBarItem.tooltip = "VModer is stopped";
+	}
+}
+
+async function updateStatusBarServerInfo(statusBarItem: StatusBarItem, client: LanguageClient) {
+	if (client.isRunning()) {
+		const info = await client.sendRequest("getRuntimeInfo");
+		const size: number = info["memoryUsedBytes"];
+		statusBarItem.text = "$(notebook-state-success) VModer RAM " + formatBytes(size);
+	}
+}
+
+function formatBytes(bytes: number): string {
+	if (bytes === 0) {
+		return '0 Bytes';
+	}
+	const k = 1024;
+	const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+	const i = Math.floor(Math.log(bytes) / Math.log(k));
+	const size = (bytes / Math.pow(k, i)).toFixed(2);
+	return size + ' ' + sizes[i];
 }
 
 export function deactivate(): Thenable<void> | undefined {
