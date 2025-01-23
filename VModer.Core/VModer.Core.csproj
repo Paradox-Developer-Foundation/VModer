@@ -13,6 +13,8 @@
         <TrimMode>full</TrimMode>
         <PublishReadyToRun>true</PublishReadyToRun>
         <ApplicationIcon>logo.ico</ApplicationIcon>
+        <!-- 在较老版本的 Windows 上运行，需要设置CETCompat为false, 见 https://github.com/dotnet/runtime/issues/110000 -->
+        <CETCompat>false</CETCompat>
     </PropertyGroup>
     
     <ItemGroup>
