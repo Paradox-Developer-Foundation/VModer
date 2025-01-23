@@ -3,7 +3,6 @@ using EmmyLua.LanguageServer.Framework.Protocol.Capabilities.Server;
 using EmmyLua.LanguageServer.Framework.Protocol.Message.Hover;
 using EmmyLua.LanguageServer.Framework.Server.Handler;
 using Microsoft.Extensions.DependencyInjection;
-using VModer.Core.Services;
 using VModer.Core.Services.Hovers;
 
 namespace VModer.Core.Handlers;

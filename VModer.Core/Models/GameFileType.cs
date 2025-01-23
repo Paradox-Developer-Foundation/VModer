@@ -1,6 +1,5 @@
 ﻿using Ardalis.SmartEnum;
 using DotNet.Globbing;
-using MethodTimer;
 
 namespace VModer.Core.Models;
 

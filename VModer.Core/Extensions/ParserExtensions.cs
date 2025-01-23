@@ -1,7 +1,5 @@
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using EmmyLua.LanguageServer.Framework.Protocol.Model;
-using Microsoft.FSharp.Collections;
 using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Parser;
 using ParadoxPower.Process;
