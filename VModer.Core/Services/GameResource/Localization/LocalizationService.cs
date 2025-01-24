@@ -15,13 +15,9 @@ public sealed class LocalizationService
     private Dictionary<string, FrozenDictionary<string, string>>.ValueCollection Localisations =>
         Resources.Values;
     private readonly LocalizationKeyMappingService _localizationKeyMapping;
-    private readonly LocalizationFormatService _localizationFormatService;
 
     [Time("加载本地化文件")]
-    public LocalizationService(
-        LocalizationKeyMappingService localizationKeyMapping,
-        LocalizationFormatService localizationFormatService
-    )
+    public LocalizationService(LocalizationKeyMappingService localizationKeyMapping)
         : base(
             Path.Combine(
                 "localisation",
@@ -32,22 +28,6 @@ public sealed class LocalizationService
         )
     {
         _localizationKeyMapping = localizationKeyMapping;
-        _localizationFormatService = localizationFormatService;
-    }
-
-    /// <summary>
-    /// 根据 <c>key</c> 获取格式化后的文本
-    /// </summary>
-    /// <param name="key"></param>
-    /// <returns>格式化后的文本, 如果未找到值, 则返回<c>key</c></returns>
-    public string GetFormatText(string key)
-    {
-        if (TryGetValue(key, out string? value))
-        {
-            value = _localizationFormatService.GetFormatText(value);
-        }
-
-        return value ?? key;
     }
 
     public string GetCountryNameByTag(string tag)

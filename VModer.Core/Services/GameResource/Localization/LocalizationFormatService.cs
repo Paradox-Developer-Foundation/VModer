@@ -10,11 +10,26 @@ public sealed class LocalizationFormatService(
 )
 {
     /// <summary>
+    /// 根据 <c>key</c> 获取格式化后的文本
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns>格式化后的文本, 如果未找到值, 则返回<c>key</c></returns>
+    public string GetFormatText(string key)
+    {
+        if (localizationService.TryGetValue(key, out string? value))
+        {
+            value = GetFormatTextByText(value);
+        }
+
+        return value ?? key;
+    }
+    
+    /// <summary>
     /// 获取格式化后的文本
     /// </summary>
     /// <param name="text"></param>
     /// <returns>一个格式化后被拼接的文本</returns>
-    public string GetFormatText(string text)
+    private string GetFormatTextByText(string text)
     {
         return string.Join(string.Empty, GetFormatTextInfo(text).Select(info => info.DisplayText));
     }

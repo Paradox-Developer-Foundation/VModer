@@ -20,6 +20,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
     private readonly LocalizationService _localizationService;
     private readonly ModifierDisplayService _modifierDisplayService;
     private readonly LeaderTraitsService _leaderTraitsService;
+    private readonly LocalizationFormatService _localizationFormatService;
     private readonly CharacterTraitsService _characterTraitsService;
 
     private const int CharacterTypeLevel = 3;
@@ -28,13 +29,15 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         LocalizationService localizationService,
         ModifierDisplayService modifierDisplayService,
         LeaderTraitsService leaderTraitsService,
-        CharacterTraitsService characterTraitsService
+        CharacterTraitsService characterTraitsService,
+        LocalizationFormatService localizationFormatService
     )
     {
         _localizationService = localizationService;
         _modifierDisplayService = modifierDisplayService;
         _leaderTraitsService = leaderTraitsService;
         _characterTraitsService = characterTraitsService;
+        _localizationFormatService = localizationFormatService;
     }
 
     public string GetHoverText(Node rootNode, HoverParams request)
@@ -98,8 +101,8 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         );
 
         string nameText = name is null
-            ? _localizationService.GetFormatText(characterNode.Key)
-            : _localizationService.GetFormatText(name.ValueText);
+            ? _localizationFormatService.GetFormatText(characterNode.Key)
+            : _localizationFormatService.GetFormatText(name.ValueText);
         builder.AppendHeader(nameText, 2);
         builder.AppendHorizontalRule();
     }
@@ -213,7 +216,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         foreach (string traitKey in traits)
         {
             // 有可能需要解引用
-            builder.AppendListItem(_localizationService.GetFormatText(traitKey));
+            builder.AppendListItem(_localizationFormatService.GetFormatText(traitKey));
             var modifiers = modifiersFactory(traitKey);
             if (modifiers is not null)
             {
