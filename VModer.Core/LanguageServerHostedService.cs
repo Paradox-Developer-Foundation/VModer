@@ -61,6 +61,8 @@ public sealed class LanguageServerHostedService : IHostedService
         _server.OnInitialize(
             (c, s) =>
             {
+                Log.Info("Language server initializing...");
+
                 string gameRootPath =
                     c.InitializationOptions?.RootElement.GetProperty("GameRootFolderPath").GetString()
                     ?? string.Empty;
@@ -74,6 +76,9 @@ public sealed class LanguageServerHostedService : IHostedService
                 {
                     handler.Initialize();
                 }
+
+                Log.Info("Game root path: {Path}", _settings.GameRootFolderPath);
+                Log.Info("Workspace root path: {Path}", _settings.ModRootFolderPath);
                 return Task.CompletedTask;
             }
         );
@@ -81,8 +86,6 @@ public sealed class LanguageServerHostedService : IHostedService
         _server.OnInitialized(
             (c) =>
             {
-                Log.Info("Game root path: {Path}", _settings.GameRootFolderPath);
-                Log.Info("Workspace root path: {Path}", _settings.ModRootFolderPath);
                 _logger.Log("Language server initialized.");
                 return Task.CompletedTask;
             }
@@ -91,7 +94,14 @@ public sealed class LanguageServerHostedService : IHostedService
         _ = Task.Run(
             async () =>
             {
-                await _server.Run().ConfigureAwait(false);
+                try
+                {
+                    await _server.Run().ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e, "Language server error.");
+                }
                 // 连接中断后关闭应用
                 _lifetime.StopApplication();
             },
