@@ -9,3 +9,7 @@ resistance_damage_to_garrison,MODIFIER_RESISTANCE_DAMAGE_TO_GARRISONS,驻军所�
 generate_wargoal_tension_against,MODIFIER_GENERATE_WARGOAL_TENSION_LIMIT,制造战争目标的紧张度限制
 attack_bonus_against,MODIFIER_ATTACK_BONUS_AGAINST_A_COUNTRY,我国对其进攻加成(目标修正本地化查找是否应该写入代码中?)
 defense_bonus_against,MODIFIER_DEFENSE_BONUS_AGAINST_A_COUNTRY,我国对其防御加成
+naval_attrition,MODIFIER_NAVAL_ATTRITION_FACTOR,损耗
+breakthrough_bonus_against,MODIFIER_BREAKTHROUGH_BONUS_AGAINST_A_COUNTRY,我国对其突破修正
+compliance_gain,MODIFIER_COMPLIANCE_GAIN_ADD,每日顺从度增长
+experience_gain_air_factor,experience_gain_air,空军经验增长
