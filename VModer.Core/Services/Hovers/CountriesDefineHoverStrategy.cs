@@ -21,7 +21,7 @@ public sealed class CountriesDefineHoverStrategy(LocalizationFormatService local
             return string.Empty;
         }
 
-        var child = adjacentNode.FindChildByPosition(request.Position.ToLocalPosition());
+        var child = adjacentNode.FindPointedChildByPosition(request.Position.ToLocalPosition());
 
         string result = string.Empty;
         if (child.TryGetNode(out var node))

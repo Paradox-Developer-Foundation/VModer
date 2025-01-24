@@ -39,7 +39,7 @@ public sealed class ModifierHoverStrategy : IHoverStrategy
             return string.Empty;
         }
 
-        var child = node.FindChildByPosition(localPosition);
+        var child = node.FindPointedChildByPosition(localPosition);
         IEnumerable<IModifier> modifiers = [];
         if (child.TryGetNode(out var childNode))
         {

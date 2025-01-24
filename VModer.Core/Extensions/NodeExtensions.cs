@@ -47,7 +47,7 @@ public static class NodeExtensions
     /// <param name="node">光标所在的 <see cref="Node"/>, 使用 <see cref="FindAdjacentNodeByPosition"/> 方法获取</param>
     /// <param name="cursorPosition">光标位置(以 1 开始)</param>
     /// <returns></returns>
-    public static Child FindChildByPosition(this Node node, LocalPosition cursorPosition)
+    public static Child FindPointedChildByPosition(this Node node, LocalPosition cursorPosition)
     {
         if (node.Position.StartLine == cursorPosition.Line)
         {

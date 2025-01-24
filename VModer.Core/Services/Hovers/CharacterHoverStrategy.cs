@@ -199,40 +199,6 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         );
     }
 
-    private void AddTraitsDescription(
-        Node node,
-        MarkdownDocument builder,
-        Func<string, IEnumerable<IModifier>?> modifiersFactory
-    )
-    {
-        if (!node.Key.Equals("traits", StringComparison.OrdinalIgnoreCase))
-        {
-            return;
-        }
-
-        var traits = node.LeafValues.Select(trait => trait.Key);
-        builder.AppendHeader($"{Resources.Traits}:", 4);
-
-        foreach (string traitKey in traits)
-        {
-            // 有可能需要解引用
-            builder.AppendListItem(_localizationFormatService.GetFormatText(traitKey));
-            var modifiers = modifiersFactory(traitKey);
-            if (modifiers is not null)
-            {
-                var infos = _modifierDisplayService.GetDescription(modifiers);
-                foreach (string info in infos)
-                {
-                    builder.AppendListItem(
-                        info,
-                        info.StartsWith(ModifierDisplayService.NodeModifierChildrenPrefix) ? 2 : 1
-                    );
-                }
-            }
-        }
-        builder.AppendHorizontalRule();
-    }
-
     private string GetAdvisorDisplayText(Node node)
     {
         var builder = new MarkdownDocument();
@@ -269,6 +235,40 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
                 return trait?.Modifiers;
             }
         );
+    }
+
+    private void AddTraitsDescription(
+        Node node,
+        MarkdownDocument builder,
+        Func<string, IEnumerable<IModifier>?> modifiersFactory
+    )
+    {
+        if (!node.Key.Equals("traits", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        var traits = node.LeafValues.Select(trait => trait.Key);
+        builder.AppendHeader($"{Resources.Traits}:", 4);
+
+        foreach (string traitKey in traits)
+        {
+            // 有可能需要解引用
+            builder.AppendListItem(_localizationFormatService.GetFormatText(traitKey));
+            var modifiers = modifiersFactory(traitKey);
+            if (modifiers is not null)
+            {
+                var infos = _modifierDisplayService.GetDescription(modifiers);
+                foreach (string info in infos)
+                {
+                    builder.AppendListItem(
+                        info,
+                        info.StartsWith(ModifierDisplayService.NodeModifierChildrenPrefix) ? 2 : 1
+                    );
+                }
+            }
+        }
+        builder.AppendHorizontalRule();
     }
 
     private string GetCountryLeaderDisplayText(Node leaderNode)
