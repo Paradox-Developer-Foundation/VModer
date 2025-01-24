@@ -1,4 +1,5 @@
 ﻿using EmmyLua.LanguageServer.Framework.Protocol.Model;
+using VModer.Core.Models;
 
 namespace VModer.Core.Extensions;
 
@@ -12,8 +13,8 @@ public static class PositionExtensions
     /// <remarks>
     /// 因为 VS Code 中的位置是以 0 开始,而解析器中的位置是以 1 开始
     /// </remarks>
-    public static Position ToLocalPosition(this Position position)
+    public static LocalPosition ToLocalPosition(this Position position)
     {
-        return new Position(position.Line + 1, position.Character);
+        return new LocalPosition(position.Line + 1, position.Character);
     }
 }

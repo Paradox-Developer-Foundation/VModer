@@ -1,5 +1,6 @@
 ﻿using EmmyLua.LanguageServer.Framework.Protocol.Model;
 using ParadoxPower.Process;
+using VModer.Core.Models;
 
 namespace VModer.Core.Extensions;
 
@@ -11,7 +12,7 @@ public static class NodeExtensions
     /// <param name="node">节点</param>
     /// <param name="cursorPosition">光标位置(以 1 开始)</param>
     /// <returns>离光标最近的 <see cref="Node"/></returns>
-    public static Node FindAdjacentNodeByPosition(this Node node, Position cursorPosition)
+    public static Node FindAdjacentNodeByPosition(this Node node, LocalPosition cursorPosition)
     {
         foreach (var childNode in node.Nodes)
         {
@@ -46,7 +47,7 @@ public static class NodeExtensions
     /// <param name="node">光标所在的 <see cref="Node"/>, 使用 <see cref="FindAdjacentNodeByPosition"/> 方法获取</param>
     /// <param name="cursorPosition">光标位置(以 1 开始)</param>
     /// <returns></returns>
-    public static Child FindChildByPosition(this Node node, Position cursorPosition)
+    public static Child FindChildByPosition(this Node node, LocalPosition cursorPosition)
     {
         if (node.Position.StartLine == cursorPosition.Line)
         {
