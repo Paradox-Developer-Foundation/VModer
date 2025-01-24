@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
 using VModer.Core.Infrastructure.Parser;
 using VModer.Core.Models;
 
@@ -13,17 +14,34 @@ public sealed class LocalizationFormatService(
     /// 根据 <c>key</c> 获取格式化后的文本
     /// </summary>
     /// <param name="key"></param>
+    /// <param name="value"></param>
+    /// <returns>格式化后的文本, 如果找到值, 返回<c>true</c>, 反之返回<c>false</c></returns>
+    public bool TryGetFormatText(string key, [NotNullWhen(true)] out string? value)
+    {
+        if (localizationService.TryGetValue(key, out value))
+        {
+            value = GetFormatTextByText(value);
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// 根据 <c>key</c> 获取格式化后的文本
+    /// </summary>
+    /// <param name="key"></param>
     /// <returns>格式化后的文本, 如果未找到值, 则返回<c>key</c></returns>
     public string GetFormatText(string key)
     {
-        if (localizationService.TryGetValue(key, out string? value))
+        if (TryGetFormatText(key, out string? value))
         {
-            value = GetFormatTextByText(value);
+            return value;
         }
 
-        return value ?? key;
+        return key;
     }
-    
+
     /// <summary>
     /// 获取格式化后的文本
     /// </summary>

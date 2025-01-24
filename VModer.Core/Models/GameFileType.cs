@@ -10,6 +10,7 @@ public sealed class GameFileType(string name, string value) : SmartEnum<GameFile
     public static readonly GameFileType Character = new(nameof(Character), "**/common/characters/*.txt");
     public static readonly GameFileType Countries = new(nameof(Countries), "**/common/countries/*.txt");
     public static readonly GameFileType Modifiers = new(nameof(Modifiers), "**/common/modifiers/*.txt");
+    public static readonly GameFileType CountryDefine = new(nameof(CountryDefine), "**/history/countries/*.txt");
 
     private static readonly Dictionary<string, Glob> Globs = new();
 
