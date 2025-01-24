@@ -1,3 +1,15 @@
+### 0.3.0
+
+- feat: 支持 Modifiers 节点显示修饰符
+- feat: 支持显示 Character 中的 country_leader
+- feat: 支持正确处理修饰符格式化语法中的 %% 转义写法
+- feat: 底部添加状态栏显示当前 RAM 使用情况
+- feat: 支持 cosmetic.txt 文件使用颜色选择器
+- feat: 添加打开 Logs 文件夹的命令
+- fix: 补充缺失的修饰符映射信息
+- fix: 特质名称支持引用写法
+- 兼容性: 禁用 CET 以支持在较低版本的 Windows 上运行此扩展
+
 ### 0.2.2
 
 - fix: 使用错误的与服务器通讯方式导致扩展不正常工作
