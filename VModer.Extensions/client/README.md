@@ -6,7 +6,7 @@
 
 ![license](https://img.shields.io/github/license/textGamex/Vmoder?style=for-the-badge&color=blue)
 [![star](https://img.shields.io/github/stars/textGamex/vmoder?style=for-the-badge)](https://github.com/textGamex/VModer)
-![](https://img.shields.io/badge/Language-CSharp-blue?style=for-the-badge)
+![language](https://img.shields.io/badge/Language-CSharp-blue?style=for-the-badge)
 
 [问题反馈/功能请求](https://github.com/textGamex/VModer/issues/new)
 
@@ -17,11 +17,13 @@
 
 您也可以选择安装其他提供`hoi4`语言模式的扩展.
 
+此外, 您还需要确保打开了工作区.
+
 ## 功能
 
 ### Modifier 可视化
 
-支持所有 `modifier` 和 `modifiers` 语句的可视化
+支持所有 `modifier` 和 `modifiers` 语句的可视化和`common\modifiers`文件夹下的文件可视化.
 
 > Modifier 节点
 > 
