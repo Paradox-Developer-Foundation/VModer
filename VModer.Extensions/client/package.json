@@ -4,7 +4,7 @@
 	"description": "A HOI4 language server",
 	"author": "textGamex",
 	"license": "Apache-2.0",
-	"version": "0.2.3",
+	"version": "0.3.0",
 	"preview": true,
 	"repository": {
 		"type": "git",
@@ -37,7 +37,13 @@
 					"description": "%VModer.GameRootPath%"
 				}
 			}
-		}
+		},
+		"commands": [
+			{
+				"command": "vmoder.openLogs",
+				"title": "Open VModer Logs Folder"
+			}
+		]
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",

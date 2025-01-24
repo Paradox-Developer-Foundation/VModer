@@ -1,4 +1,4 @@
-import { workspace, ExtensionContext, window, ExtensionMode, l10n, StatusBarAlignment, StatusBarItem } from 'vscode';
+import { workspace, ExtensionContext, window, ExtensionMode, l10n, StatusBarAlignment, StatusBarItem, commands, Uri } from 'vscode';
 import * as net from "net";
 import * as fs from 'fs';
 import * as os from 'os';
@@ -16,10 +16,14 @@ let client: LanguageClient;
 export function activate(context: ExtensionContext) {
 
 	const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Right, 100000);
-	context.subscriptions.push(statusBarItem);
+	const openLogs = commands.registerCommand('vmoder.openLogs', () => {
+		const dirPath = path.dirname(command);
+		commands.executeCommand('revealFileInOS', Uri.file(path.join(dirPath, "Logs")));
+	});
+	context.subscriptions.push(openLogs, statusBarItem);
 
 	let serverOptions: ServerOptions;
-
+	let command = "";
 	if (context.extensionMode == ExtensionMode.Development) {
 		const connectionInfo = {
 			port: 1231
@@ -40,7 +44,6 @@ export function activate(context: ExtensionContext) {
 	else {
 		const platform: string = os.platform();
 
-		let command = "";
 		switch (platform) {
 			case "win32":
 				command = path.join(
