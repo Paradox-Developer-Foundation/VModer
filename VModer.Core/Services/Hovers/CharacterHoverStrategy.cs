@@ -1,5 +1,6 @@
 ﻿using EmmyLua.LanguageServer.Framework.Protocol.Message.Hover;
 using Markdown;
+using NLog;
 using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
 using VModer.Core.Extensions;
@@ -24,6 +25,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
     private readonly CharacterTraitsService _characterTraitsService;
 
     private const int CharacterTypeLevel = 3;
+    private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
     public CharacterHoverStrategy(
         LocalizationService localizationService,
@@ -76,12 +78,56 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
             }
             result = builder.ToString();
         }
+        else if (adjacentNode.Key.Equals("traits", StringComparison.OrdinalIgnoreCase))
+        {
+            result = GetTraitsDisplayText(adjacentNode, localPosition);
+        }
         else
         {
             result = GetCharacterDisplayTextByType(adjacentNode);
         }
 
         return result;
+    }
+
+    private string GetTraitsDisplayText(Node adjacentNode, LocalPosition localPosition)
+    {
+        var builder = new MarkdownDocument();
+        var child = adjacentNode.FindPointedChildByPosition(localPosition);
+
+        // 当光标放在某一个特质上时
+        if (child.TryGetLeafValue(out var traitName))
+        {
+            var node = Node.Create("traits");
+            node.AddChild(traitName);
+
+            AddTraitsByType(node, builder);
+        }
+        // 当光标放在某一个特质列表上时
+        else if (child.TryGetNode(out var traitsNode))
+        {
+            AddTraitsByType(traitsNode, builder);
+        }
+
+        return builder.ToString();
+    }
+
+    private void AddTraitsByType(Node node, MarkdownDocument builder)
+    {
+        AddTraitsDescription(
+            node,
+            builder,
+            traitKey =>
+            {
+                if (_leaderTraitsService.TryGetValue(traitKey, out var leaderTrait))
+                {
+                    return leaderTrait.Modifiers;
+                }
+
+                _characterTraitsService.TryGetTrait(traitKey, out var characterTrait);
+                return characterTrait?.AllModifiers;
+            }
+        );
     }
 
     private static bool IsCharacterNode(Node rootNode, Node node)
@@ -238,17 +284,17 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
     }
 
     private void AddTraitsDescription(
-        Node node,
+        Node traitsNode,
         MarkdownDocument builder,
         Func<string, IEnumerable<IModifier>?> modifiersFactory
     )
     {
-        if (!node.Key.Equals("traits", StringComparison.OrdinalIgnoreCase))
+        if (!traitsNode.Key.Equals("traits", StringComparison.OrdinalIgnoreCase))
         {
             return;
         }
 
-        var traits = node.LeafValues.Select(trait => trait.Key);
+        var traits = traitsNode.LeafValues.Select(trait => trait.Key);
         builder.AppendHeader($"{Resources.Traits}:", 4);
 
         foreach (string traitKey in traits)
