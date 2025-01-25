@@ -39,8 +39,7 @@ public static class NodeExtensions
 
         return node;
     }
-    
-        
+
     /// <summary>
     /// 获取光标指向的 <see cref="Child"/>
     /// </summary>
@@ -49,11 +48,6 @@ public static class NodeExtensions
     /// <returns></returns>
     public static Child FindPointedChildByPosition(this Node node, LocalPosition cursorPosition)
     {
-        if (node.Position.StartLine == cursorPosition.Line)
-        {
-            return Child.Create(node);
-        }
-
         foreach (var child in node.AllArray)
         {
             var childPosition = child.Position;
@@ -63,14 +57,27 @@ public static class NodeExtensions
             }
 
             if (
-                (
-                    cursorPosition.Line == childPosition.StartLine
-                    && cursorPosition.Character >= childPosition.StartColumn
+                cursorPosition.Line == childPosition.StartLine
+                && (
+                    (
+                        cursorPosition.Line == childPosition.EndLine
+                        && cursorPosition.Character >= childPosition.StartColumn
+                        && cursorPosition.Character <= childPosition.EndColumn
+                    )
+                    || (
+                        cursorPosition.Character >= childPosition.StartColumn
+                        && cursorPosition.Line != childPosition.EndLine
+                    )
                 )
-                || (
-                    cursorPosition.Line == childPosition.EndLine
-                    && cursorPosition.Character <= childPosition.EndColumn
-                )
+            )
+            {
+                return child;
+            }
+
+            if (
+                cursorPosition.Line == childPosition.EndLine
+                && cursorPosition.Character <= childPosition.EndColumn
+                && cursorPosition.Line != childPosition.StartLine
             )
             {
                 return child;
