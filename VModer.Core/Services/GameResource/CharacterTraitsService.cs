@@ -150,9 +150,11 @@ public sealed class CharacterTraitsService
                 }
                 else if (
                     traitAttribute.TryGetNode(out var node)
-                    && Array.Exists(
-                        ModifierNodeKeys,
-                        keyword => StringComparer.OrdinalIgnoreCase.Equals(keyword, key)
+                    && (
+                        Array.Exists(
+                            ModifierNodeKeys,
+                            keyword => StringComparer.OrdinalIgnoreCase.Equals(keyword, key)
+                        ) || StringComparer.OrdinalIgnoreCase.Equals(key, CharacterTrait.TraitXpFactor)
                     )
                 )
                 {

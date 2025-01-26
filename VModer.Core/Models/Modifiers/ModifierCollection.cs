@@ -6,7 +6,7 @@
 public sealed class ModifierCollection
 {
     /// <summary>
-    /// 容纳 Modifier 的 Key
+    /// 容纳 Modifier 的节点 Key
     /// </summary>
     public string Key { get; }
     public IEnumerable<IModifier> Modifiers { get; }

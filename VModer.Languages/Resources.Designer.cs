@@ -139,5 +139,14 @@ namespace VModer.Languages {
                 return ResourceManager.GetString("Traits", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 经验值系数.
+        /// </summary>
+        public static string TraitXpFactor {
+            get {
+                return ResourceManager.GetString("TraitXpFactor", resourceCulture);
+            }
+        }
     }
 }

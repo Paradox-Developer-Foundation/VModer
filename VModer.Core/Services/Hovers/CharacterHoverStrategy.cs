@@ -19,6 +19,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
     public GameFileType FileType => GameFileType.Character;
 
     private readonly LocalizationService _localizationService;
+    private readonly ModifierService _modifierService;
     private readonly ModifierDisplayService _modifierDisplayService;
     private readonly LeaderTraitsService _leaderTraitsService;
     private readonly LocalizationFormatService _localizationFormatService;
@@ -32,7 +33,8 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         ModifierDisplayService modifierDisplayService,
         LeaderTraitsService leaderTraitsService,
         CharacterTraitsService characterTraitsService,
-        LocalizationFormatService localizationFormatService
+        LocalizationFormatService localizationFormatService,
+        ModifierService modifierService
     )
     {
         _localizationService = localizationService;
@@ -40,6 +42,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         _leaderTraitsService = leaderTraitsService;
         _characterTraitsService = characterTraitsService;
         _localizationFormatService = localizationFormatService;
+        _modifierService = modifierService;
     }
 
     public string GetHoverText(Node rootNode, HoverParams request)
@@ -101,33 +104,15 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
             var node = Node.Create("traits");
             node.AddChild(traitName);
 
-            AddTraitsByType(node, builder);
+            AddTraitsDescription(node, builder, LookUpTraitType.All);
         }
         // 当光标放在某一个特质列表上时
         else if (child.TryGetNode(out var traitsNode))
         {
-            AddTraitsByType(traitsNode, builder);
+            AddTraitsDescription(traitsNode, builder, LookUpTraitType.All);
         }
 
         return builder.ToString();
-    }
-
-    private void AddTraitsByType(Node node, MarkdownDocument builder)
-    {
-        AddTraitsDescription(
-            node,
-            builder,
-            traitKey =>
-            {
-                if (_leaderTraitsService.TryGetValue(traitKey, out var leaderTrait))
-                {
-                    return leaderTrait.Modifiers;
-                }
-
-                _characterTraitsService.TryGetTrait(traitKey, out var characterTrait);
-                return characterTrait?.AllModifiers;
-            }
-        );
     }
 
     private static bool IsCharacterNode(Node rootNode, Node node)
@@ -200,7 +185,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
             }
             else if (child.TryGetNode(out var childNode))
             {
-                AddGeneralTraits(childNode, builder);
+                AddTraitsDescription(childNode, builder, LookUpTraitType.General);
             }
         }
 
@@ -232,19 +217,6 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         };
     }
 
-    private void AddGeneralTraits(Node node, MarkdownDocument builder)
-    {
-        AddTraitsDescription(
-            node,
-            builder,
-            traitKey =>
-            {
-                _characterTraitsService.TryGetTrait(traitKey, out var trait);
-                return trait?.AllModifiers;
-            }
-        );
-    }
-
     private string GetAdvisorDisplayText(Node node)
     {
         var builder = new MarkdownDocument();
@@ -254,7 +226,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         {
             if (child.TryGetNode(out var childNode))
             {
-                AddLeaderTraits(childNode, builder);
+                AddTraitsDescription(childNode, builder, LookUpTraitType.Leader);
             }
             else if (child.TryGetLeaf(out var leaf))
             {
@@ -270,24 +242,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         return builder.ToString();
     }
 
-    private void AddLeaderTraits(Node node, MarkdownDocument builder)
-    {
-        AddTraitsDescription(
-            node,
-            builder,
-            traitKey =>
-            {
-                _leaderTraitsService.TryGetValue(traitKey, out var trait);
-                return trait?.Modifiers;
-            }
-        );
-    }
-
-    private void AddTraitsDescription(
-        Node traitsNode,
-        MarkdownDocument builder,
-        Func<string, IEnumerable<IModifier>?> modifiersFactory
-    )
+    private void AddTraitsDescription(Node traitsNode, MarkdownDocument builder, LookUpTraitType type)
     {
         if (!traitsNode.Key.Equals("traits", StringComparison.OrdinalIgnoreCase))
         {
@@ -301,20 +256,70 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         {
             // 有可能需要解引用
             builder.AppendListItem(_localizationFormatService.GetFormatText(traitKey));
-            var modifiers = modifiersFactory(traitKey);
-            if (modifiers is not null)
+
+            var modifiers = GetTraitModifiersByType(traitKey, type);
+            var infos = _modifierDisplayService.GetDescription(modifiers);
+            foreach (string info in infos)
             {
-                var infos = _modifierDisplayService.GetDescription(modifiers);
-                foreach (string info in infos)
+                builder.AppendListItem(
+                    info,
+                    info.StartsWith(ModifierDisplayService.NodeModifierChildrenPrefix) ? 2 : 1
+                );
+            }
+
+            if (
+                type != LookUpTraitType.Leader
+                && _characterTraitsService.TryGetTrait(traitKey, out var trait)
+            )
+            {
+                foreach (var modifier in trait.TraitXpModifiers.OfType<LeafModifier>())
                 {
+                    //TODO: 实现从本地化中读取 trait_xp_factor 的本地化值
                     builder.AppendListItem(
-                        info,
-                        info.StartsWith(ModifierDisplayService.NodeModifierChildrenPrefix) ? 2 : 1
+                        $"{_localizationFormatService.GetFormatText(modifier.Key)} {Resources.TraitXpFactor}：{_modifierService.GetDisplayValue(modifier, "H%.0")}",
+                        1
                     );
                 }
             }
         }
         builder.AppendHorizontalRule();
+    }
+
+    private IEnumerable<IModifier> GetTraitModifiersByType(string traitKey, LookUpTraitType type)
+    {
+        switch (type)
+        {
+            case LookUpTraitType.All:
+            {
+                _characterTraitsService.TryGetTrait(traitKey, out var trait);
+                if (trait is not null)
+                {
+                    return trait.AllModifiers;
+                }
+
+                _leaderTraitsService.TryGetValue(traitKey, out var leaderTrait);
+                return leaderTrait?.Modifiers ?? [];
+            }
+            case LookUpTraitType.General:
+            {
+                _characterTraitsService.TryGetTrait(traitKey, out var trait);
+                return trait?.AllModifiers ?? [];
+            }
+            case LookUpTraitType.Leader:
+            {
+                _leaderTraitsService.TryGetValue(traitKey, out var trait);
+                return trait?.Modifiers ?? [];
+            }
+            default:
+                return [];
+        }
+    }
+
+    private enum LookUpTraitType : byte
+    {
+        All,
+        General,
+        Leader
     }
 
     private string GetCountryLeaderDisplayText(Node leaderNode)
@@ -338,7 +343,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
 
         if (traits is not null)
         {
-            AddLeaderTraits(traits, builder);
+            AddTraitsDescription(traits, builder, LookUpTraitType.Leader);
         }
 
         return builder.ToString();

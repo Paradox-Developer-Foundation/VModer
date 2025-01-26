@@ -38,4 +38,7 @@
     <data name="Character.country_leader" xml:space="preserve">
         <value>Country Leader</value>
     </data>
+    <data name="TraitXpFactor" xml:space="preserve">
+        <value>experience factor</value>
+    </data>
 </root>

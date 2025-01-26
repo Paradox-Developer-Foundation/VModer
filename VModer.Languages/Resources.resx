@@ -45,4 +45,7 @@
     <data name="Character.country_leader" xml:space="preserve">
         <value>领导人</value>
     </data>
+    <data name="TraitXpFactor" xml:space="preserve">
+        <value>经验值系数</value>
+    </data>
 </root>
