@@ -4,7 +4,6 @@ using EmmyLua.LanguageServer.Framework.Protocol.Model;
 using EmmyLua.LanguageServer.Framework.Protocol.Model.TextEdit;
 using MethodTimer;
 using NLog;
-using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
 using VModer.Core.Extensions;
 using VModer.Core.Infrastructure.Parser;
@@ -14,8 +13,6 @@ namespace VModer.Core.Services;
 
 public sealed class DocumentColorService(GameFilesService gameFilesService)
 {
-    private static Task<DocumentColorResponse> Empty => Task.FromResult(new DocumentColorResponse([]));
-
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
     public ColorPresentationResponse GetColorPresentation(ColorPresentationParams request)
@@ -165,27 +162,28 @@ public sealed class DocumentColorService(GameFilesService gameFilesService)
         var filePathUri = request.TextDocument.Uri.Uri;
         if (!gameFilesService.TryGetFileText(filePathUri, out string? fileText))
         {
-            return Empty;
+            return Task.FromResult(new DocumentColorResponse([]));
         }
 
         string filePath = filePathUri.ToSystemPath();
         var fileType = GameFileType.FromFilePath(filePath);
+        DocumentColorResponse? colorsResponse = null;
         if (fileType == GameFileType.Countries)
         {
-            return Task.FromResult(GetDocumentColorForCountriesFolder(filePath, fileText));
+            colorsResponse = GetDocumentColorForCountriesFolder(filePath, fileText);
         }
 
         if (fileType == GameFileType.CoreGfx)
         {
-            return Task.FromResult(GetDocumentColorForCoreGfx(filePath, fileText));
+            colorsResponse = GetDocumentColorForCoreGfx(filePath, fileText);
         }
 
         if (fileType == GameFileType.Ideologies)
         {
-            return Task.FromResult(GetDocumentColorForIdeologies(filePath, fileText));
+            colorsResponse = GetDocumentColorForIdeologies(filePath, fileText);
         }
 
-        return Empty;
+        return Task.FromResult(colorsResponse ?? new DocumentColorResponse([]));
     }
 
     private static DocumentColorResponse GetDocumentColorForCoreGfx(string filePath, string fileText)
@@ -252,7 +250,7 @@ public sealed class DocumentColorService(GameFilesService gameFilesService)
 
     private static DocumentColorResponse GetDocumentColorForCountriesFolder(string filePath, string fileText)
     {
-        if (!TextParser.TryParse(filePath, fileText, out var node, out _))
+        if (!TextParser.TryParse(filePath, fileText, out var rootNode, out _))
         {
             return new DocumentColorResponse([]);
         }
@@ -261,8 +259,8 @@ public sealed class DocumentColorService(GameFilesService gameFilesService)
         var colorsInfo =
             fileName.Equals("colors.txt", StringComparison.OrdinalIgnoreCase)
             || fileName.Equals("cosmetic.txt", StringComparison.OrdinalIgnoreCase)
-                ? GetColorInNodeColorFile(node)
-                : GetColorInLeafColorFile(node);
+                ? GetColorInNodeColorFile(rootNode)
+                : GetColorInLeafColorFile(rootNode);
 
         return new DocumentColorResponse(colorsInfo);
     }
@@ -273,38 +271,30 @@ public sealed class DocumentColorService(GameFilesService gameFilesService)
 
         foreach (var countryNode in rootNode.Nodes)
         {
-            foreach (var child in countryNode.AllArray)
-            {
-                if (
-                    child.TryGetNode(out var colorNode)
-                    && (
-                        colorNode.Key.Equals("color", StringComparison.OrdinalIgnoreCase)
-                        || colorNode.Key.Equals("color_ui", StringComparison.OrdinalIgnoreCase)
-                    )
+            foreach (
+                var colorNode in countryNode.Nodes.Where(node =>
+                    node.Key.Equals("color", StringComparison.OrdinalIgnoreCase)
+                    || node.Key.Equals("color_ui", StringComparison.OrdinalIgnoreCase)
                 )
-                {
-                    AddColorInfoToList(colorNode, colorsInfo);
-                }
+            )
+            {
+                AddColorInfoToList(colorNode, colorsInfo);
             }
         }
 
         return colorsInfo;
     }
 
-    private static List<ColorInformation> GetColorInLeafColorFile(Node node)
+    private static List<ColorInformation> GetColorInLeafColorFile(Node rootNode)
     {
         var colorsInfo = new List<ColorInformation>();
 
-        foreach (var child in node.AllArray)
-        {
-            if (
-                !child.TryGetNode(out var colorNode)
-                || !colorNode.Key.Equals("color", StringComparison.OrdinalIgnoreCase)
+        foreach (
+            var colorNode in rootNode.Nodes.Where(node =>
+                node.Key.Equals("color", StringComparison.OrdinalIgnoreCase)
             )
-            {
-                continue;
-            }
-
+        )
+        {
             AddColorInfoToList(colorNode, colorsInfo);
         }
 
