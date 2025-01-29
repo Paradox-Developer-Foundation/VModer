@@ -180,10 +180,15 @@ public sealed class DocumentColorService(GameFilesService gameFilesService)
             return Task.FromResult(GetDocumentColorForCoreGfx(filePath, fileText));
         }
 
+        if (fileType == GameFileType.Ideologies)
+        {
+            return Task.FromResult(GetDocumentColorForIdeologies(filePath, fileText));
+        }
+
         return Empty;
     }
-    
-    private DocumentColorResponse GetDocumentColorForCoreGfx(string filePath, string fileText)
+
+    private static DocumentColorResponse GetDocumentColorForCoreGfx(string filePath, string fileText)
     {
         if (!TextParser.TryParse(filePath, fileText, out var rootNode, out _))
         {
@@ -213,6 +218,36 @@ public sealed class DocumentColorService(GameFilesService gameFilesService)
                 AddTextColors(childNode, colorsInfo);
             }
         }
+    }
+
+    private static DocumentColorResponse GetDocumentColorForIdeologies(string filePath, string fileText)
+    {
+        if (!TextParser.TryParse(filePath, fileText, out var rootNode, out _))
+        {
+            return new DocumentColorResponse([]);
+        }
+
+        var colorsInfo = new List<ColorInformation>();
+        foreach (
+            var ideologiesNode in rootNode.Nodes.Where(node =>
+                node.Key.Equals("ideologies", StringComparison.OrdinalIgnoreCase)
+            )
+        )
+        {
+            foreach (var ideologyNode in ideologiesNode.Nodes)
+            {
+                foreach (
+                    var colorNode in ideologyNode.Nodes.Where(node =>
+                        node.Key.Equals("color", StringComparison.OrdinalIgnoreCase)
+                    )
+                )
+                {
+                    AddColorInfoToList(colorNode, colorsInfo);
+                }
+            }
+        }
+
+        return new DocumentColorResponse(colorsInfo);
     }
 
     private static DocumentColorResponse GetDocumentColorForCountriesFolder(string filePath, string fileText)
