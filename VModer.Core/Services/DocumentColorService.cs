@@ -2,6 +2,7 @@
 using EmmyLua.LanguageServer.Framework.Protocol.Message.DocumentColor;
 using EmmyLua.LanguageServer.Framework.Protocol.Model;
 using EmmyLua.LanguageServer.Framework.Protocol.Model.TextEdit;
+using MethodTimer;
 using NLog;
 using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
@@ -121,12 +122,12 @@ public sealed class DocumentColorService(GameFilesService gameFilesService)
 
     private static (double H, double S, double V) RgbToHsv(double red, double green, double blue)
     {
-        double R = red / 255.0;
-        double G = green / 255.0;
-        double B = blue / 255.0;
+        double r = red / 255.0;
+        double g = green / 255.0;
+        double b = blue / 255.0;
 
-        double max = Math.Max(R, Math.Max(G, B));
-        double min = Math.Min(R, Math.Min(G, B));
+        double max = Math.Max(r, Math.Max(g, b));
+        double min = Math.Min(r, Math.Min(g, b));
         double delta = max - min;
 
         double h;
@@ -134,17 +135,17 @@ public sealed class DocumentColorService(GameFilesService gameFilesService)
         {
             h = 0;
         }
-        else if (Math.Abs(max - R) < 1e-6)
+        else if (Math.Abs(max - r) < 1e-6)
         {
-            h = 60.0 * (((G - B) / delta) % 6);
+            h = 60.0 * (((g - b) / delta) % 6);
         }
-        else if (Math.Abs(max - G) < 1e-6)
+        else if (Math.Abs(max - g) < 1e-6)
         {
-            h = 60.0 * (((B - R) / delta) + 2);
+            h = 60.0 * (((b - r) / delta) + 2);
         }
         else
         {
-            h = 60.0 * (((R - G) / delta) + 4);
+            h = 60.0 * (((r - g) / delta) + 4);
         }
 
         if (h < 0)
@@ -158,6 +159,7 @@ public sealed class DocumentColorService(GameFilesService gameFilesService)
         return (h, s, v);
     }
 
+    [Time("获取颜色选择器位置")]
     public Task<DocumentColorResponse> GetDocumentColorAsync(DocumentColorParams request)
     {
         var filePathUri = request.TextDocument.Uri.Uri;
@@ -170,13 +172,50 @@ public sealed class DocumentColorService(GameFilesService gameFilesService)
         var fileType = GameFileType.FromFilePath(filePath);
         if (fileType == GameFileType.Countries)
         {
-            return Task.FromResult(GetDocumentColor(filePath, fileText));
+            return Task.FromResult(GetDocumentColorForCountriesFolder(filePath, fileText));
+        }
+
+        if (fileType == GameFileType.CoreGfx)
+        {
+            return Task.FromResult(GetDocumentColorForCoreGfx(filePath, fileText));
         }
 
         return Empty;
     }
+    
+    private DocumentColorResponse GetDocumentColorForCoreGfx(string filePath, string fileText)
+    {
+        if (!TextParser.TryParse(filePath, fileText, out var rootNode, out _))
+        {
+            return new DocumentColorResponse([]);
+        }
 
-    private static DocumentColorResponse GetDocumentColor(string filePath, string fileText)
+        var colors = new List<ColorInformation>();
+        AddTextColors(rootNode, colors);
+
+        return new DocumentColorResponse(colors);
+    }
+
+    private static void AddTextColors(Node node, List<ColorInformation> colorsInfo)
+    {
+        foreach (var childNode in node.Nodes)
+        {
+            if (childNode.Key.Equals("textcolors", StringComparison.OrdinalIgnoreCase))
+            {
+                foreach (var colorNode in childNode.Nodes)
+                {
+                    AddColorInfoToList(colorNode, colorsInfo);
+                }
+            }
+            // 确保不是 LeafValues 节点以避免无效的递归调用
+            else if (!childNode.LeafValues.Any())
+            {
+                AddTextColors(childNode, colorsInfo);
+            }
+        }
+    }
+
+    private static DocumentColorResponse GetDocumentColorForCountriesFolder(string filePath, string fileText)
     {
         if (!TextParser.TryParse(filePath, fileText, out var node, out _))
         {
