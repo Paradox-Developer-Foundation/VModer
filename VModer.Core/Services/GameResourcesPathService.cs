@@ -3,25 +3,32 @@ using VModer.Core.Extensions;
 
 namespace VModer.Core.Services;
 
-public sealed class GameResourcesPathService
+public sealed class GameResourcesPathService(
+    SettingsService settingService,
+    GameModDescriptorService descriptor
+)
 {
-    private readonly SettingsService _settingService;
-    private readonly GameModDescriptorService _descriptor;
-
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-    public GameResourcesPathService(SettingsService settingService, GameModDescriptorService descriptor)
+    public FileType GetFilePathType(string filePath)
     {
-        _settingService = settingService;
-        _descriptor = descriptor;
+        if (filePath.Contains(settingService.ModRootFolderPath))
+        {
+            return FileType.Mod;
+        }
+
+        if (filePath.Contains(settingService.GameRootFolderPath))
+        {
+            return FileType.Game;
+        }
+        return FileType.Unknown;
     }
 
-    public IReadOnlyCollection<string> GetAllFilePriorModByRelativePathForFolder(
-        params string[] folderRelativePaths
-    )
+    public enum FileType : byte
     {
-        string relativePath = Path.Combine(folderRelativePaths);
-        return GetAllFilePriorModByRelativePathForFolder(relativePath);
+        Unknown,
+        Game,
+        Mod
     }
 
     /// <summary>
@@ -37,8 +44,8 @@ public sealed class GameResourcesPathService
     )
     {
         Log.Info("正在获取文件夹 {Path} 下的文件", folderRelativePath);
-        string modFolder = Path.Combine(_settingService.ModRootFolderPath, folderRelativePath);
-        string gameFolder = Path.Combine(_settingService.GameRootFolderPath, folderRelativePath);
+        string modFolder = Path.Combine(settingService.ModRootFolderPath, folderRelativePath);
+        string gameFolder = Path.Combine(settingService.GameRootFolderPath, folderRelativePath);
 
         if (!Directory.Exists(gameFolder))
         {
@@ -50,7 +57,7 @@ public sealed class GameResourcesPathService
             return Directory.GetFiles(gameFolder, filter);
         }
 
-        if (_descriptor.ReplacePaths.Contains(folderRelativePath))
+        if (descriptor.ReplacePaths.Contains(folderRelativePath))
         {
             Log.Debug(
                 "MOD文件夹已完全替换游戏文件夹: \n\t {GamePath} => {ModPath}",
@@ -77,13 +84,14 @@ public sealed class GameResourcesPathService
         string[] modFilePaths
     )
     {
-        Dictionary<string, string> set = new Dictionary<string, string>(Math.Max(gameFilePaths.Length, modFilePaths.Length));
+        var set = new Dictionary<string, string>(Math.Max(gameFilePaths.Length, modFilePaths.Length));
 
         // 优先读取Mod文件
         // TODO: 做一下性能测试, 看和原来的算法有什么区别
         foreach (string filePath in modFilePaths.Concat(gameFilePaths))
         {
-            string fileName = Path.GetFileName(filePath) ?? throw new ArgumentException($"无法得到文件名: {filePath}");
+            string fileName =
+                Path.GetFileName(filePath) ?? throw new ArgumentException($"无法得到文件名: {filePath}");
             set.TryAdd(fileName, filePath);
         }
 
@@ -101,13 +109,13 @@ public sealed class GameResourcesPathService
     /// <returns>文件绝对路径</returns>
     public string GetFilePathPriorModByRelativePath(string fileRelativePath)
     {
-        string modFilePath = Path.Combine(_settingService.ModRootFolderPath, fileRelativePath);
+        string modFilePath = Path.Combine(settingService.ModRootFolderPath, fileRelativePath);
         if (File.Exists(modFilePath))
         {
             return modFilePath;
         }
 
-        string gameFilePath = Path.Combine(_settingService.GameRootFolderPath, fileRelativePath);
+        string gameFilePath = Path.Combine(settingService.GameRootFolderPath, fileRelativePath);
         if (File.Exists(gameFilePath))
         {
             return gameFilePath;

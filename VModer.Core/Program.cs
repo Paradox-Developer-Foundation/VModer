@@ -93,6 +93,7 @@ builder.Services.AddSingleton<ModiferLocalizationFormatService>();
 builder.Services.AddSingleton<CharacterTraitsService>();
 builder.Services.AddSingleton<LeaderTraitsService>();
 builder.Services.AddSingleton<IdeologiesService>();
+builder.Services.AddSingleton<DefinesService>();
 
 builder.Services.AddHostedService<LanguageServerHostedService>();
 
