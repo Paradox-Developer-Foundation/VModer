@@ -8,15 +8,32 @@ using ParadoxPower.Process;
 using VModer.Core.Extensions;
 using VModer.Core.Infrastructure.Parser;
 using VModer.Core.Models;
+using VModer.Core.Services.GameResource;
 
 namespace VModer.Core.Services;
 
-public sealed class DocumentColorService(GameFilesService gameFilesService)
+public sealed class DocumentColorService(GameFilesService gameFilesService, DefinesService definesService)
 {
+    private const string CountryColorSaturationModifier =
+        "NDefines.NGraphics.COUNTRY_COLOR_SATURATION_MODIFIER";
+    private const string CountryColorBrightnessModifier =
+        "NDefines.NGraphics.COUNTRY_COLOR_BRIGHTNESS_MODIFIER";
+
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
     public ColorPresentationResponse GetColorPresentation(ColorPresentationParams request)
     {
+        string filePath = request.TextDocument.Uri.Uri.ToSystemPath();
+
+        var fileType = GameFileType.FromFilePath(filePath);
+
+        // 节点键不为 color 而是颜色代码, 无法直接替换
+        // TODO: 实现字体颜色代码颜色选择器
+        if (fileType == GameFileType.CoreGfx)
+        {
+            return new ColorPresentationResponse([]);
+        }
+
         double red = request.Color.Red * 255;
         double green = request.Color.Green * 255;
         double blue = request.Color.Blue * 255;
@@ -81,37 +98,55 @@ public sealed class DocumentColorService(GameFilesService gameFilesService)
         return sb.ToString();
     }
 
-    private static ColorPresentation GetRgbColorPresentation(
+    private ColorPresentation GetRgbColorPresentation(
         double red,
         double green,
         double blue,
         DocumentRange documentRange
     )
     {
+        double max = Math.Max(red, Math.Max(green, blue));
+        double saturationModifier = definesService.Get<double>(CountryColorSaturationModifier);
+        double brightnessModifier = definesService.Get<double>(CountryColorBrightnessModifier);
+
+        Log.Info(GetDisplayColor(green));
         return new ColorPresentation
         {
             Label = $"rgb({red:F0}, {green:F0}, {blue:F0})",
             TextEdit = new TextEdit
             {
-                NewText = $"color = rgb {{ {red:F0} {green:F0} {blue:F0} }}",
+                NewText =
+                    $"color = rgb {{ {GetDisplayColor(red):F0} {GetDisplayColor(green):F0} {GetDisplayColor(blue):F0} }}",
                 Range = documentRange
             }
         };
+
+        double GetDisplayColor(double color)
+        {
+            return (color + (saturationModifier - 1) * max) / (saturationModifier * brightnessModifier);
+        }
     }
 
-    private static ColorPresentation GetHsvColorPresentation(
+    private ColorPresentation GetHsvColorPresentation(
         double h,
         double s,
         double v,
         DocumentRange documentRange
     )
     {
+        double saturationModifier = definesService.Get<double>(CountryColorSaturationModifier);
+        double brightnessModifier = definesService.Get<double>(CountryColorBrightnessModifier);
+
+        // 使用修饰符算出应填入的数字
+        double usedSaturation = s / saturationModifier;
+        double usedBrightness = v / brightnessModifier;
+
         return new ColorPresentation
         {
             Label = $"hsv({h:F0}, {s:P}, {v:P})",
             TextEdit = new TextEdit
             {
-                NewText = $"color = HSV {{ {h / 360.0:F2} {s:F2} {v:F2} }}",
+                NewText = $"color = HSV {{ {h / 360.0:F2} {usedSaturation:F2} {usedBrightness:F2} }}",
                 Range = documentRange
             }
         };
@@ -186,7 +221,7 @@ public sealed class DocumentColorService(GameFilesService gameFilesService)
         return Task.FromResult(colorsResponse ?? new DocumentColorResponse([]));
     }
 
-    private static DocumentColorResponse GetDocumentColorForCoreGfx(string filePath, string fileText)
+    private DocumentColorResponse GetDocumentColorForCoreGfx(string filePath, string fileText)
     {
         if (!TextParser.TryParse(filePath, fileText, out var rootNode, out _))
         {
@@ -199,7 +234,7 @@ public sealed class DocumentColorService(GameFilesService gameFilesService)
         return new DocumentColorResponse(colors);
     }
 
-    private static void AddTextColors(Node node, List<ColorInformation> colorsInfo)
+    private void AddTextColors(Node node, List<ColorInformation> colorsInfo)
     {
         foreach (var childNode in node.Nodes)
         {
@@ -218,7 +253,7 @@ public sealed class DocumentColorService(GameFilesService gameFilesService)
         }
     }
 
-    private static DocumentColorResponse GetDocumentColorForIdeologies(string filePath, string fileText)
+    private DocumentColorResponse GetDocumentColorForIdeologies(string filePath, string fileText)
     {
         if (!TextParser.TryParse(filePath, fileText, out var rootNode, out _))
         {
@@ -248,7 +283,7 @@ public sealed class DocumentColorService(GameFilesService gameFilesService)
         return new DocumentColorResponse(colorsInfo);
     }
 
-    private static DocumentColorResponse GetDocumentColorForCountriesFolder(string filePath, string fileText)
+    private DocumentColorResponse GetDocumentColorForCountriesFolder(string filePath, string fileText)
     {
         if (!TextParser.TryParse(filePath, fileText, out var rootNode, out _))
         {
@@ -265,7 +300,7 @@ public sealed class DocumentColorService(GameFilesService gameFilesService)
         return new DocumentColorResponse(colorsInfo);
     }
 
-    private static List<ColorInformation> GetColorInNodeColorFile(Node rootNode)
+    private List<ColorInformation> GetColorInNodeColorFile(Node rootNode)
     {
         var colorsInfo = new List<ColorInformation>();
 
@@ -285,7 +320,7 @@ public sealed class DocumentColorService(GameFilesService gameFilesService)
         return colorsInfo;
     }
 
-    private static List<ColorInformation> GetColorInLeafColorFile(Node rootNode)
+    private List<ColorInformation> GetColorInLeafColorFile(Node rootNode)
     {
         var colorsInfo = new List<ColorInformation>();
 
@@ -301,7 +336,7 @@ public sealed class DocumentColorService(GameFilesService gameFilesService)
         return colorsInfo;
     }
 
-    private static void AddColorInfoToList(Node colorNode, List<ColorInformation> colorsInfo)
+    private void AddColorInfoToList(Node colorNode, List<ColorInformation> colorsInfo)
     {
         Span<double> colors = stackalloc double[3];
         var colorLeafValues = colorNode.LeafValues.ToArray();
@@ -328,18 +363,45 @@ public sealed class DocumentColorService(GameFilesService gameFilesService)
         );
     }
 
-    private static DocumentColor GetColor(Span<double> colors, Node colorNode)
+    private DocumentColor GetColor(ReadOnlySpan<double> colors, Node colorNode)
     {
         if (
             colorNode.Leaves.Count == 0
             || colorNode.Leaves.Any(leaf => leaf.Key.Equals("rgb", StringComparison.OrdinalIgnoreCase))
         )
         {
-            return new DocumentColor(colors[0] / 255, colors[1] / 255, colors[2] / 255, 255);
+            return GetColorFromRgb(colors);
         }
 
-        var (r, g, b) = HsvToRgb(colors[0], colors[1], colors[2]);
-        return new DocumentColor(r, g, b, 255);
+        return GetColorFromHsv(colors);
+    }
+
+    private DocumentColor GetColorFromRgb(ReadOnlySpan<double> rgb)
+    {
+        double max = Math.Max(Math.Max(rgb[0], rgb[1]), rgb[2]);
+        double saturationModifier = definesService.Get<double>(CountryColorSaturationModifier);
+        double brightnessModifier = definesService.Get<double>(CountryColorBrightnessModifier);
+
+        return new DocumentColor(
+            GetActualColor(rgb[0]) / 255,
+            GetActualColor(rgb[1]) / 255,
+            GetActualColor(rgb[2]) / 255,
+            1
+        );
+
+        double GetActualColor(double color)
+        {
+            return brightnessModifier * (saturationModifier * color + (1 - saturationModifier) * max);
+        }
+    }
+
+    private DocumentColor GetColorFromHsv(ReadOnlySpan<double> hsv)
+    {
+        double saturationModifier = definesService.Get<double>(CountryColorSaturationModifier);
+        double brightnessModifier = definesService.Get<double>(CountryColorBrightnessModifier);
+        var (r, g, b) = HsvToRgb(hsv[0], hsv[1] * saturationModifier, hsv[2] * brightnessModifier);
+
+        return new DocumentColor(r, g, b, 1);
     }
 
     private static (double r, double g, double b) HsvToRgb(double h, double s, double v)
