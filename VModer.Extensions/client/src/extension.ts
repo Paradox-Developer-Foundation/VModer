@@ -144,6 +144,9 @@ async function updateStatusBarServerInfo(statusBarItem: StatusBarItem, client: L
 }
 
 function formatBytes(bytes: number): string {
+	if (!Number.isFinite(bytes) || bytes < 0) {
+		return '0 Bytes';
+	}
 	if (bytes === 0) {
 		return '0 Bytes';
 	}
