@@ -13,7 +13,7 @@ import * as path from 'path';
 
 let client: LanguageClient;
 
-export function activate(context: ExtensionContext) {
+export async function activate(context: ExtensionContext) {
 
 	const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Right, 100000);
 	const openLogs = commands.registerCommand('vmoder.openLogs', () => {
@@ -83,19 +83,17 @@ export function activate(context: ExtensionContext) {
 	const gameRootFolderPath = config.get<string>("VModer.GameRootPath") || config.get<string>("cwtools.cache.hoi4");
 
 	if (gameRootFolderPath === undefined || gameRootFolderPath === "") {
-		window.showWarningMessage(l10n.t("SelectGameRootPath"), l10n.t("SelectFolder"))
-			.then(() => {
-				window.showOpenDialog({
-					canSelectFiles: false,
-					canSelectFolders: true,
-					canSelectMany: false,
-					openLabel: l10n.t("SelectFolder")
-				}).then((uri) => {
-					if (uri && uri[0]) {
-						config.update("VModer.GameRootPath", uri[0].fsPath, true);
-					}
-				}).then(() => window.showInformationMessage(l10n.t("MustRestart")));
-			});
+		await window.showWarningMessage(l10n.t("SelectGameRootPath"), l10n.t("SelectFolder"));
+		const uri = await window.showOpenDialog({
+			canSelectFiles: false,
+			canSelectFolders: true,
+			canSelectMany: false,
+			openLabel: l10n.t("SelectFolder")
+		});
+		if (uri && uri[0]) {
+			config.update("VModer.GameRootPath", uri[0].fsPath, true);
+		}
+		await window.showInformationMessage(l10n.t("MustRestart"));
 	}
 
 	// 控制语言客户端的选项
