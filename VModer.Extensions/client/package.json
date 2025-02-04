@@ -35,6 +35,12 @@
 					"type": "string",
 					"default": "",
 					"description": "%VModer.GameRootPath%"
+				},
+				"VModer.RamQueryIntervalTime": {
+					"scope": "resource",
+					"type": "number",
+					"default": 1500,
+					"description": "%VModer.RamQueryIntervalTime%"
 				}
 			}
 		},

@@ -1,3 +1,4 @@
 {
-	"VModer.GameRootPath": "游戏根目录路径."
+	"VModer.GameRootPath": "游戏根目录路径.",
+	"VModer.RamQueryIntervalTime": "查询内存使用情况的间隔时间, 单位为毫秒."
 }

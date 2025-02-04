@@ -121,7 +121,7 @@ export async function activate(context: ExtensionContext) {
 	context.subscriptions.push(client.onDidChangeState(() => updateStatusBarItem(statusBarItem, client)));
 	setInterval(() => {
 		updateStatusBarServerInfo(statusBarItem, client);
-	}, 1500);
+	}, config.get<number>("VModer.RamQueryIntervalTime") || 1500);
 }
 
 async function updateStatusBarItem(statusBarItem: StatusBarItem, client: LanguageClient): Promise<void> {

@@ -1,3 +1,4 @@
 {
-	"VModer.GameRootPath": "The root path of HOI4 game folder."
+	"VModer.GameRootPath": "The root path of HOI4 game folder.",
+	"VModer.RamQueryIntervalTime": "The interval time of querying RAM, Unit is millisecond."
 }
