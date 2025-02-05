@@ -109,7 +109,6 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
         double saturationModifier = definesService.Get<double>(CountryColorSaturationModifier);
         double brightnessModifier = definesService.Get<double>(CountryColorBrightnessModifier);
 
-        Log.Info(GetDisplayColor(green));
         return new ColorPresentation
         {
             Label = $"rgb({red:F0}, {green:F0}, {blue:F0})",
@@ -192,12 +191,12 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
     }
 
     [Time("获取颜色选择器位置")]
-    public Task<DocumentColorResponse> GetDocumentColorAsync(DocumentColorParams request)
+    public DocumentColorResponse GetDocumentColor(DocumentColorParams request)
     {
         var filePathUri = request.TextDocument.Uri.Uri;
         if (!gameFilesService.TryGetFileText(filePathUri, out string? fileText))
         {
-            return Task.FromResult(new DocumentColorResponse([]));
+            return new DocumentColorResponse([]);
         }
 
         string filePath = filePathUri.ToSystemPath();
@@ -218,7 +217,7 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
             colorsResponse = GetDocumentColorForIdeologies(filePath, fileText);
         }
 
-        return Task.FromResult(colorsResponse ?? new DocumentColorResponse([]));
+        return colorsResponse ?? new DocumentColorResponse([]);
     }
 
     private DocumentColorResponse GetDocumentColorForCoreGfx(string filePath, string fileText)

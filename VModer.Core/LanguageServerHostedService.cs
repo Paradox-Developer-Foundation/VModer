@@ -39,11 +39,17 @@ public sealed class LanguageServerHostedService : IHostedService
         CancellationToken cancellationToken
     )
     {
-        _currentProcess.Refresh();
+        return Task.Run<JsonDocument?>(
+            () =>
+            {
+                _currentProcess.Refresh();
 
-        long memoryUsedBytes = _currentProcess.PrivateMemorySize64;
-        var document = JsonDocument.Parse($"{{\"memoryUsedBytes\": {memoryUsedBytes}}}");
-        return Task.FromResult<JsonDocument?>(document);
+                long memoryUsedBytes = _currentProcess.PrivateMemorySize64;
+                var document = JsonDocument.Parse($"{{\"memoryUsedBytes\": {memoryUsedBytes}}}");
+                return document;
+            },
+            cancellationToken
+        );
     }
 
     public Task StartAsync(CancellationToken cancellationToken)

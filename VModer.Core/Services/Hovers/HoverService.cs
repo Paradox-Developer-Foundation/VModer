@@ -19,25 +19,28 @@ public sealed class HoverService
     }
 
     [Time]
-    public Task<HoverResponse?> GetHoverResponseAsync(HoverParams request)
+    public HoverResponse? GetHoverResponse(HoverParams request)
     {
         string filePath = request.TextDocument.Uri.Uri.ToSystemPath();
         if (!_gameFilesService.TryGetFileText(request.TextDocument.Uri.Uri, out string? text))
         {
-            return Task.FromResult<HoverResponse?>(null);
+            return null;
         }
         if (!TextParser.TryParse(filePath, text, out var rootNode, out _))
         {
-            return Task.FromResult<HoverResponse?>(null);
+            return null;
         }
 
         var fileType = GameFileType.FromFilePath(filePath);
         string hoverText = _hoverStrategyManager.GetHoverText(fileType, rootNode, request);
-        return Task.FromResult<HoverResponse?>(
-            new HoverResponse
-            {
-                Contents = new MarkupContent { Kind = MarkupKind.Markdown, Value = hoverText }
-            }
-        );
+        if (string.IsNullOrEmpty(hoverText))
+        {
+            return null;
+        }
+
+        return new HoverResponse
+        {
+            Contents = new MarkupContent { Kind = MarkupKind.Markdown, Value = hoverText }
+        };
     }
 }

@@ -19,7 +19,7 @@ public sealed class DocumentColorHandler : DocumentColorHandlerBase, IHandler
         CancellationToken token
     )
     {
-        return _documentColorService.GetDocumentColorAsync(request);
+        return Task.Run(() => _documentColorService.GetDocumentColor(request), token);
     }
 
     protected override Task<ColorPresentationResponse> Resolve(
@@ -27,7 +27,7 @@ public sealed class DocumentColorHandler : DocumentColorHandlerBase, IHandler
         CancellationToken token
     )
     {
-        return Task.FromResult(_documentColorService.GetColorPresentation(request));
+        return Task.Run(() => _documentColorService.GetColorPresentation(request), token);
     }
 
     public override void RegisterCapability(

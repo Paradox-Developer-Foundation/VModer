@@ -9,12 +9,11 @@ namespace VModer.Core.Handlers;
 
 public sealed class HoverHandler : HoverHandlerBase, IHandler
 {
-    
     private HoverService _hoverService = null!;
 
     protected override Task<HoverResponse?> Handle(HoverParams request, CancellationToken token)
     {
-        return _hoverService.GetHoverResponseAsync(request);
+        return Task.Run(() => _hoverService.GetHoverResponse(request), token);
     }
 
     public override void RegisterCapability(
