@@ -2,6 +2,7 @@
 using System.Text.Json;
 using EmmyLua.LanguageServer.Framework.Protocol.JsonRpc;
 using EmmyLua.LanguageServer.Framework.Server;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NLog;
 using VModer.Core.Handlers;
@@ -89,13 +90,16 @@ public sealed class LanguageServerHostedService : IHostedService
             }
         );
 
-        _server.OnInitialized(
-            (c) =>
-            {
-                _logger.Log("Language server initialized.");
-                return Task.CompletedTask;
-            }
-        );
+        _server.OnInitialized(c =>
+        {
+            _logger.Log("Language server initialized.");
+            var analyzersService = App.Services.GetRequiredService<AnalyzeService>();
+            analyzersService
+                .AnalyzeAllFilesAsync(cancellationToken)
+                .ContinueWith(_ => Log.Info("Language server initialized."), cancellationToken);
+
+            return Task.CompletedTask;
+        });
 
         _ = Task.Run(
             async () =>

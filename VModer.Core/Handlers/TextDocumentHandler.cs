@@ -28,7 +28,7 @@ public sealed class TextDocumentHandler : TextDocumentHandlerBase, IHandler
 
         return Task.Run(
             async () =>
-                await _analyzeService.AnalyzeFileAsync(request.TextDocument.Uri.Uri).ConfigureAwait(false),
+                await _analyzeService.AnalyzeFileFromOpenedFileAsync(request.TextDocument.Uri.Uri).ConfigureAwait(false),
             token
         );
     }
@@ -47,7 +47,7 @@ public sealed class TextDocumentHandler : TextDocumentHandlerBase, IHandler
 
         return Task.Run(
             async () =>
-                await _analyzeService.AnalyzeFileAsync(request.TextDocument.Uri.Uri).ConfigureAwait(false),
+                await _analyzeService.AnalyzeFileFromOpenedFileAsync(request.TextDocument.Uri.Uri).ConfigureAwait(false),
             token
         );
     }

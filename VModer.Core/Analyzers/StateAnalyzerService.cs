@@ -12,6 +12,7 @@ namespace VModer.Core.Analyzers;
 public sealed class StateAnalyzerService
 {
     private readonly BuildingsService _buildingService;
+
     // private readonly GlobalValue _provinces = new("province");
     // private readonly GlobalValue _idSet = new("id");
 
@@ -22,7 +23,6 @@ public sealed class StateAnalyzerService
         _buildingService = buildingService;
     }
 
-    [Time]
     public List<Diagnostic> Analyze(Node node, string filePath)
     {
         var list = new List<Diagnostic>();
