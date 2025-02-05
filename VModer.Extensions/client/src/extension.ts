@@ -114,6 +114,9 @@ export async function activate(context: ExtensionContext) {
 		serverOptions,
 		clientOptions
 	);
+	client.onNotification("analyzeAllFilesStart", () => {
+		statusBarItem.text = "$(extensions-sync-enabled) VModer Analyzing";
+	});
 
 	client.start();
 	statusBarItem.show();

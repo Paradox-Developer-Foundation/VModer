@@ -90,13 +90,21 @@ public sealed class LanguageServerHostedService : IHostedService
             }
         );
 
-        _server.OnInitialized(c =>
+        _server.OnInitialized(_ =>
         {
-            _logger.Log("Language server initialized.");
             var analyzersService = App.Services.GetRequiredService<AnalyzeService>();
+
+            _server.SendNotification(new NotificationMessage("analyzeAllFilesStart", null));
             analyzersService
                 .AnalyzeAllFilesAsync(cancellationToken)
-                .ContinueWith(_ => Log.Info("Language server initialized."), cancellationToken);
+                .ContinueWith(
+                    _ =>
+                    {
+                        Log.Info("Language server initialized.");
+                        _logger.Log("Language server initialized.");
+                    },
+                    cancellationToken
+                );
 
             return Task.CompletedTask;
         });
