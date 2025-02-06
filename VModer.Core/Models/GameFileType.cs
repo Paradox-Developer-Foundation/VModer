@@ -1,4 +1,5 @@
-﻿using Ardalis.SmartEnum;
+﻿using System.Collections.Concurrent;
+using Ardalis.SmartEnum;
 using DotNet.Globbing;
 
 namespace VModer.Core.Models;
@@ -14,7 +15,7 @@ public sealed class GameFileType(string name, string value) : SmartEnum<GameFile
     public static readonly GameFileType CoreGfx = new(nameof(CoreGfx), "**/interface/core.gfx");
     public static readonly GameFileType Ideologies = new(nameof(Ideologies), "**/common/ideologies/*.txt");
 
-    private static readonly Dictionary<string, Glob> Globs = new();
+    private static readonly ConcurrentDictionary<string, Glob> Globs = new();
 
     static GameFileType()
     {
@@ -41,7 +42,7 @@ public sealed class GameFileType(string name, string value) : SmartEnum<GameFile
         if (!Globs.TryGetValue(key, out var glob))
         {
             glob = Glob.Parse(patter);
-            Globs.Add(key, glob);
+            Globs.TryAdd(key, glob);
         }
 
         return glob.IsMatch(filePath);
