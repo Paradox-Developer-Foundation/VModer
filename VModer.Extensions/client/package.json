@@ -12,7 +12,9 @@
 	},
 	"icon": "./logo.png",
 	"publisher": "textGamex",
-	"categories": ["Programming Languages"],
+	"categories": [
+		"Programming Languages"
+	],
 	"l10n": "./l10n",
 	"keywords": [
 		"hoi4",
@@ -41,6 +43,18 @@
 					"type": "number",
 					"default": 1500,
 					"description": "%VModer.RamQueryIntervalTime%"
+				},
+				"VModer.Blacklist": {
+					"scope": "resource",
+					"type": "array",
+					"default": [
+						"README.txt",
+						"credits.txt",
+						"credits_l_simp_chinese.txt",
+						"reference.txt",
+						"startup_info.txt"
+					],
+					"description": "%VModer.Blacklist%"
 				}
 			}
 		},

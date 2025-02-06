@@ -24,6 +24,7 @@ public sealed class AnalyzeService(
     {
         long start = Stopwatch.GetTimestamp();
         var tasks = new List<Task>();
+
         foreach (
             string filePath in Directory.EnumerateFiles(
                 settingsService.ModRootFolderPath,
@@ -53,16 +54,27 @@ public sealed class AnalyzeService(
 
     public Task AnalyzeFileFromOpenedFileAsync(Uri fileUri)
     {
+        string filePath = fileUri.ToSystemPath();
+        if (settingsService.AnalysisBlackList.Contains(Path.GetFileName(filePath)))
+        {
+            return Task.CompletedTask;
+        }
+
         if (!gameFilesService.TryGetFileText(fileUri, out string? fileText))
         {
             return Task.CompletedTask;
         }
 
-        return AnalyzeFileAsync(fileUri.ToSystemPath(), fileText);
+        return AnalyzeFileAsync(filePath, fileText);
     }
 
     private Task AnalyzeFileFromFilePathAsync(string filePath)
     {
+        if (settingsService.AnalysisBlackList.Contains(Path.GetFileName(filePath)))
+        {
+            return Task.CompletedTask;
+        }
+
         return AnalyzeFileAsync(filePath, File.ReadAllText(filePath));
     }
 

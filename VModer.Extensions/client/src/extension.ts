@@ -103,7 +103,8 @@ export async function activate(context: ExtensionContext) {
 			fileEvents: [workspace.createFileSystemWatcher('**/*.txt')],
 		},
 		initializationOptions: {
-			"GameRootFolderPath": gameRootFolderPath
+			"GameRootFolderPath": gameRootFolderPath,
+			"Blacklist": config.get<string[]>("VModer.Blacklist") || [],
 		}
 	};
 

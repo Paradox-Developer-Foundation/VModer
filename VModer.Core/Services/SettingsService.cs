@@ -1,4 +1,5 @@
-﻿using VModer.Core.Models;
+﻿using System.Collections.Frozen;
+using VModer.Core.Models;
 
 namespace VModer.Core.Services;
 
@@ -8,4 +9,5 @@ public sealed class SettingsService
     public string ModRootFolderPath { get; set; } = string.Empty;
     // TODO: 在VS Code 中添加配置项
     public GameLanguage GameLanguage { get; set; } = GameLanguage.Default;
+    public FrozenSet<string> AnalysisBlackList { get; set; } = [];
 }

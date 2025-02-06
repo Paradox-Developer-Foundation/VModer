@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Frozen;
+using System.Diagnostics;
 using System.Text.Json;
 using EmmyLua.LanguageServer.Framework.Protocol.JsonRpc;
 using EmmyLua.LanguageServer.Framework.Server;
@@ -73,9 +74,15 @@ public sealed class LanguageServerHostedService : IHostedService
                 string gameRootPath =
                     c.InitializationOptions?.RootElement.GetProperty("GameRootFolderPath").GetString()
                     ?? string.Empty;
+                var blackList =
+                    c.InitializationOptions?.RootElement.GetProperty("Blacklist")
+                        .EnumerateArray()
+                        .Select(element => element.GetString() ?? string.Empty) ?? [];
 
                 _settings.GameRootFolderPath = gameRootPath;
                 _settings.ModRootFolderPath = c.RootUri?.FileSystemPath ?? string.Empty;
+                _settings.AnalysisBlackList = blackList.ToFrozenSet(StringComparer.OrdinalIgnoreCase);
+
                 s.Name = "VModer";
                 s.Version = "1.0.0";
 
