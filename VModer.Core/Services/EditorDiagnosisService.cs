@@ -2,7 +2,6 @@
 using EmmyLua.LanguageServer.Framework.Protocol.Model;
 using EmmyLua.LanguageServer.Framework.Protocol.Model.Diagnostic;
 using EmmyLua.LanguageServer.Framework.Server;
-using NLog;
 using ParadoxPower.CSharp;
 
 namespace VModer.Core.Services;
@@ -10,9 +9,6 @@ namespace VModer.Core.Services;
 public sealed class EditorDiagnosisService
 {
     private readonly LanguageServer _server;
-
-    private static readonly List<Diagnostic> EmptyDiagnostics = [];
-    private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
     public EditorDiagnosisService(LanguageServer server)
     {
@@ -63,12 +59,5 @@ public sealed class EditorDiagnosisService
     public Task AddDiagnoseAsync(PublishDiagnosticsParams diagnoseParams)
     {
         return _server.Client.PublishDiagnostics(diagnoseParams);
-    }
-
-    public Task ClearDiagnoseAsync(Uri fileUri)
-    {
-        return _server.Client.PublishDiagnostics(
-            new PublishDiagnosticsParams { Diagnostics = EmptyDiagnostics, Uri = fileUri }
-        );
     }
 }
