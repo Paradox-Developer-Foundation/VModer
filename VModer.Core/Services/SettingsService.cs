@@ -10,4 +10,5 @@ public sealed class SettingsService
     // TODO: 在VS Code 中添加配置项
     public GameLanguage GameLanguage { get; set; } = GameLanguage.Default;
     public FrozenSet<string> AnalysisBlackList { get; set; } = [];
+    public long ParseFileMaxBytesSize { get; set; }
 }

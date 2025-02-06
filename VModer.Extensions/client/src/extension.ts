@@ -105,6 +105,7 @@ export async function activate(context: ExtensionContext) {
 		initializationOptions: {
 			"GameRootFolderPath": gameRootFolderPath,
 			"Blacklist": config.get<string[]>("VModer.Blacklist") || [],
+			"ParseFileMaxSize": config.get<number>("VModer.ParseFileMaxSize") || 2,
 		}
 	};
 

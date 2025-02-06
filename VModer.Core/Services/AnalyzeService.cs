@@ -65,12 +65,23 @@ public sealed class AnalyzeService(
             return Task.CompletedTask;
         }
 
+        int textSize = fileText.Length * 2;
+        if (textSize > settingsService.ParseFileMaxBytesSize)
+        {
+            return Task.CompletedTask;
+        }
+
         return AnalyzeFileAsync(filePath, fileText);
     }
 
     private Task AnalyzeFileFromFilePathAsync(string filePath)
     {
         if (settingsService.AnalysisBlackList.Contains(Path.GetFileName(filePath)))
+        {
+            return Task.CompletedTask;
+        }
+
+        if (new FileInfo(filePath).Length > settingsService.ParseFileMaxBytesSize)
         {
             return Task.CompletedTask;
         }

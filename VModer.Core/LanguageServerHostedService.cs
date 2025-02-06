@@ -78,10 +78,17 @@ public sealed class LanguageServerHostedService : IHostedService
                     c.InitializationOptions?.RootElement.GetProperty("Blacklist")
                         .EnumerateArray()
                         .Select(element => element.GetString() ?? string.Empty) ?? [];
+                // 传来的是 MB, 要转成 byte
+                long parseFileMaxBytesSize = (long)(
+                    (c.InitializationOptions?.RootElement.GetProperty("ParseFileMaxSize").GetDouble() ?? 0)
+                    * 1024
+                    * 1024
+                );
 
                 _settings.GameRootFolderPath = gameRootPath;
                 _settings.ModRootFolderPath = c.RootUri?.FileSystemPath ?? string.Empty;
                 _settings.AnalysisBlackList = blackList.ToFrozenSet(StringComparer.OrdinalIgnoreCase);
+                _settings.ParseFileMaxBytesSize = parseFileMaxBytesSize;
 
                 s.Name = "VModer";
                 s.Version = "1.0.0";

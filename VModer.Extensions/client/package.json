@@ -55,6 +55,12 @@
 						"startup_info.txt"
 					],
 					"description": "%VModer.Blacklist%"
+				},
+				"VModer.ParseFileMaxSize": {
+					"scope": "resource",
+					"type": "number",
+					"default": 2,
+					"description": "%VModer.ParseFileMaxSize%"
 				}
 			}
 		},
