@@ -4,4 +4,5 @@
         <type fullname="VModer.Core.Models.ModifierLocalizationFormatInfo" preserve="all"/>
     </assembly>
     <assembly fullname="CsvHelper" preserve="all"/>
+    <assembly fullname="Neo.Lua" preserve="all"/>
 </linker>

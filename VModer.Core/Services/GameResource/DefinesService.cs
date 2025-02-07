@@ -1,27 +1,30 @@
-﻿using System.Text;
-using NLua;
+﻿using Neo.IronLua;
 using VModer.Core.Infrastructure;
 using VModer.Core.Services.GameResource.Base;
 
 namespace VModer.Core.Services.GameResource;
 
 public sealed class DefinesService
-    : ResourcesService<DefinesService, (string FilePath, Lua Lua), (string FilePath, Lua Lua)>,
+    : ResourcesService<
+        DefinesService,
+        (string FilePath, Lua Lua, LuaGlobal LuaGlobal),
+        (string FilePath, Lua Lua, LuaGlobal LuaGlobal)
+    >,
         IDisposable
 {
-    private Lua[] SortedLua => _sortedLuaLazy.Value;
-    private readonly ResetLazy<Lua[]> _sortedLuaLazy;
+    private LuaGlobal[] SortedLua => _sortedLuaLazy.Value;
+    private readonly ResetLazy<LuaGlobal[]> _sortedLuaLazy;
 
     public DefinesService(GameResourcesPathService pathService)
         : base(Path.Combine(Keywords.Common, "defines"), WatcherFilter.Lua, PathType.Folder)
     {
-        _sortedLuaLazy = new ResetLazy<Lua[]>(
+        _sortedLuaLazy = new ResetLazy<LuaGlobal[]>(
             () =>
                 Resources
                     .Values.OrderByDescending(tuple =>
                         pathService.GetFilePathType(tuple.FilePath) == GameResourcesPathService.FileType.Mod
                     )
-                    .Select(tuple => tuple.Lua)
+                    .Select(tuple => tuple.LuaGlobal)
                     .ToArray()
         );
 
@@ -32,7 +35,8 @@ public sealed class DefinesService
     {
         foreach (var lua in SortedLua)
         {
-            object? value = lua[defineName];
+            // ReSharper disable once CoVariantArrayConversion
+            object? value = lua.GetValue(defineName.Split('.'));
             if (value is not null)
             {
                 return (T)value;
@@ -42,19 +46,21 @@ public sealed class DefinesService
         return default;
     }
 
-    protected override (string FilePath, Lua Lua) ParseFileToContent((string FilePath, Lua Lua) result)
+    protected override (string FilePath, Lua Lua, LuaGlobal LuaGlobal) ParseFileToContent(
+        (string FilePath, Lua Lua, LuaGlobal LuaGlobal) result
+    )
     {
         return result;
     }
 
-    protected override (string, Lua) GetParseResult(string filePath)
+    protected override (string, Lua, LuaGlobal) GetParseResult(string filePath)
     {
         var lua = new Lua();
-        lua.State.Encoding = Encoding.UTF8;
-        lua.DoString("NDefines = {}");
-        lua.DoFile(filePath);
+        var env = lua.CreateEnvironment();
+        env.DoChunk("NDefines = {}", "patch.lua");
+        env.DoChunk(filePath);
 
-        return (filePath, lua);
+        return (filePath, lua, env);
     }
 
     public void Dispose()
