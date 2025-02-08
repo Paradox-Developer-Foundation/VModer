@@ -35,15 +35,16 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
         var watcherService = App.Services.GetRequiredService<GameResourcesWatcherService>();
 
         bool isFolderPath = pathType == PathType.Folder;
-        var filePaths = isFolderPath
-            ? gameResourcesPathService.GetAllFilePriorModByRelativePathForFolder(
-                _folderOrFileRelativePath,
-                filter.Name
-            )
+        string[] filePaths = isFolderPath
+            ? gameResourcesPathService
+                .GetAllFilePriorModByRelativePathForFolder(_folderOrFileRelativePath, filter.Name)
+                .ToArray()
             : [gameResourcesPathService.GetFilePathPriorModByRelativePath(folderOrFileRelativePath)];
 
         // Resources 必须在使用 ParseFileAndAddToResources 之前初始化
-        Resources = new Dictionary<string, TContent>(filePaths.Count);
+        Resources = new Dictionary<string, TContent>(filePaths.Length);
+
+        SortFilePath(filePaths);
 
         foreach (string filePath in filePaths)
         {
@@ -57,9 +58,15 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
             this,
             filter.Name
         );
-        Log.Info("初始化资源成功: {FolderRelativePath}, 共 {Count} 个文件", _folderOrFileRelativePath, filePaths.Count);
+        Log.Info("初始化资源成功: {FolderRelativePath}, 共 {Count} 个文件", _folderOrFileRelativePath, filePaths.Length);
         LogItemsSum();
     }
+
+    /// <summary>
+    /// 当需要对传入的文件路径顺序进行排序时, 重写此方法
+    /// </summary>
+    /// <param name="filePathArray"></param>
+    protected virtual void SortFilePath(string[] filePathArray) { }
 
     [Conditional("DEBUG")]
     private void LogItemsSum()
@@ -67,7 +74,7 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
         if (typeof(IReadOnlyCollection<object>).IsAssignableFrom(typeof(TContent)))
         {
             Log.Debug(
-                "'{Path}'下已加载的资源数量: {Count}",
+                "已加载的资源数量: {Count}, Path: '{Path}'",
                 _folderOrFileRelativePath,
                 Resources.Values.Cast<IReadOnlyCollection<object>>().Sum(content => content.Count)
             );
@@ -114,7 +121,10 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
         if (Resources.Remove(folderOrFilePath))
         {
             Log.Info("移除 Mod 资源成功");
-            string relativeFilePath = Path.GetRelativePath(_settingService.ModRootFolderPath, folderOrFilePath);
+            string relativeFilePath = Path.GetRelativePath(
+                _settingService.ModRootFolderPath,
+                folderOrFilePath
+            );
 
             // 如果删除的mod资源在原版资源中存在, 移除mod资源, 添加原版资源
             string gameFilePath = Path.Combine(_settingService.GameRootFolderPath, relativeFilePath);

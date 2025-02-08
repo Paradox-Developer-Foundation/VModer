@@ -1,73 +1,76 @@
-﻿using Neo.IronLua;
-using VModer.Core.Infrastructure;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Neo.IronLua;
 using VModer.Core.Services.GameResource.Base;
 
 namespace VModer.Core.Services.GameResource;
 
-public sealed class DefinesService
-    : ResourcesService<
-        DefinesService,
-        (string FilePath, Lua Lua, LuaGlobal LuaGlobal),
-        (string FilePath, Lua Lua, LuaGlobal LuaGlobal)
-    >,
-        IDisposable
+// 使用 byte 是因为不需要分开存储各个文件中的变量, 而是集中在一个静态只读字段中, 使用 byte 只是为了最小化浪费内存
+public sealed class DefinesService : ResourcesService<DefinesService, byte, byte>, IDisposable
 {
-    private LuaGlobal[] SortedLua => _sortedLuaLazy.Value;
-    private readonly ResetLazy<LuaGlobal[]> _sortedLuaLazy;
+    private static readonly Lua GlobalLua = new();
+    private static readonly LuaGlobal GlobalEnv = GlobalLua.CreateEnvironment();
 
-    public DefinesService(GameResourcesPathService pathService)
-        : base(Path.Combine(Keywords.Common, "defines"), WatcherFilter.Lua, PathType.Folder)
+    public DefinesService()
+        : base(Path.Combine(Keywords.Common, "defines"), WatcherFilter.Lua, PathType.Folder) { }
+
+    protected override void SortFilePath(string[] filePathArray)
     {
-        _sortedLuaLazy = new ResetLazy<LuaGlobal[]>(
-            () =>
-                Resources
-                    .Values.OrderByDescending(tuple =>
-                        pathService.GetFilePathType(tuple.FilePath) == GameResourcesPathService.FileType.Mod
-                    )
-                    .Select(tuple => tuple.LuaGlobal)
-                    .ToArray()
-        );
+        var pathService = App.Services.GetRequiredService<GameResourcesPathService>();
 
-        OnResourceChanged += (_, _) => _sortedLuaLazy.Reset();
+        Array.Sort(
+            filePathArray,
+            (x, y) =>
+            {
+                int xPriority = GetFilePathPriority(x, pathService);
+                int yPriority = GetFilePathPriority(y, pathService);
+
+                return xPriority.CompareTo(yPriority);
+            }
+        );
+    }
+
+    private static int GetFilePathPriority(string filePath, GameResourcesPathService pathService)
+    {
+        if (Path.GetFileName(filePath).Equals("00_defines.lua", StringComparison.OrdinalIgnoreCase))
+        {
+            return 0;
+        }
+
+        var fileType = pathService.GetFilePathType(filePath);
+        if (fileType == GameResourcesPathService.FileType.Game)
+        {
+            return 1;
+        }
+
+        return 2;
     }
 
     public T? Get<T>(string defineName)
     {
-        foreach (var lua in SortedLua)
+        // ReSharper disable once CoVariantArrayConversion
+        object? value = GlobalEnv.GetValue(defineName.Split('.'));
+        if (value is not null)
         {
-            // ReSharper disable once CoVariantArrayConversion
-            object? value = lua.GetValue(defineName.Split('.'));
-            if (value is not null)
-            {
-                return (T)value;
-            }
+            return (T)value;
         }
 
         return default;
     }
 
-    protected override (string FilePath, Lua Lua, LuaGlobal LuaGlobal) ParseFileToContent(
-        (string FilePath, Lua Lua, LuaGlobal LuaGlobal) result
-    )
+    protected override byte ParseFileToContent(byte result)
     {
         return result;
     }
 
-    protected override (string, Lua, LuaGlobal) GetParseResult(string filePath)
+    protected override byte GetParseResult(string filePath)
     {
-        var lua = new Lua();
-        var env = lua.CreateEnvironment();
-        env.DoChunk("NDefines = {}", "patch.lua");
-        env.DoChunk(filePath);
+        GlobalEnv.DoChunk(filePath);
 
-        return (filePath, lua, env);
+        return 0;
     }
 
     public void Dispose()
     {
-        foreach (var value in Resources.Values)
-        {
-            value.Lua.Dispose();
-        }
+        GlobalLua.Dispose();
     }
 }
