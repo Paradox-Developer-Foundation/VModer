@@ -1,3 +1,12 @@
+## 0.4.2
+
+- feat: 添加游戏文本语言配置项, 此配置项决定扩展从 `Hearts of Iron IV\localisation`下的指定文件夹中读取文本
+- fix: 当分析未结束时触发查询时依然会结束分析状态显示
+- feat: 在不打开工作区时不启动服务端以防止扩展报错
+- feat: 配置项 RamQueryIntervalTime, ParseFileMaxSize 添加最小值
+  - RamQueryIntervalTime 最小值: 500
+  - ParseFileMaxSize 最小值: 0
+
 ## 0.4.1
 
 - fix: 当 Mod 改写 `common\defines` 文件夹下的内容时导致的扩展崩溃
