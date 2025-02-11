@@ -42,6 +42,7 @@
 					"scope": "resource",
 					"type": "number",
 					"default": 1500,
+					"minimum": 500,
 					"description": "%VModer.RamQueryIntervalTime%"
 				},
 				"VModer.Blacklist": {
@@ -60,6 +61,7 @@
 					"scope": "resource",
 					"type": "number",
 					"default": 2,
+					"minimum": 0,
 					"description": "%VModer.ParseFileMaxSize%"
 				}
 			}
