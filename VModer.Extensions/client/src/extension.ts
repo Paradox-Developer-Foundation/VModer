@@ -116,17 +116,26 @@ export async function activate(context: ExtensionContext) {
 		serverOptions,
 		clientOptions
 	);
+
 	client.onNotification("analyzeAllFilesStart", () => {
 		statusBarItem.text = "$(extensions-sync-enabled) VModer Analyzing";
 	});
 
-	client.start();
+	const isOpenWorkspace = workspace.workspaceFolders !== undefined;
+	if (isOpenWorkspace) {
+		client.start();
+		setInterval(() => {
+			updateStatusBarServerInfo(statusBarItem, client);
+		}, config.get<number>("VModer.RamQueryIntervalTime") || 1500);
+
+		client.info("VModer 服务端启动中...");
+	}
+	else {
+		client.info("未打开工作区, 无法启动 VModer 服务端");
+	}
 	statusBarItem.show();
 	updateStatusBarItem(statusBarItem, client);
 	context.subscriptions.push(client.onDidChangeState(() => updateStatusBarItem(statusBarItem, client)));
-	setInterval(() => {
-		updateStatusBarServerInfo(statusBarItem, client);
-	}, config.get<number>("VModer.RamQueryIntervalTime") || 1500);
 }
 
 async function updateStatusBarItem(statusBarItem: StatusBarItem, client: LanguageClient): Promise<void> {
