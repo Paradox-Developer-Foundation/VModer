@@ -2,11 +2,14 @@
 using System.Diagnostics;
 using System.Text.Json;
 using EmmyLua.LanguageServer.Framework.Protocol.JsonRpc;
+using EmmyLua.LanguageServer.Framework.Protocol.Message.Initialize;
 using EmmyLua.LanguageServer.Framework.Server;
+using EnumsNET;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NLog;
 using VModer.Core.Handlers;
+using VModer.Core.Models;
 using VModer.Core.Services;
 
 namespace VModer.Core;
@@ -71,25 +74,7 @@ public sealed class LanguageServerHostedService : IHostedService
             {
                 Log.Info("Language server initializing...");
 
-                string gameRootPath =
-                    c.InitializationOptions?.RootElement.GetProperty("GameRootFolderPath").GetString()
-                    ?? string.Empty;
-                var blackList =
-                    c.InitializationOptions?.RootElement.GetProperty("Blacklist")
-                        .EnumerateArray()
-                        .Select(element => element.GetString() ?? string.Empty) ?? [];
-                // 传来的是 MB, 要转成 byte
-                long parseFileMaxBytesSize = (long)(
-                    (c.InitializationOptions?.RootElement.GetProperty("ParseFileMaxSize").GetDouble() ?? 0)
-                    * 1024
-                    * 1024
-                );
-
-                _settings.GameRootFolderPath = gameRootPath;
-                _settings.ModRootFolderPath = c.RootUri?.FileSystemPath ?? string.Empty;
-                _settings.AnalysisBlackList = blackList.ToFrozenSet(StringComparer.OrdinalIgnoreCase);
-                _settings.ParseFileMaxBytesSize = parseFileMaxBytesSize;
-
+                InitialSettings(c);
                 s.Name = "VModer";
                 s.Version = "1.0.0";
 
@@ -142,6 +127,34 @@ public sealed class LanguageServerHostedService : IHostedService
         );
         Log.Info("Language server started.");
         return Task.CompletedTask;
+    }
+
+    private void InitialSettings(InitializeParams param)
+    {
+        string gameRootPath =
+            param.InitializationOptions?.RootElement.GetProperty("GameRootFolderPath").GetString()
+            ?? string.Empty;
+        var blackList =
+            param
+                .InitializationOptions?.RootElement.GetProperty("Blacklist")
+                .EnumerateArray()
+                .Select(element => element.GetString() ?? string.Empty) ?? [];
+        // 传来的是 MB, 要转成 byte
+        long parseFileMaxBytesSize = (long)(
+            (param.InitializationOptions?.RootElement.GetProperty("ParseFileMaxSize").GetDouble() ?? 0)
+            * 1024
+            * 1024
+        );
+        string gameLanguage =
+            param.InitializationOptions?.RootElement.GetProperty("GameLanguage").GetString() ?? string.Empty;
+
+        _settings.GameRootFolderPath = gameRootPath;
+        _settings.ModRootFolderPath = param.RootUri?.FileSystemPath ?? string.Empty;
+        _settings.AnalysisBlackList = blackList.ToFrozenSet(StringComparer.OrdinalIgnoreCase);
+        _settings.ParseFileMaxBytesSize = parseFileMaxBytesSize;
+        _settings.GameLanguage = Enums.TryParse<GameLanguage>(gameLanguage, true, out var gameLanguageEnum)
+            ? gameLanguageEnum
+            : GameLanguage.Default;
     }
 
     public Task StopAsync(CancellationToken cancellationToken)

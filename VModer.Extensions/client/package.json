@@ -63,6 +63,24 @@
 					"default": 2,
 					"minimum": 0,
 					"description": "%VModer.ParseFileMaxSize%"
+				},
+				"VModer.GameLocalizedLanguage": {
+					"scope": "resource",
+					"type": "string",
+					"enum": [
+						"default",
+						"english",
+						"chinese",
+						"french",
+						"german",
+						"japanese",
+						"polish",
+						"russian",
+						"spanish",
+						"portuguese"
+					],
+					"default": "default",
+					"description": "%VModer.GameLocalizedLanguage%"
 				}
 			}
 		},

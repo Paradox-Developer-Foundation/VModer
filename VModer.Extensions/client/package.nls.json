@@ -2,5 +2,6 @@
 	"VModer.GameRootPath": "The root path of HOI4 game folder.",
 	"VModer.RamQueryIntervalTime": "The interval time of querying RAM, Unit is millisecond.",
 	"VModer.Blacklist": "The list of file names that will not be analyzed.",
-	"VModer.ParseFileMaxSize": "The maximum size of file that will be parsed, Unit is MB."
+	"VModer.ParseFileMaxSize": "The maximum size of file that will be parsed, Unit is MB.",
+	"VModer.GameLocalizedLanguage": "The language of the game text."
 }
