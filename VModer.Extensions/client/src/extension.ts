@@ -12,6 +12,7 @@ import {
 import * as path from 'path';
 
 let client: LanguageClient;
+let analyzeAllFilesEnd = false;
 
 export async function activate(context: ExtensionContext) {
 
@@ -121,6 +122,10 @@ export async function activate(context: ExtensionContext) {
 		statusBarItem.text = "$(extensions-sync-enabled) VModer Analyzing";
 	});
 
+	client.onNotification("analyzeAllFilesEnd", () => {
+		analyzeAllFilesEnd = true;
+	});
+
 	const isOpenWorkspace = workspace.workspaceFolders !== undefined;
 	if (isOpenWorkspace) {
 		client.start();
@@ -150,7 +155,7 @@ async function updateStatusBarItem(statusBarItem: StatusBarItem, client: Languag
 }
 
 async function updateStatusBarServerInfo(statusBarItem: StatusBarItem, client: LanguageClient) {
-	if (client.isRunning()) {
+	if (client.isRunning() && analyzeAllFilesEnd) {
 		const info = await client.sendRequest("getRuntimeInfo");
 		const size: number = info["memoryUsedBytes"];
 		statusBarItem.text = "$(notebook-state-success) VModer RAM " + formatBytes(size);

@@ -114,6 +114,7 @@ public sealed class LanguageServerHostedService : IHostedService
                 .ContinueWith(
                     _ =>
                     {
+                        _server.SendNotification(new NotificationMessage("analyzeAllFilesEnd", null));
                         Log.Info("Language server initialized.");
                         _logger.Log("Language server initialized.");
                     },
