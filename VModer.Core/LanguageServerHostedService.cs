@@ -59,12 +59,7 @@ public sealed class LanguageServerHostedService : IHostedService
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        var handlers = new List<IHandler>
-        {
-            new TextDocumentHandler(),
-            new HoverHandler(),
-            new DocumentColorHandler()
-        };
+        List<IHandler> handlers = [new TextDocumentHandler(), new HoverHandler(), new DocumentColorHandler()];
         foreach (var handler in handlers)
         {
             _server.AddHandler(handler);
@@ -155,6 +150,8 @@ public sealed class LanguageServerHostedService : IHostedService
         _settings.GameLanguage = Enums.TryParse<GameLanguage>(gameLanguage, true, out var gameLanguageEnum)
             ? gameLanguageEnum
             : GameLanguage.Default;
+
+        Log.Info("Settings: {@Settings}", _settings);
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
