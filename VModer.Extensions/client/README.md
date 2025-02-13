@@ -59,6 +59,5 @@
 ## 赞助
 
 如果您觉得此扩展帮助了您, 可以通过爱发电请我喝一杯奶茶
-[爱发电链接](https://afdian.com/a/textGamex)
 
-![QR](https://www.helloimg.com/i/2025/01/14/67860b62b54f5.jpg)
+[爱发电(ID: textGamex)](https://afdian.com/a/textGamex)
