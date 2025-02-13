@@ -24,7 +24,7 @@ public static class LocalizationFormatParser
         ));
 
     private static readonly Parser<char, LocalizationFormatInfo> IconParser = Char('£')
-        .Then(Parser<char>.Any.Until(OneOf(Char(' '), Char('!'))))
+        .Then(Parser<char>.Any.Until(OneOf(Char(' '), Char('!'), Char('£'))))
         .Map(text => new LocalizationFormatInfo(string.Concat(text), LocalizationFormatType.Icon));
 
     private static readonly Parser<char, LocalizationFormatInfo> TextParser =
