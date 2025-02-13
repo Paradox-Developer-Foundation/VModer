@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using NLog;
 using VModer.Core.Models;
-using VModer.Core.Models.Character;
 using VModer.Core.Models.Modifiers;
 using VModer.Core.Services.GameResource.Localization;
 using VModer.Languages;
@@ -17,7 +16,6 @@ public sealed class ModifierDisplayService
     private readonly ModifierService _modifierService;
     private readonly TerrainService _terrainService;
     private readonly LocalizationKeyMappingService _localisationKeyMappingService;
-    private readonly CharacterSkillService _characterSkillService;
 
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
@@ -26,8 +24,7 @@ public sealed class ModifierDisplayService
         LocalizationService localizationService,
         ModifierService modifierService,
         LocalizationKeyMappingService localisationKeyMappingService,
-        TerrainService terrainService,
-        CharacterSkillService characterSkillService
+        TerrainService terrainService
     )
     {
         _localisationFormatService = localisationFormatService;
@@ -35,25 +32,6 @@ public sealed class ModifierDisplayService
         _modifierService = modifierService;
         _localisationKeyMappingService = localisationKeyMappingService;
         _terrainService = terrainService;
-        _characterSkillService = characterSkillService;
-    }
-
-    public IEnumerable<string> GetSkillModifierDescription(
-        SkillType skillType,
-        SkillCharacterType skillCharacterType,
-        ushort level
-    )
-    {
-        var skillModifier = _characterSkillService
-            .Skills.FirstOrDefault(skill => skill.SkillType == skillType)
-            ?.GetModifierDescription(skillCharacterType, level);
-
-        if (skillModifier is null || skillModifier.Modifiers.Count == 0)
-        {
-            return [];
-        }
-
-        return GetDescription(skillModifier.Modifiers);
     }
 
     /// <summary>

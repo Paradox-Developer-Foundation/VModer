@@ -24,6 +24,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
     private readonly LeaderTraitsService _leaderTraitsService;
     private readonly LocalizationFormatService _localizationFormatService;
     private readonly CharacterTraitsService _characterTraitsService;
+    private readonly CharacterSkillService _characterSkillService;
 
     private const int CharacterTypeLevel = 3;
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
@@ -34,7 +35,8 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         LeaderTraitsService leaderTraitsService,
         CharacterTraitsService characterTraitsService,
         LocalizationFormatService localizationFormatService,
-        ModifierService modifierService
+        ModifierService modifierService,
+        CharacterSkillService characterSkillService
     )
     {
         _localizationService = localizationService;
@@ -43,6 +45,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         _characterTraitsService = characterTraitsService;
         _localizationFormatService = localizationFormatService;
         _modifierService = modifierService;
+        _characterSkillService = characterSkillService;
     }
 
     public string GetHoverText(Node rootNode, HoverParams request)
@@ -192,11 +195,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         var skillType = SkillCharacterType.FromCharacterType(node.Key);
         foreach (
             string skillInfo in skillSet.SelectMany(kvp =>
-                _modifierDisplayService.GetSkillModifierDescription(
-                    SkillType.FromValue(kvp.Key),
-                    skillType,
-                    kvp.Value
-                )
+                GetSkillModifierDescription(SkillType.FromValue(kvp.Key), skillType, kvp.Value)
             )
         )
         {
@@ -204,6 +203,24 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         }
 
         return builder.ToString();
+    }
+
+    private IEnumerable<string> GetSkillModifierDescription(
+        SkillType skillType,
+        SkillCharacterType skillCharacterType,
+        ushort level
+    )
+    {
+        var skillModifier = _characterSkillService
+            .Skills.FirstOrDefault(skill => skill.SkillType == skillType)
+            ?.GetModifierDescription(skillCharacterType, level);
+
+        if (skillModifier is null || skillModifier.Modifiers.Count == 0)
+        {
+            return [];
+        }
+
+        return _modifierDisplayService.GetDescription(skillModifier.Modifiers);
     }
 
     private static string GetGeneralTypeName(string nodeKey)
