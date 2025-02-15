@@ -28,7 +28,7 @@ public static class LocalizationFormatParser
         .Map(text => new LocalizationFormatInfo(string.Concat(text), LocalizationFormatType.Icon));
 
     private static readonly Parser<char, LocalizationFormatInfo> TextParser =
-        from text in Try(String("$$").WithResult('$')).Or(AnyCharExcept('$', '§')).AtLeastOnceString()
+        from text in Try(String("$$").WithResult('$')).Or(AnyCharExcept('$', '§', '£')).AtLeastOnceString()
         select new LocalizationFormatInfo(text, LocalizationFormatType.Text);
 
     private static readonly Parser<char, IEnumerable<LocalizationFormatInfo>> LocalizationTextParser =
