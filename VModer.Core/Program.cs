@@ -60,6 +60,7 @@ builder.Services.AddSingleton<GameResourcesPathService>();
 builder.Services.AddSingleton<GameModDescriptorService>();
 builder.Services.AddSingleton<GameFilesService>();
 builder.Services.AddSingleton<GameResourcesWatcherService>();
+builder.Services.AddSingleton<ImageService>();
 
 // 语言服务
 builder.Services.AddSingleton<AnalyzeService>();
@@ -94,6 +95,7 @@ builder.Services.AddSingleton<CharacterTraitsService>();
 builder.Services.AddSingleton<LeaderTraitsService>();
 builder.Services.AddSingleton<IdeologiesService>();
 builder.Services.AddSingleton<DefinesService>();
+builder.Services.AddSingleton<SpriteService>();
 
 builder.Services.AddHostedService<LanguageServerHostedService>();
 

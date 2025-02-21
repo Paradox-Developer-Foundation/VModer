@@ -64,11 +64,6 @@ public static class ParserExtensions
         return null;
     }
 
-    public static string PrintRaw(this Node node)
-    {
-        return CKPrinter.PrettyPrintStatement(node.ToRaw);
-    }
-    
     public static DocumentRange ToDocumentRange(this Position.Range position)
     {
         return new DocumentRange(
@@ -77,7 +72,27 @@ public static class ParserExtensions
                 position.StartLine - 1,
                 position.StartColumn
             ),
-            new EmmyLua.LanguageServer.Framework.Protocol.Model.Position(position.EndLine - 1, position.EndColumn)
+            new EmmyLua.LanguageServer.Framework.Protocol.Model.Position(
+                position.EndLine - 1,
+                position.EndColumn
+            )
         );
+    }
+
+    public static bool TryGetIntCast(this Types.Value value, out int result)
+    {
+        if (value.TryGetInt(out result))
+        {
+            return true;
+        }
+
+        if (value.TryGetDecimal(out decimal decimalValue))
+        {
+            result = (int)decimalValue;
+            return true;
+        }
+
+        result = 0;
+        return false;
     }
 }

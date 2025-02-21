@@ -1,5 +1,4 @@
-﻿using EmmyLua.LanguageServer.Framework.Protocol.Model;
-using ParadoxPower.Process;
+﻿using ParadoxPower.Process;
 using VModer.Core.Models;
 
 namespace VModer.Core.Extensions;

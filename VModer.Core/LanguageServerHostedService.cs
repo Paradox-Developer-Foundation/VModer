@@ -142,6 +142,8 @@ public sealed class LanguageServerHostedService : IHostedService
         );
         string gameLanguage =
             param.InitializationOptions?.RootElement.GetProperty("GameLanguage").GetString() ?? string.Empty;
+        string extensionPath =
+            param.InitializationOptions?.RootElement.GetProperty("ExtensionPath").GetString() ?? string.Empty;
 
         _settings.GameRootFolderPath = gameRootPath;
         _settings.ModRootFolderPath = param.RootUri?.FileSystemPath ?? string.Empty;
@@ -150,6 +152,7 @@ public sealed class LanguageServerHostedService : IHostedService
         _settings.GameLanguage = Enums.TryParse<GameLanguage>(gameLanguage, true, out var gameLanguageEnum)
             ? gameLanguageEnum
             : GameLanguage.Default;
+        _settings.ExtensionPath = extensionPath;
 
         Log.Info("Settings: {@Settings}", _settings);
     }

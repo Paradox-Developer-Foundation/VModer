@@ -14,6 +14,10 @@ import * as path from 'path';
 let client: LanguageClient;
 let analyzeAllFilesEnd = false;
 
+// function getWebviewContent(context: ExtensionContext) {
+// 	return fs.readFileSync(path.join(context.extensionPath, 'src', 'views', 'traitsView.html'), 'utf-8');
+// }
+
 export async function activate(context: ExtensionContext) {
 
 	const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Right, 100000);
@@ -21,6 +25,17 @@ export async function activate(context: ExtensionContext) {
 		const dirPath = path.dirname(command);
 		commands.executeCommand('revealFileInOS', Uri.file(path.join(dirPath, "Logs")));
 	});
+	// const openTraitsView = commands.registerCommand('vmoder.openTraitsView', () => {
+	// 	const panel = window.createWebviewPanel(
+	// 		'traitsView',
+	// 		'特质查询',
+	// 		ViewColumn.One,
+	// 		{}
+	// 	);
+
+	// 	panel.webview.html = getWebviewContent(context);
+	// });
+
 	context.subscriptions.push(openLogs, statusBarItem);
 
 	let serverOptions: ServerOptions;
@@ -108,6 +123,7 @@ export async function activate(context: ExtensionContext) {
 			"Blacklist": config.get<string[]>("VModer.Blacklist") || [],
 			"ParseFileMaxSize": config.get<number>("VModer.ParseFileMaxSize") || 2,
 			"GameLanguage": config.get<string>("VModer.GameLocalizedLanguage") || "default",
+			"ExtensionPath": context.extensionPath
 		}
 	};
 

@@ -47,7 +47,9 @@
       <PackageReference Include="NLog.Extensions.Logging" Version="5.4.0" />
       <PackageReference Include="ParadoxPower" Version="0.8.5-beta" />
       <PackageReference Include="ParadoxPower.CSharpExtensions" Version="0.4.0-beta" />
+      <PackageReference Include="Pfim" Version="0.11.3" />
       <PackageReference Include="Pidgin" Version="3.3.0" />
+      <PackageReference Include="SixLabors.ImageSharp" Version="3.1.6" />
     </ItemGroup>
 
     <ItemGroup>

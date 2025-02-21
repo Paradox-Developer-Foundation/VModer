@@ -7,7 +7,10 @@ namespace VModer.Core.Services.GameResource.Localization;
 
 public sealed class LocalizationFormatService(
     LocalizationTextColorsService localizationTextColorsService,
-    LocalizationService localizationService
+    LocalizationService localizationService,
+    ImageService imageService,
+    SpriteService spriteService,
+    GameResourcesPathService pathService
 )
 {
     /// <summary>
@@ -82,7 +85,29 @@ public sealed class LocalizationFormatService(
                     // 尝试当成本地化键处理
                     result.Add(new TextFormatInfo(localizationService.GetValue(format.Text), Color.Black));
                 }
-                else if (format.Type != LocalizationFormatType.Icon)
+                else if (format.Type == LocalizationFormatType.Icon)
+                {
+                    short frame = 1;
+                    string[] frameStr = format.Text.Split('|');
+                    if (frameStr.Length > 1)
+                    {
+                        frame = (short)(short.TryParse(frameStr[1], out short frameResult) ? frameResult : 1);
+                    }
+                    string spriteName = $"GFX_{frameStr[0]}";
+
+                    // icon 都为此格式
+                    if (
+                        imageService.TryGetLocalImagePathBySpriteName(
+                            spriteName,
+                            frame,
+                            out string? imagePath
+                        ) && !string.IsNullOrEmpty(imagePath)
+                    )
+                    {
+                        result.Add(new TextFormatInfo($"![icon]({imagePath}) ", Color.Black));
+                    }
+                }
+                else
                 {
                     result.Add(GetColorText(format));
                 }
