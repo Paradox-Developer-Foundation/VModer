@@ -60,12 +60,12 @@ builder.Services.AddSingleton<GameResourcesPathService>();
 builder.Services.AddSingleton<GameModDescriptorService>();
 builder.Services.AddSingleton<GameFilesService>();
 builder.Services.AddSingleton<GameResourcesWatcherService>();
+builder.Services.AddSingleton<ImageService>();
 
 // 语言服务
 builder.Services.AddSingleton<AnalyzeService>();
 builder.Services.AddSingleton<StateAnalyzerService>();
 builder.Services.AddSingleton<CharacterAnalyzerService>();
-builder.Services.AddSingleton<CompletionService>();
 builder.Services.AddSingleton<EditorDiagnosisService>();
 builder.Services.AddSingleton<DocumentColorService>();
 builder.Services.AddSingleton<ServerLoggerService>();
@@ -79,8 +79,6 @@ builder.Services.AddSingleton<IHoverStrategy, CountriesDefineHoverStrategy>();
 
 // 游戏资源服务
 builder.Services.AddSingleton<LocalizationService>();
-builder.Services.AddSingleton<CountryTagService>();
-builder.Services.AddSingleton<OreService>();
 builder.Services.AddSingleton<BuildingsService>();
 builder.Services.AddSingleton<LocalizationKeyMappingService>();
 builder.Services.AddSingleton<LocalizationFormatService>();
@@ -90,10 +88,10 @@ builder.Services.AddSingleton<ModifierService>();
 builder.Services.AddSingleton<LocalizationTextColorsService>();
 builder.Services.AddSingleton<CharacterSkillService>();
 builder.Services.AddSingleton<ModiferLocalizationFormatService>();
-builder.Services.AddSingleton<CharacterTraitsService>();
+builder.Services.AddSingleton<GeneralTraitsService>();
 builder.Services.AddSingleton<LeaderTraitsService>();
-builder.Services.AddSingleton<IdeologiesService>();
 builder.Services.AddSingleton<DefinesService>();
+builder.Services.AddSingleton<SpriteService>();
 
 builder.Services.AddHostedService<LanguageServerHostedService>();
 

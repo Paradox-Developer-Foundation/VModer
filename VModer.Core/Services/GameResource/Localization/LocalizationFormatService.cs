@@ -7,7 +7,8 @@ namespace VModer.Core.Services.GameResource.Localization;
 
 public sealed class LocalizationFormatService(
     LocalizationTextColorsService localizationTextColorsService,
-    LocalizationService localizationService
+    LocalizationService localizationService,
+    ImageService imageService
 )
 {
     /// <summary>
@@ -61,32 +62,15 @@ public sealed class LocalizationFormatService(
     /// 现支持
     /// 1. 文本颜色格式
     /// 2. 对其他本地化键的引用
+    /// 3. Icon 引用
     /// </remarks>
     public IReadOnlyCollection<TextFormatInfo> GetFormatTextInfo(string text)
     {
         var result = new List<TextFormatInfo>(4);
 
-        // TODO: 修饰符显示内置的 icon
         if (LocalizationFormatParser.TryParse(text, out var formats))
         {
-            foreach (var format in formats)
-            {
-                if (format.Type == LocalizationFormatType.Placeholder)
-                {
-                    // 一般来说, 包含管道符或文本为 VALUE | VAL 的为格式说明字符串, 不需要处理
-                    if (format.Text.Contains('|') || format.Text == "VALUE" || format.Text == "VAL")
-                    {
-                        continue;
-                    }
-
-                    // 尝试当成本地化键处理
-                    result.Add(new TextFormatInfo(localizationService.GetValue(format.Text), Color.Black));
-                }
-                else if (format.Type != LocalizationFormatType.Icon)
-                {
-                    result.Add(GetColorText(format));
-                }
-            }
+            ParseFormatToList(formats, result);
         }
         else
         {
@@ -96,12 +80,58 @@ public sealed class LocalizationFormatService(
         return result;
     }
 
+    private void ParseFormatToList(IEnumerable<LocalizationFormatInfo> formats, List<TextFormatInfo> result)
+    {
+        foreach (var format in formats)
+        {
+            if (format.Type == LocalizationFormatType.Placeholder)
+            {
+                // 一般来说, 包含管道符或文本为 VALUE | VAL 的为格式说明字符串, 不需要处理
+                if (format.Text.Contains('|') || format.Text == "VALUE" || format.Text == "VAL")
+                {
+                    continue;
+                }
+
+                // 尝试当成本地化键处理
+                result.Add(new TextFormatInfo(localizationService.GetValue(format.Text), Color.Black));
+            }
+            else if (format.Type == LocalizationFormatType.Icon)
+            {
+                ParseIcon(format, result);
+            }
+            else
+            {
+                result.Add(GetColorText(format));
+            }
+        }
+    }
+
+    private void ParseIcon(LocalizationFormatInfo format, List<TextFormatInfo> result)
+    {
+        int frame = 1;
+        string[] frameStr = format.Text.Split('|');
+        if (frameStr.Length > 1 && int.TryParse(frameStr[1], out int frameResult))
+        {
+            frame = Math.Max(1, frameResult);
+        }
+        // icon 都为此格式
+        string spriteName = $"GFX_{frameStr[0]}";
+
+        if (
+            imageService.TryGetLocalImagePathBySpriteName(spriteName, (short)frame, out string? imagePath)
+            && !string.IsNullOrEmpty(imagePath)
+        )
+        {
+            result.Add(new TextFormatInfo($"![icon]({imagePath})", Color.Black));
+        }
+    }
+
     /// <summary>
     /// 尝试将文本解析为 <see cref="TextFormatInfo"/>, 并使用 <see cref="LocalizationFormatInfo"/> 中指定的颜色, 如果颜色不存在, 则使用默认颜色
     /// </summary>
     /// <param name="format">文本格式信息</param>
     /// <returns></returns>
-    public TextFormatInfo GetColorText(LocalizationFormatInfo format)
+    private TextFormatInfo GetColorText(LocalizationFormatInfo format)
     {
         if (format.Type == LocalizationFormatType.TextWithColor)
         {

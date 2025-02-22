@@ -10,4 +10,5 @@ public sealed class SettingsService
     public GameLanguage GameLanguage { get; set; } = GameLanguage.Default;
     public FrozenSet<string> AnalysisBlackList { get; set; } = [];
     public long ParseFileMaxBytesSize { get; set; }
+    public string ExtensionPath { get; set; } = string.Empty;
 }

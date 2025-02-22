@@ -87,9 +87,24 @@
 		"commands": [
 			{
 				"command": "vmoder.openLogs",
+				"category": "VModer",
 				"title": "Open VModer Logs Folder"
+			},
+			{
+				"command": "vmoder.openTraitsView",
+				"title": "Open Traits Search Panel",
+				"category": "VModer",
+				"icon": "$(file-symlink-file)"
 			}
-		]
+		],
+		"menus": {
+			"editor/title": [
+				{
+					"command": "vmoder.openTraitsView",
+					"group": "navigation"
+				}
+			]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
