@@ -1,4 +1,5 @@
 ﻿using System.Collections.Frozen;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using MethodTimer;
 using ParadoxPower.CSharpExtensions;
@@ -86,6 +87,7 @@ public sealed class SpriteService
                 && leaf.Value.TryGetIntCast(out int frameSumValue)
             )
             {
+                Debug.Assert(frameSumValue <= short.MaxValue);
                 frameSum = (short)frameSumValue;
             }
         }
