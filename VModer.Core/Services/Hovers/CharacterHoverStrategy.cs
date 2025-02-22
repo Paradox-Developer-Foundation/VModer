@@ -23,8 +23,9 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
     private readonly ModifierDisplayService _modifierDisplayService;
     private readonly LeaderTraitsService _leaderTraitsService;
     private readonly LocalizationFormatService _localizationFormatService;
-    private readonly CharacterTraitsService _characterTraitsService;
+    private readonly GeneralTraitsService _generalTraitsService;
     private readonly CharacterSkillService _characterSkillService;
+    private readonly ImageService _imageService;
 
     private const int CharacterTypeLevel = 3;
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
@@ -33,19 +34,21 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         LocalizationService localizationService,
         ModifierDisplayService modifierDisplayService,
         LeaderTraitsService leaderTraitsService,
-        CharacterTraitsService characterTraitsService,
+        GeneralTraitsService generalTraitsService,
         LocalizationFormatService localizationFormatService,
         ModifierService modifierService,
-        CharacterSkillService characterSkillService
+        CharacterSkillService characterSkillService,
+        ImageService imageService
     )
     {
         _localizationService = localizationService;
         _modifierDisplayService = modifierDisplayService;
         _leaderTraitsService = leaderTraitsService;
-        _characterTraitsService = characterTraitsService;
+        _generalTraitsService = generalTraitsService;
         _localizationFormatService = localizationFormatService;
         _modifierService = modifierService;
         _characterSkillService = characterSkillService;
+        _imageService = imageService;
     }
 
     public string GetHoverText(Node rootNode, HoverParams request)
@@ -165,11 +168,11 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         return result;
     }
 
-    private string GetGeneralDisplayText(Node node)
+    private string GetGeneralDisplayText(Node generalNode)
     {
         var builder = new MarkdownDocument();
 
-        builder.AppendHeader(GetGeneralTypeName(node.Key), CharacterTypeLevel);
+        builder.AppendHeader(GetGeneralTypeName(generalNode.Key), CharacterTypeLevel);
 
         var skillSet = SkillType.List.ToDictionary(
             type => type.Value,
@@ -177,7 +180,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
             StringComparer.OrdinalIgnoreCase
         );
 
-        foreach (var child in node.AllArray)
+        foreach (var child in generalNode.AllArray)
         {
             if (child.TryGetLeaf(out var leaf))
             {
@@ -192,7 +195,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
             }
         }
 
-        var skillType = SkillCharacterType.FromCharacterType(node.Key);
+        var skillType = SkillCharacterType.FromCharacterType(generalNode.Key);
         foreach (
             string skillInfo in skillSet.SelectMany(kvp =>
                 GetSkillModifierDescription(SkillType.FromValue(kvp.Key), skillType, kvp.Value)
@@ -272,7 +275,12 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         foreach (string traitKey in traits)
         {
             // 有可能需要解引用
-            builder.AppendListItem(_localizationFormatService.GetFormatText(traitKey));
+            string traitName = _localizationFormatService.GetFormatText(traitKey);
+            if (_imageService.TryGetLocalImagePathBySpriteName($"GFX_trait_{traitKey}", out string? imageUri))
+            {
+                traitName = $"![icon]({imageUri}){traitName}";
+            }
+            builder.AppendListItem(traitName);
 
             var modifiers = GetTraitModifiersByType(traitKey, type);
             var infos = _modifierDisplayService.GetDescription(modifiers);
@@ -284,10 +292,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
                 );
             }
 
-            if (
-                type != LookUpTraitType.Leader
-                && _characterTraitsService.TryGetTrait(traitKey, out var trait)
-            )
+            if (type != LookUpTraitType.Leader && _generalTraitsService.TryGetTrait(traitKey, out var trait))
             {
                 foreach (var modifier in trait.TraitXpModifiers.OfType<LeafModifier>())
                 {
@@ -308,7 +313,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         {
             case LookUpTraitType.All:
             {
-                _characterTraitsService.TryGetTrait(traitKey, out var trait);
+                _generalTraitsService.TryGetTrait(traitKey, out var trait);
                 if (trait is not null)
                 {
                     return trait.AllModifiers;
@@ -319,7 +324,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
             }
             case LookUpTraitType.General:
             {
-                _characterTraitsService.TryGetTrait(traitKey, out var trait);
+                _generalTraitsService.TryGetTrait(traitKey, out var trait);
                 return trait?.AllModifiers ?? [];
             }
             case LookUpTraitType.Leader:

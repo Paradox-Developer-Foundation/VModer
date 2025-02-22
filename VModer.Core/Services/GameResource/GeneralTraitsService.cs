@@ -13,8 +13,8 @@ using VModer.Core.Services.GameResource.Localization;
 
 namespace VModer.Core.Services.GameResource;
 
-public sealed class CharacterTraitsService
-    : CommonResourcesService<CharacterTraitsService, FrozenDictionary<string, CharacterTrait>>
+public sealed class GeneralTraitsService
+    : CommonResourcesService<GeneralTraitsService, FrozenDictionary<string, CharacterTrait>>
 {
     public IEnumerable<CharacterTrait> GetAllTraits() => _allTraitsLazy.Value;
 
@@ -56,8 +56,8 @@ public sealed class CharacterTraitsService
         "coordination_skill_factor"
     ];
 
-    [Time("加载人物特质")]
-    public CharacterTraitsService(LocalizationService localizationService)
+    [Time("加载将领特质")]
+    public GeneralTraitsService(LocalizationService localizationService)
         : base(Path.Combine(Keywords.Common, "unit_leader"), WatcherFilter.Text)
     {
         _localizationService = localizationService;

@@ -55,20 +55,39 @@ public sealed class ImageService
     /// 尝试获取精灵的图片 Uri, 如果格式不支持, 则转化为 Png 后返回 Png 图片的Uri
     /// </summary>
     /// <param name="spriteName"></param>
+    /// <param name="localImageUri"></param>
+    /// <returns></returns>
+    public bool TryGetLocalImagePathBySpriteName(
+        string spriteName,
+        [NotNullWhen(true)] out string? localImageUri
+    )
+    {
+        if (TryGetLocalImagePathBySpriteName(spriteName, 1, out localImageUri))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// 尝试获取精灵的图片 Uri, 如果格式不支持, 则转化为 Png 后返回 Png 图片的Uri
+    /// </summary>
+    /// <param name="spriteName"></param>
     /// <param name="frame">需要的图片帧数, 不需要切割时应为 1</param>
-    /// <param name="localImagePath"></param>
+    /// <param name="localImageUri"></param>
     /// <returns></returns>
     public bool TryGetLocalImagePathBySpriteName(
         string spriteName,
         short frame,
-        [NotNullWhen(true)] out string? localImagePath
+        [NotNullWhen(true)] out string? localImageUri
     )
     {
         if (_spriteService.TryGetSpriteInfo(spriteName, out var spriteInfo))
         {
             try
             {
-                localImagePath = GetLocalImagePath(
+                localImageUri = GetLocalImageUri(
                     _pathService.GetFilePathPriorModByRelativePath(spriteInfo.RelativePath),
                     spriteInfo.TotalFrames,
                     frame
@@ -77,14 +96,14 @@ public sealed class ImageService
             catch (Exception e)
             {
                 Log.Error(e, "获取本地图片路径失败: {Name}", spriteName);
-                localImagePath = null;
+                localImageUri = null;
                 return false;
             }
 
             return true;
         }
 
-        localImagePath = null;
+        localImageUri = null;
         return false;
     }
 
@@ -96,7 +115,7 @@ public sealed class ImageService
     /// <param name="frame"></param>
     /// <exception cref="ArgumentException">图片转换失败, <c>totalFrames</c> 参数错误</exception>
     /// <returns></returns>
-    private string GetLocalImagePath(string imagePath, short totalFrames, short frame)
+    private string GetLocalImageUri(string imagePath, short totalFrames, short frame)
     {
         Debug.Assert(totalFrames > 0 && frame > 0);
 

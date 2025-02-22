@@ -88,7 +88,7 @@ builder.Services.AddSingleton<ModifierService>();
 builder.Services.AddSingleton<LocalizationTextColorsService>();
 builder.Services.AddSingleton<CharacterSkillService>();
 builder.Services.AddSingleton<ModiferLocalizationFormatService>();
-builder.Services.AddSingleton<CharacterTraitsService>();
+builder.Services.AddSingleton<GeneralTraitsService>();
 builder.Services.AddSingleton<LeaderTraitsService>();
 builder.Services.AddSingleton<DefinesService>();
 builder.Services.AddSingleton<SpriteService>();
