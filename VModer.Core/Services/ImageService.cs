@@ -89,7 +89,7 @@ public sealed class ImageService
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="imagePath"></param>
     /// <param name="totalFrames"></param>
@@ -98,7 +98,7 @@ public sealed class ImageService
     /// <returns></returns>
     private string GetLocalImagePath(string imagePath, short totalFrames, short frame)
     {
-        Debug.Assert(totalFrames > 0);
+        Debug.Assert(totalFrames > 0 && frame > 0);
 
         string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(imagePath);
         if (_localImages.TryGetValue(fileNameWithoutExtension, out string? localImagePath))
