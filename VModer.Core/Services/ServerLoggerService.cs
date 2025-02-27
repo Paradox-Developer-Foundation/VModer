@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using EmmyLua.LanguageServer.Framework.Protocol.JsonRpc;
 using EmmyLua.LanguageServer.Framework.Protocol.Message.Client.ShowMessage;
@@ -9,11 +8,6 @@ namespace VModer.Core.Services;
 
 public sealed class ServerLoggerService(LanguageServer server)
 {
-    [UnconditionalSuppressMessage(
-        "Trimming",
-        "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
-        Justification = "<Pending>"
-    )]
     public void Log(string message)
     {
         server.SendNotification(
@@ -21,20 +15,13 @@ public sealed class ServerLoggerService(LanguageServer server)
                 "window/logMessage",
                 JsonSerializer.SerializeToDocument(
                     new LogMessageParams { Type = MessageType.Log, Message = message },
-                    JsonSerializerOptions
+                    JsonProtocolContext.Default.LogMessageParams
                 )
             )
         );
     }
 
-    private static readonly JsonSerializerOptions JsonSerializerOptions =
-        new()
-        {
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            TypeInfoResolver = JsonProtocolContext.Default
-        };
-
-    public class LogMessageParams
+    public sealed class LogMessageParams
     {
         [JsonPropertyName("type")]
         public MessageType Type { get; set; }
