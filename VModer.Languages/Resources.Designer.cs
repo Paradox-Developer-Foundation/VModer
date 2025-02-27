@@ -114,6 +114,15 @@ namespace VModer.Languages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 清理成功.
+        /// </summary>
+        public static string CleanupSuccessful {
+            get {
+                return ResourceManager.GetString("CleanupSuccessful", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 意识形态.
         /// </summary>
         public static string Ideology {

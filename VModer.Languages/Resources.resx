@@ -48,4 +48,7 @@
     <data name="TraitXpFactor" xml:space="preserve">
         <value>经验值系数</value>
     </data>
+    <data name="CleanupSuccessful" xml:space="preserve">
+        <value>清理成功</value>
+    </data>
 </root>

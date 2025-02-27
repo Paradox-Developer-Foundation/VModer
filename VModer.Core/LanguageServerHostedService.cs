@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Text.Json;
 using EmmyLua.LanguageServer.Framework.Protocol.JsonRpc;
+using EmmyLua.LanguageServer.Framework.Protocol.Message.Client.ShowMessage;
 using EmmyLua.LanguageServer.Framework.Protocol.Message.Initialize;
 using EmmyLua.LanguageServer.Framework.Server;
 using EnumsNET;
@@ -11,6 +12,7 @@ using NLog;
 using VModer.Core.Handlers;
 using VModer.Core.Models;
 using VModer.Core.Services;
+using VModer.Languages;
 
 namespace VModer.Core;
 
@@ -20,6 +22,7 @@ public sealed class LanguageServerHostedService : IHostedService
     private readonly SettingsService _settings;
     private readonly LanguageServer _server;
     private readonly ServerLoggerService _logger;
+    private readonly IServiceProvider _serviceProvider;
     private readonly Process _currentProcess = Process.GetCurrentProcess();
 
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
@@ -28,15 +31,18 @@ public sealed class LanguageServerHostedService : IHostedService
         IHostApplicationLifetime lifetime,
         SettingsService settings,
         LanguageServer server,
-        ServerLoggerService logger
+        ServerLoggerService logger,
+        IServiceProvider serviceProvider
     )
     {
         _lifetime = lifetime;
         _settings = settings;
         _server = server;
         _logger = logger;
+        _serviceProvider = serviceProvider;
 
         _server.AddRequestHandler("getRuntimeInfo", GetRuntimeInfoAsync);
+        _server.AddNotificationHandler("clearImageCache", ClearLocalImageCacheAsync);
     }
 
     private Task<JsonDocument?> GetRuntimeInfoAsync(
@@ -52,6 +58,37 @@ public sealed class LanguageServerHostedService : IHostedService
                 long memoryUsedBytes = _currentProcess.PrivateMemorySize64;
                 var document = JsonDocument.Parse($"{{\"memoryUsedBytes\": {memoryUsedBytes}}}");
                 return document;
+            },
+            cancellationToken
+        );
+    }
+
+    private Task ClearLocalImageCacheAsync(
+        NotificationMessage notificationMessage,
+        CancellationToken cancellationToken
+    )
+    {
+        return Task.Run(
+            () =>
+            {
+                Log.Info("开始清理本地图片缓存.");
+                try
+                {
+                    _serviceProvider.GetRequiredService<ImageService>().ClearCache();
+                    _server.Client.ShowMessage(
+                        new ShowMessageParams { Type = MessageType.Info, Message = Resources.CleanupSuccessful }
+                    );
+                }
+                catch (Exception e)
+                {
+                    const string message = "清理本地图片缓存失败.";
+
+                    _server.Client.ShowMessage(
+                        new ShowMessageParams { Type = MessageType.Error, Message = message }
+                    );
+                    Log.Error(e, message);
+                    _logger.Log(message);
+                }
             },
             cancellationToken
         );

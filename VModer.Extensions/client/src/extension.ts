@@ -157,7 +157,10 @@ export async function activate(context: ExtensionContext) {
 	}
 	statusBarItem.show();
 	updateStatusBarItem(statusBarItem, client);
-	context.subscriptions.push(client.onDidChangeState(() => updateStatusBarItem(statusBarItem, client)));
+	const clearImageCache = commands.registerCommand('vmoder.clearImageCache', () => {
+		client.sendNotification("clearImageCache");
+	});
+	context.subscriptions.push(client.onDidChangeState(() => updateStatusBarItem(statusBarItem, client)), clearImageCache);
 }
 
 async function updateStatusBarItem(statusBarItem: StatusBarItem, client: LanguageClient): Promise<void> {

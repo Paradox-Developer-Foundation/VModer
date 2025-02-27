@@ -19,6 +19,7 @@ public sealed class ImageService
     /// <summary>
     /// 键为不带扩展名的文件名, 值为图片路径
     /// </summary>
+    //TODO: 有问题, 重名文件, 存储spriteName
     private readonly Dictionary<string, string> _localImages = new();
     private const string CacheFolderPath = "local_image_cache";
 
@@ -48,7 +49,7 @@ public sealed class ImageService
             _localImages.Add(Path.GetFileNameWithoutExtension(filePath), filePath);
         }
 
-        Log.Info("本地图片缓存: {Count}", count);
+        Log.Info("本地图片缓存数量: {Count}", count);
     }
 
     /// <summary>
@@ -68,6 +69,21 @@ public sealed class ImageService
         }
 
         return false;
+    }
+
+    public void ClearCache()
+    {
+        _localImages.Clear();
+        foreach (string file in Directory.EnumerateFiles(_cachePath))
+        {
+            File.Delete(file);
+        }
+
+        // 删除所有子文件夹及其内容
+        foreach (string subfolder in Directory.EnumerateDirectories(_cachePath))
+        {
+            Directory.Delete(subfolder, true);
+        }
     }
 
     /// <summary>

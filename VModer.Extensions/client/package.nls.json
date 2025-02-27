@@ -3,5 +3,7 @@
 	"VModer.RamQueryIntervalTime": "The interval time of querying RAM, Unit is millisecond.",
 	"VModer.Blacklist": "The list of file names that will not be analyzed.",
 	"VModer.ParseFileMaxSize": "The maximum size of file that will be parsed, Unit is MB.",
-	"VModer.GameLocalizedLanguage": "The language of the game text."
+	"VModer.GameLocalizedLanguage": "The language of the game text.",
+	"vmoder.openLogsTitle": "Open VModer log folder",
+	"vmoder.clearImageCacheTitle": "Clear local image cache"
 }

@@ -88,13 +88,18 @@
 			{
 				"command": "vmoder.openLogs",
 				"category": "VModer",
-				"title": "Open VModer Logs Folder"
+				"title": "%vmoder.openLogsTitle%"
 			},
 			{
 				"command": "vmoder.openTraitsView",
 				"title": "Open Traits Search Panel",
 				"category": "VModer",
 				"icon": "$(file-symlink-file)"
+			},
+			{
+				"command": "vmoder.clearImageCache",
+				"title": "%vmoder.clearImageCacheTitle%",
+				"category": "VModer"
 			}
 		],
 		"menus": {

@@ -3,5 +3,7 @@
 	"VModer.RamQueryIntervalTime": "查询内存使用情况的间隔时间, 单位为毫秒.",
 	"VModer.Blacklist": "不会进行分析的文件名列表.",
 	"VModer.ParseFileMaxSize": "将被解析的文件的最大大小, 单位为 MB.",
-	"VModer.GameLocalizedLanguage": "游戏文本的语言. 决定扩展从哪个语言文件夹读取文本."
+	"VModer.GameLocalizedLanguage": "游戏文本的语言. 决定扩展从哪个语言文件夹读取文本.",
+	"vmoder.openLogsTitle": "打开 VModer 日志文件夹",
+	"vmoder.clearImageCacheTitle": "清除本地图片缓存"
 }

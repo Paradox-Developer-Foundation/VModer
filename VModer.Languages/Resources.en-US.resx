@@ -41,4 +41,7 @@
     <data name="TraitXpFactor" xml:space="preserve">
         <value>experience factor</value>
     </data>
+    <data name="CleanupSuccessful" xml:space="preserve">
+        <value>Cleanup successful</value>
+    </data>
 </root>
