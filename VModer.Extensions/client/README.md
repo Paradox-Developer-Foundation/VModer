@@ -4,6 +4,12 @@
 
 ---
 
+## 赞助
+
+如果您觉得此扩展帮助了您, 可以通过爱发电请我喝一杯奶茶, 这有助于我持续开发此扩展
+
+[爱发电(ID: textGamex)](https://afdian.com/a/textGamex)
+
 ![license](https://img.shields.io/github/license/textGamex/Vmoder?style=for-the-badge&color=blue)
 [![star](https://img.shields.io/github/stars/textGamex/vmoder?style=for-the-badge)](https://github.com/textGamex/VModer)
 ![language](https://img.shields.io/badge/Language-CSharp-blue?style=for-the-badge)
@@ -55,9 +61,3 @@
 
 - 建筑等级分析
 - Character 技能等级分析
-
-## 赞助
-
-如果您觉得此扩展帮助了您, 可以通过爱发电请我喝一杯奶茶
-
-[爱发电(ID: textGamex)](https://afdian.com/a/textGamex)

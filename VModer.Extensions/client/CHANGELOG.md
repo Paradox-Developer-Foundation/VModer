@@ -1,3 +1,12 @@
+## 0.5.0
+
+- feat: 支持显示本地化中的 Icon
+- feat: 支持显示将领特质 Icon
+- feat: 添加清理本地图片缓存命令
+- feat: 支持显示 hidden_modifier 下的修饰符, 此前会显示多余的 `hidden_modifier:`
+- fix: 部分情况下无法正确识别字符串中的Icon部分
+- i18n: 一些本地化工作
+
 ## 0.4.2
 
 - feat: 添加游戏文本语言配置项, 此配置项决定扩展从 `Hearts of Iron IV\localisation`下的指定文件夹中读取文本
