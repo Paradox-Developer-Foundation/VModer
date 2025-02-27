@@ -145,6 +145,12 @@ public sealed class ModifierDisplayService
             return GetEquipmentModifierDescription(nodeModifier);
         }
 
+        if (nodeModifier.Key.Equals(Keywords.HiddenModifier, StringComparison.OrdinalIgnoreCase))
+        {
+            // 直接展开 hidden_modifier 节点下的修饰符
+            return nodeModifier.Leaves.Select(GetDescriptionForLeaf).ToList();
+        }
+
         return GetDescriptionForUnknownNode(nodeModifier);
     }
 
