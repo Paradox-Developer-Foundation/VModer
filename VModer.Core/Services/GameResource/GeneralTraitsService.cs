@@ -6,6 +6,7 @@ using MethodTimer;
 using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
 using VModer.Core.Extensions;
+using VModer.Core.Infrastructure;
 using VModer.Core.Models.Character;
 using VModer.Core.Models.Modifiers;
 using VModer.Core.Services.GameResource.Base;
@@ -16,9 +17,9 @@ namespace VModer.Core.Services.GameResource;
 public sealed class GeneralTraitsService
     : CommonResourcesService<GeneralTraitsService, FrozenDictionary<string, CharacterTrait>>
 {
-    public IEnumerable<CharacterTrait> GetAllTraits() => _allTraitsLazy.Value;
+    public IReadOnlyCollection<CharacterTrait> GetAllTraits() => _allTraitsLazy.Value;
 
-    private Lazy<IEnumerable<CharacterTrait>> _allTraitsLazy;
+    private readonly ResetLazy<CharacterTrait[]> _allTraitsLazy;
     private readonly LocalizationService _localizationService;
     private Dictionary<string, FrozenDictionary<string, CharacterTrait>>.ValueCollection Traits =>
         Resources.Values;
@@ -62,12 +63,11 @@ public sealed class GeneralTraitsService
     {
         _localizationService = localizationService;
 
-        _allTraitsLazy = GetAllTraitsLazy();
-        OnResourceChanged += (_, _) => _allTraitsLazy = GetAllTraitsLazy();
+        _allTraitsLazy = new ResetLazy<CharacterTrait[]>(
+            () => Traits.SelectMany(trait => trait.Values).ToArray()
+        );
+        OnResourceChanged += (_, _) => _allTraitsLazy.Reset();
     }
-
-    private Lazy<IEnumerable<CharacterTrait>> GetAllTraitsLazy() =>
-        new(() => Traits.SelectMany(trait => trait.Values).ToArray());
 
     public bool TryGetTrait(string name, [NotNullWhen(true)] out CharacterTrait? trait)
     {
