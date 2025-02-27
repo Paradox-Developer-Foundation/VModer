@@ -115,9 +115,6 @@ export async function activate(context: ExtensionContext) {
 	// 控制语言客户端的选项
 	const clientOptions: LanguageClientOptions = {
 		documentSelector: [{ scheme: 'file', language: 'hoi4' }],
-		synchronize: {
-			fileEvents: [workspace.createFileSystemWatcher('**/*.txt')],
-		},
 		initializationOptions: {
 			"GameRootFolderPath": gameRootFolderPath,
 			"Blacklist": config.get<string[]>("VModer.Blacklist") || [],
