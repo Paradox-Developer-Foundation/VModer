@@ -10,7 +10,7 @@ namespace VModer.Core.Services.GameResource;
 public sealed class BuildingsService
     : CommonResourcesService<BuildingsService, FrozenDictionary<string, BuildingInfo>>
 {
-    private Dictionary<string, FrozenDictionary<string, BuildingInfo>>.ValueCollection Buildings =>
+    private ICollection<FrozenDictionary<string, BuildingInfo>> Buildings =>
         Resources.Values;
     private const string BuildingsKeyword = "buildings";
 

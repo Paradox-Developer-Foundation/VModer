@@ -12,7 +12,7 @@ namespace VModer.Core.Services.GameResource.Localization;
 public sealed class LocalizationService
     : ResourcesService<LocalizationService, FrozenDictionary<string, string>, YAMLLocalisationParser.LocFile>
 {
-    private Dictionary<string, FrozenDictionary<string, string>>.ValueCollection Localisations =>
+    private ICollection<FrozenDictionary<string, string>> Localisations =>
         Resources.Values;
     private readonly LocalizationKeyMappingService _localizationKeyMapping;
 
@@ -24,7 +24,8 @@ public sealed class LocalizationService
                 App.Services.GetRequiredService<SettingsService>().GameLanguage.ToGameLocalizationLanguage()
             ),
             WatcherFilter.LocalizationFiles,
-            PathType.Folder
+            PathType.Folder,
+            true
         )
     {
         _localizationKeyMapping = localizationKeyMapping;

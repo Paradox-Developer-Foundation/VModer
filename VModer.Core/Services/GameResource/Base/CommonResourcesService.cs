@@ -11,9 +11,10 @@ public abstract class CommonResourcesService<TType, TContent> : ResourcesService
     protected CommonResourcesService(
         string folderOrFileRelativePath,
         WatcherFilter filter,
-        PathType pathType = PathType.Folder
+        PathType pathType = PathType.Folder,
+        bool isAsyncLoading = false
     )
-        : base(folderOrFileRelativePath, filter, pathType) { }
+        : base(folderOrFileRelativePath, filter, pathType, isAsyncLoading) { }
 
     ///<inheritdoc />
     protected abstract override TContent? ParseFileToContent(Node rootNode);

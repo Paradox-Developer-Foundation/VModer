@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
@@ -12,7 +13,7 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
     /// <summary>
     /// key: 文件路径, value: 文件内资源内容
     /// </summary>
-    protected readonly Dictionary<string, TContent> Resources;
+    protected readonly IDictionary<string, TContent> Resources;
     protected readonly Logger Log;
 
     private readonly SettingsService _settingService;
@@ -25,7 +26,13 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
     /// <param name="folderOrFileRelativePath">文件夹或文件的相对路径</param>
     /// <param name="filter">过滤条件</param>
     /// <param name="pathType"><c>folderOrFileRelativePath</c>的类型</param>
-    protected ResourcesService(string folderOrFileRelativePath, WatcherFilter filter, PathType pathType)
+    /// <param name="isAsyncLoading">是否多线程加载资源, 子类需要确保重写的方法是线程安全的</param>
+    protected ResourcesService(
+        string folderOrFileRelativePath,
+        WatcherFilter filter,
+        PathType pathType,
+        bool isAsyncLoading = false
+    )
     {
         _folderOrFileRelativePath = folderOrFileRelativePath;
         Log = LogManager.GetLogger(typeof(TType).FullName);
@@ -42,13 +49,23 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
             : [gameResourcesPathService.GetFilePathPriorModByRelativePath(folderOrFileRelativePath)];
 
         // Resources 必须在使用 ParseFileAndAddToResources 之前初始化
-        Resources = new Dictionary<string, TContent>(filePaths.Length);
-
-        SortFilePath(filePaths);
-
-        foreach (string filePath in filePaths)
+        if (isAsyncLoading)
         {
-            ParseFileAndAddToResources(filePath);
+            Resources = new ConcurrentDictionary<string, TContent>();
+        }
+        else
+        {
+            Resources = new Dictionary<string, TContent>(filePaths.Length);
+        }
+
+        if (isAsyncLoading)
+        {
+            ParseFileAndAddToResourcesAsync(filePaths);
+        }
+        else
+        {
+            SortFilePath(filePaths);
+            ParseFileAndAddToResourcesSync(filePaths);
         }
 
         watcherService.Watch(
@@ -63,10 +80,28 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
     }
 
     /// <summary>
-    /// 当需要对传入的文件路径顺序进行排序时, 重写此方法
+    /// 当需要对传入的文件路径顺序进行排序时, 重写此方法, 在多线程加载资源时不调用.
     /// </summary>
     /// <param name="filePathArray"></param>
     protected virtual void SortFilePath(string[] filePathArray) { }
+
+    private void ParseFileAndAddToResourcesAsync(string[] filePaths)
+    {
+        var tasks = new List<Task>();
+        foreach (string filePath in filePaths)
+        {
+            tasks.Add(Task.Run(() => ParseFileAndAddToResources(filePath)));
+        }
+        Task.WaitAll(tasks);
+    }
+
+    private void ParseFileAndAddToResourcesSync(string[] filePaths)
+    {
+        foreach (string filePath in filePaths)
+        {
+            ParseFileAndAddToResources(filePath);
+        }
+    }
 
     [Conditional("DEBUG")]
     private void LogItemsSum()

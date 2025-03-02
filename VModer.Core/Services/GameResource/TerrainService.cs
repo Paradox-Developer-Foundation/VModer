@@ -11,7 +11,7 @@ namespace VModer.Core.Services.GameResource;
 /// </summary>
 public sealed class TerrainService : CommonResourcesService<TerrainService, FrozenSet<string>>
 {
-    private Dictionary<string, FrozenSet<string>>.ValueCollection Terrains => Resources.Values;
+    private ICollection<FrozenSet<string>> Terrains => Resources.Values;
 
     /// <summary>
     /// 未在文件中定义的地形

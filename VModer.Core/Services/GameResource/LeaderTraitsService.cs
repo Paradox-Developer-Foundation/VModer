@@ -14,7 +14,7 @@ public sealed class LeaderTraitsService()
         WatcherFilter.Text
     )
 {
-    private Dictionary<string, FrozenDictionary<string, LeaderTrait>>.ValueCollection Traits =>
+    private ICollection<FrozenDictionary<string, LeaderTrait>> Traits =>
         Resources.Values;
 
     public bool TryGetValue(string traitName, [NotNullWhen(true)] out LeaderTrait? trait)
