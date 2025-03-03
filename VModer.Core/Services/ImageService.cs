@@ -17,9 +17,8 @@ public sealed class ImageService
     private readonly GameResourcesPathService _pathService;
 
     /// <summary>
-    /// 键为spriteName, 值为图片路径
+    /// 键为 spriteName, 当有 frame 参数时 spriteName^frame, 则为, 值为图片绝对路径
     /// </summary>
-    // BUG: 多帧读取有大问题, frame参数不生效
     private readonly Dictionary<string, string> _localImages = new();
     private const string CacheFolderPath = "local_image_cache";
 
@@ -135,9 +134,11 @@ public sealed class ImageService
     /// <returns>图片的本地Uri</returns>
     private string GetLocalImageUri(string spriteName, string imagePath, short totalFrames, short frame)
     {
-        Debug.Assert(totalFrames > 0 && frame > 0);
+        CheckFrame(totalFrames, frame);
 
-        if (_localImages.TryGetValue(spriteName, out string? localImagePath))
+        string queryKey =
+            totalFrames == 1 ? spriteName : GetMultipleFrameImageFileNameWithoutExtension(spriteName, frame);
+        if (_localImages.TryGetValue(queryKey, out string? localImagePath))
         {
             return new Uri(localImagePath).ToString();
         }
@@ -152,7 +153,7 @@ public sealed class ImageService
         )
         {
             string outputPath = ConvertToPng(spriteName, imagePath, totalFrames, frame);
-            _localImages.Add(spriteName, outputPath);
+            _localImages.Add(queryKey, outputPath);
             imageUri = new Uri(outputPath);
 
             Log.Debug("{RawName} 转换为 {Name}", Path.GetFileName(imagePath), Path.GetFileName(outputPath));
@@ -170,6 +171,16 @@ public sealed class ImageService
         }
 
         return imageUri.ToString();
+    }
+
+    [Conditional("DEBUG")]
+    private static void CheckFrame(int totalFrames, int frame)
+    {
+        Debug.Assert(totalFrames > 0 && frame > 0);
+        if (totalFrames == 1)
+        {
+            Debug.Assert(frame == 1);
+        }
     }
 
     private string ConvertToPng(string spriteName, string filePath, short totalFrames, short frame)
@@ -293,8 +304,19 @@ public sealed class ImageService
     {
         string outputPath = Path.Combine(
             _cachePath,
-            $"{spriteName}^{frame.ToString(CultureInfo.InvariantCulture)}.png"
+            $"{GetMultipleFrameImageFileNameWithoutExtension(spriteName, frame)}.png"
         );
         return outputPath;
+    }
+
+    /// <summary>
+    /// 获取多帧图片文件名, 不包含扩展名
+    /// </summary>
+    /// <param name="spriteName"></param>
+    /// <param name="frame"></param>
+    /// <returns></returns>
+    private static string GetMultipleFrameImageFileNameWithoutExtension(string spriteName, int frame)
+    {
+        return $"{spriteName}^{frame.ToString(CultureInfo.InvariantCulture)}";
     }
 }
