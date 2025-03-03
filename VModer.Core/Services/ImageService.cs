@@ -17,9 +17,9 @@ public sealed class ImageService
     private readonly GameResourcesPathService _pathService;
 
     /// <summary>
-    /// 键为不带扩展名的文件名, 值为图片路径
+    /// 键为spriteName, 值为图片路径
     /// </summary>
-    //TODO: 有问题, 重名文件, 存储spriteName
+    // BUG: 多帧读取有大问题, frame参数不生效
     private readonly Dictionary<string, string> _localImages = new();
     private const string CacheFolderPath = "local_image_cache";
 
@@ -52,6 +52,21 @@ public sealed class ImageService
         Log.Info("本地图片缓存数量: {Count}", count);
     }
 
+    public void ClearCache()
+    {
+        _localImages.Clear();
+        foreach (string file in Directory.EnumerateFiles(_cachePath))
+        {
+            File.Delete(file);
+        }
+
+        // 删除所有子文件夹及其内容
+        foreach (string subfolder in Directory.EnumerateDirectories(_cachePath))
+        {
+            Directory.Delete(subfolder, true);
+        }
+    }
+
     /// <summary>
     /// 尝试获取精灵的图片 Uri, 如果格式不支持, 则转化为 Png 后返回 Png 图片的Uri
     /// </summary>
@@ -69,21 +84,6 @@ public sealed class ImageService
         }
 
         return false;
-    }
-
-    public void ClearCache()
-    {
-        _localImages.Clear();
-        foreach (string file in Directory.EnumerateFiles(_cachePath))
-        {
-            File.Delete(file);
-        }
-
-        // 删除所有子文件夹及其内容
-        foreach (string subfolder in Directory.EnumerateDirectories(_cachePath))
-        {
-            Directory.Delete(subfolder, true);
-        }
     }
 
     /// <summary>
@@ -104,6 +104,7 @@ public sealed class ImageService
             try
             {
                 localImageUri = GetLocalImageUri(
+                    spriteName,
                     _pathService.GetFilePathPriorModByRelativePath(spriteInfo.RelativePath),
                     spriteInfo.TotalFrames,
                     frame
@@ -126,22 +127,23 @@ public sealed class ImageService
     /// <summary>
     ///
     /// </summary>
-    /// <param name="imagePath"></param>
+    /// <param name="imagePath">游戏图片资源绝对路径</param>
     /// <param name="totalFrames"></param>
     /// <param name="frame"></param>
+    /// <param name="spriteName"></param>
     /// <exception cref="ArgumentException">图片转换失败, <c>totalFrames</c> 参数错误</exception>
-    /// <returns></returns>
-    private string GetLocalImageUri(string imagePath, short totalFrames, short frame)
+    /// <returns>图片的本地Uri</returns>
+    private string GetLocalImageUri(string spriteName, string imagePath, short totalFrames, short frame)
     {
         Debug.Assert(totalFrames > 0 && frame > 0);
 
-        string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(imagePath);
-        if (_localImages.TryGetValue(fileNameWithoutExtension, out string? localImagePath))
+        if (_localImages.TryGetValue(spriteName, out string? localImagePath))
         {
             return new Uri(localImagePath).ToString();
         }
 
-        Log.Debug("未在缓存中找到图片: {Name}", fileNameWithoutExtension);
+        Log.Debug("未在缓存中找到图片: {Name}", spriteName);
+
         Uri imageUri;
         var imageExtension = Path.GetExtension(imagePath.AsSpan());
         if (
@@ -149,10 +151,11 @@ public sealed class ImageService
             || imageExtension.Equals(".tga", StringComparison.OrdinalIgnoreCase)
         )
         {
-            string outputPath = ConvertToPng(imagePath, totalFrames, frame);
-            Log.Debug("{RawName} 转换为 {Name}", Path.GetFileName(imagePath), Path.GetFileName(outputPath));
-            _localImages.Add(fileNameWithoutExtension, outputPath);
+            string outputPath = ConvertToPng(spriteName, imagePath, totalFrames, frame);
+            _localImages.Add(spriteName, outputPath);
             imageUri = new Uri(outputPath);
+
+            Log.Debug("{RawName} 转换为 {Name}", Path.GetFileName(imagePath), Path.GetFileName(outputPath));
         }
         else if (
             imageExtension.Equals(".png", StringComparison.OrdinalIgnoreCase)
@@ -169,7 +172,7 @@ public sealed class ImageService
         return imageUri.ToString();
     }
 
-    private string ConvertToPng(string filePath, short totalFrames, short frame)
+    private string ConvertToPng(string spriteName, string filePath, short totalFrames, short frame)
     {
         using var image = Pfimage.FromFile(filePath);
         byte[] newData;
@@ -190,10 +193,45 @@ public sealed class ImageService
             newData = image.Data;
         }
 
-        return SaveAsPng(filePath, image, newData, totalFrames, frame);
+        return SaveAsPng(spriteName, GetImageByFormat(image, newData), totalFrames, frame);
     }
 
-    private string SaveAsPng(string filePath, IImage image, byte[] newData, short totalFrames, short frame)
+    private string SaveAsPng(string spriteName, Image image, short totalFrames, short frame)
+    {
+        string outputPath;
+        if (totalFrames == 1)
+        {
+            outputPath = GetSingleFrameImagePath(spriteName);
+            image.SaveAsPng(outputPath);
+        }
+        else
+        {
+            outputPath = GetMultipleFrameImagePath(spriteName, frame);
+            // 计算每帧宽度
+            int frameWidth = image.Width / totalFrames;
+            if (frameWidth * totalFrames != image.Width)
+            {
+                throw new ArgumentException("图像宽度必须能被总帧数整除，当前宽度: " + $"{image.Width}, 总帧数: {totalFrames}");
+            }
+
+            // 遍历每一帧
+            for (int i = 0; i < totalFrames; i++)
+            {
+                // 计算裁剪区域
+                int x = i * frameWidth;
+                var cropRect = new Rectangle(x, 0, frameWidth, image.Height);
+
+                // 裁剪并保存
+                using var frameImage = image.Clone(ctx => ctx.Crop(cropRect));
+                frameImage.SaveAsPng(GetMultipleFrameImagePath(spriteName, i));
+            }
+        }
+
+        image.Dispose();
+        return outputPath;
+    }
+
+    private static Image GetImageByFormat(IImage image, byte[] newData)
     {
         Image data;
         switch (image.Format)
@@ -242,51 +280,20 @@ public sealed class ImageService
                 throw new Exception($"ImageSharp does not recognize image format: {image.Format}");
         }
 
-        string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(filePath);
-        string outputPath;
-        if (totalFrames == 1)
-        {
-            outputPath = GetSingleFrameImagePath(fileNameWithoutExtension);
-            data.SaveAsPng(outputPath);
-        }
-        else
-        {
-            outputPath = GetMultipleFrameImagePath(fileNameWithoutExtension, frame);
-            // 计算每帧宽度
-            int frameWidth = data.Width / totalFrames;
-            if (frameWidth * totalFrames != data.Width)
-            {
-                throw new ArgumentException("图像宽度必须能被总帧数整除，当前宽度: " + $"{data.Width}, 总帧数: {totalFrames}");
-            }
-
-            // 遍历每一帧
-            for (int i = 0; i < totalFrames; i++)
-            {
-                // 计算裁剪区域
-                int x = i * frameWidth;
-                var cropRect = new Rectangle(x, 0, frameWidth, data.Height);
-
-                // 裁剪并保存
-                using var frameImage = data.Clone(ctx => ctx.Crop(cropRect));
-                frameImage.SaveAsPng(GetMultipleFrameImagePath(fileNameWithoutExtension, i));
-            }
-        }
-
-        data.Dispose();
-        return outputPath;
+        return data;
     }
 
-    private string GetSingleFrameImagePath(string fileNameWithoutExtension)
+    private string GetSingleFrameImagePath(string spriteName)
     {
-        string outputPath = Path.Combine(_cachePath, $"{fileNameWithoutExtension}.png");
+        string outputPath = Path.Combine(_cachePath, $"{spriteName}.png");
         return outputPath;
     }
 
-    private string GetMultipleFrameImagePath(string fileNameWithoutExtension, int frame)
+    private string GetMultipleFrameImagePath(string spriteName, int frame)
     {
         string outputPath = Path.Combine(
             _cachePath,
-            $"{fileNameWithoutExtension}^{frame.ToString(CultureInfo.InvariantCulture)}.png"
+            $"{spriteName}^{frame.ToString(CultureInfo.InvariantCulture)}.png"
         );
         return outputPath;
     }
