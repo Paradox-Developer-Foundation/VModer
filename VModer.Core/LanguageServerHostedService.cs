@@ -1,6 +1,7 @@
 ﻿using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using EmmyLua.LanguageServer.Framework.Protocol.JsonRpc;
 using EmmyLua.LanguageServer.Framework.Protocol.Message.Client.ShowMessage;
 using EmmyLua.LanguageServer.Framework.Protocol.Message.Initialize;
@@ -9,12 +10,18 @@ using EnumsNET;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NLog;
+using VModer.Core.Dto;
 using VModer.Core.Handlers;
 using VModer.Core.Models;
 using VModer.Core.Services;
+using VModer.Core.Services.GameResource;
 using VModer.Languages;
 
 namespace VModer.Core;
+
+[JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Metadata)]
+[JsonSerializable(typeof(List<TraitDto>))]
+internal partial class TraitContext : JsonSerializerContext;
 
 public sealed class LanguageServerHostedService : IHostedService
 {
@@ -43,6 +50,23 @@ public sealed class LanguageServerHostedService : IHostedService
 
         _server.AddRequestHandler("getRuntimeInfo", GetRuntimeInfoAsync);
         _server.AddNotificationHandler("clearImageCache", ClearLocalImageCacheAsync);
+        _server.AddRequestHandler("getAllTrait", GetAllTraitAsync);
+    }
+
+    private Task<JsonDocument?> GetAllTraitAsync(RequestMessage message, CancellationToken token)
+    {
+        return Task.Run<JsonDocument?>(
+            () =>
+            {
+                var traits = _serviceProvider.GetRequiredService<GeneralTraitsService>().GetAllTraitDto();
+                var value = JsonSerializer.SerializeToDocument(
+                    traits,
+                    TraitContext.Default.ListTraitDto
+                );
+                return value;
+            },
+            token
+        );
     }
 
     private Task<JsonDocument?> GetRuntimeInfoAsync(
@@ -76,7 +100,11 @@ public sealed class LanguageServerHostedService : IHostedService
                 {
                     _serviceProvider.GetRequiredService<ImageService>().ClearCache();
                     _server.Client.ShowMessage(
-                        new ShowMessageParams { Type = MessageType.Info, Message = Resources.CleanupSuccessful }
+                        new ShowMessageParams
+                        {
+                            Type = MessageType.Info,
+                            Message = Resources.CleanupSuccessful
+                        }
                     );
                 }
                 catch (Exception e)

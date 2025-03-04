@@ -4,3 +4,4 @@ client/server
 .vscode-test
 
 local_image_cache/
+dist/

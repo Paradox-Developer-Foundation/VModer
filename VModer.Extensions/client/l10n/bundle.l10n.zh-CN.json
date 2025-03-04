@@ -1,5 +1,13 @@
 {
-	"SelectGameRootPath": "请选择游戏根目录.",
-	"SelectFolder": "选择文件夹",
-	"MustRestart": "您必须重新启动才能使更改生效."
+  "SelectGameRootPath": "请选择游戏根目录.",
+  "SelectFolder": "选择文件夹",
+  "MustRestart": "您必须重新启动才能使更改生效.",
+  "TraitsView.Search": "搜索",
+  "TraitsView.SearchButton": "搜索",
+  "TraitsView.Origin": "来源:",
+  "TraitsView.All": "全部",
+  "TraitsView.GameOnly": "仅游戏",
+  "TraitsView.ModOnly": "仅模组",
+  "TraitsView.TraitType": "特质类型:",
+  "TraitsView.Title": "人物特质查询"
 }

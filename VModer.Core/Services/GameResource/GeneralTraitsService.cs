@@ -5,24 +5,25 @@ using System.Runtime.InteropServices;
 using MethodTimer;
 using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
+using VModer.Core.Dto;
 using VModer.Core.Extensions;
 using VModer.Core.Infrastructure;
 using VModer.Core.Models.Character;
 using VModer.Core.Models.Modifiers;
 using VModer.Core.Services.GameResource.Base;
 using VModer.Core.Services.GameResource.Localization;
+using VModer.Core.Services.GameResource.Modifiers;
 
 namespace VModer.Core.Services.GameResource;
 
 public sealed class GeneralTraitsService
     : CommonResourcesService<GeneralTraitsService, FrozenDictionary<string, CharacterTrait>>
 {
-    public IReadOnlyCollection<CharacterTrait> GetAllTraits() => _allTraitsLazy.Value;
-
     private readonly ResetLazy<CharacterTrait[]> _allTraitsLazy;
-    private readonly LocalizationService _localizationService;
-    private Dictionary<string, FrozenDictionary<string, CharacterTrait>>.ValueCollection Traits =>
-        Resources.Values;
+    private readonly LocalizationFormatService _localizationFormatService;
+    private readonly ModifierDisplayService _modifierDisplayService;
+    private readonly GameResourcesPathService _gameResourcesPathService;
+    private ICollection<FrozenDictionary<string, CharacterTrait>> Traits => Resources.Values;
 
     /// <summary>
     /// 特质修饰符节点名称
@@ -58,15 +59,50 @@ public sealed class GeneralTraitsService
     ];
 
     [Time("加载将领特质")]
-    public GeneralTraitsService(LocalizationService localizationService)
+    public GeneralTraitsService(
+        LocalizationFormatService localizationFormatService,
+        ModifierDisplayService modifierDisplayService,
+        GameResourcesPathService gameResourcesPathService
+    )
         : base(Path.Combine(Keywords.Common, "unit_leader"), WatcherFilter.Text)
     {
-        _localizationService = localizationService;
+        _localizationFormatService = localizationFormatService;
+        _modifierDisplayService = modifierDisplayService;
+        _gameResourcesPathService = gameResourcesPathService;
 
         _allTraitsLazy = new ResetLazy<CharacterTrait[]>(
             () => Traits.SelectMany(trait => trait.Values).ToArray()
         );
         OnResourceChanged += (_, _) => _allTraitsLazy.Reset();
+    }
+
+    [Time("获取所有将领特质")]
+    public List<TraitDto> GetAllTraitDto()
+    {
+        var traits = new List<TraitDto>(Resources.Sum(dic => dic.Value.Count));
+
+        foreach (var fileResource in Resources)
+        {
+            var fileOrigin = _gameResourcesPathService.GetFileOrigin(fileResource.Key);
+            foreach (var trait in fileResource.Value.Select(item => item.Value))
+            {
+                traits.Add(
+                    new TraitDto
+                    {
+                        Name = trait.Name,
+                        LocalizedName = GetLocalizationName(trait),
+                        Modifiers = string.Join(
+                            '\n',
+                            _modifierDisplayService.GetDescription(trait.AllModifiers)
+                        ),
+                        FileOrigin = fileOrigin,
+                        Type = trait.Type
+                    }
+                );
+            }
+        }
+
+        return traits;
     }
 
     public bool TryGetTrait(string name, [NotNullWhen(true)] out CharacterTrait? trait)
@@ -83,9 +119,9 @@ public sealed class GeneralTraitsService
         return false;
     }
 
-    public string GetLocalizationName(CharacterTrait characterTrait)
+    private string GetLocalizationName(CharacterTrait characterTrait)
     {
-        return _localizationService.GetValue(characterTrait.Name);
+        return _localizationFormatService.GetFormatText(characterTrait.Name);
     }
 
     protected override FrozenDictionary<string, CharacterTrait>? ParseFileToContent(Node rootNode)

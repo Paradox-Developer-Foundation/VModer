@@ -26,7 +26,7 @@
 	"activationEvents": [
 		"onLanguage:hoi4"
 	],
-	"main": "./out/extension",
+	"main": "./dist/extension/extension.js",
 	"contributes": {
 		"configuration": {
 			"type": "object",
@@ -92,7 +92,7 @@
 			},
 			{
 				"command": "vmoder.openTraitsView",
-				"title": "Open Traits Search Panel",
+				"title": "%vmoder.openTraitsViewTitle%",
 				"category": "VModer",
 				"icon": "$(file-symlink-file)"
 			},
@@ -112,26 +112,32 @@
 		}
 	},
 	"scripts": {
-		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -b",
-		"watch": "tsc -b -w",
+		"vscode:prepublish": "npm run build",
+		"dev": "vite",
+		"build": "vue-tsc --noEmit && vite build",
 		"lint": "eslint",
-		"postinstall": "npm install",
-		"test": "sh ./scripts/e2e.sh"
+		"postinstall": "npm install"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.13.0",
 		"@stylistic/eslint-plugin": "^2.9.0",
-		"@types/mocha": "^10.0.6",
+		"@tomjs/tsconfig": "^1.7.1",
+		"@tomjs/vite-plugin-vscode": "^3.2.1",
+		"@types/lodash-es": "^4.17.12",
 		"@types/node": "^20",
 		"@types/vscode": "^1.75.1",
-		"@vscode/test-electron": "^2.3.9",
+		"@vitejs/plugin-vue": "^5.2.1",
+		"esbuild": "^0.25.0",
 		"eslint": "^9.13.0",
-		"mocha": "^10.3.0",
 		"typescript": "^5.7.2",
-		"typescript-eslint": "^8.16.0"
+		"typescript-eslint": "^8.16.0",
+		"vue-tsc": "^2.2.8"
 	},
 	"dependencies": {
-		"vscode-languageclient": "^9.0.1"
+		"@tomjs/vscode-webview": "^2.0.2",
+		"@vscode-elements/elements": "^1.13.1",
+		"lodash-es": "^4.17.21",
+		"vscode-languageclient": "^9.0.1",
+		"vue": "^3.5.13"
 	}
 }

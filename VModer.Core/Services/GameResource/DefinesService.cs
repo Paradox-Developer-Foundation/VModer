@@ -36,8 +36,8 @@ public sealed class DefinesService : ResourcesService<DefinesService, byte, byte
             return 0;
         }
 
-        var fileType = pathService.GetFilePathType(filePath);
-        if (fileType == GameResourcesPathService.FileType.Game)
+        var fileType = pathService.GetFileOrigin(filePath);
+        if (fileType == FileOrigin.Game)
         {
             return 1;
         }

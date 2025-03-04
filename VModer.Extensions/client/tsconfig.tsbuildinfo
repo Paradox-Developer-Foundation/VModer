@@ -1,1 +1,1 @@
-{"root":["./src/extension.ts"],"version":"5.7.2"}
+{"root":["./src/vscode.d.ts","./src/dto/traitdto.d.ts","./src/entry/traits.ts","./src/scripts/listbox.ts","./src/scripts/traitsview.ts","./src/scripts/vscode.ts","./src/views/traitpanel.ts","./extension/env.d.ts","./extension/extension.ts"],"errors":true,"version":"5.7.2"}

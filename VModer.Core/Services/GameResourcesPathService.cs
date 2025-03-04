@@ -3,32 +3,25 @@ using VModer.Core.Extensions;
 
 namespace VModer.Core.Services;
 
-public sealed class GameResourcesPathService(
+public sealed partial class GameResourcesPathService(
     SettingsService settingService,
     GameModDescriptorService descriptor
 )
 {
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-    public FileType GetFilePathType(string filePath)
+    public FileOrigin GetFileOrigin(string filePath)
     {
         if (filePath.Contains(settingService.ModRootFolderPath))
         {
-            return FileType.Mod;
+            return FileOrigin.Mod;
         }
 
         if (filePath.Contains(settingService.GameRootFolderPath))
         {
-            return FileType.Game;
+            return FileOrigin.Game;
         }
-        return FileType.Unknown;
-    }
-
-    public enum FileType : byte
-    {
-        Unknown,
-        Game,
-        Mod
+        return FileOrigin.Unknown;
     }
 
     /// <summary>
