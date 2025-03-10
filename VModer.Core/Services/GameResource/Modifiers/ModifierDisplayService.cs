@@ -245,7 +245,7 @@ public sealed class ModifierDisplayService
 
     private List<string> GetDescriptionForUnknownNode(NodeModifier nodeModifier)
     {
-        Log.Info("未知的节点修饰符: {Name}", nodeModifier.Key);
+        Log.Debug("节点修饰符: {Name}", nodeModifier.Key);
         return GetDescriptionForNode(
             nodeModifier.Key,
             // 仅处理 Leaf, 省略 Node
