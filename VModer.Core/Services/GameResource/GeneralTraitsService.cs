@@ -23,6 +23,7 @@ public sealed class GeneralTraitsService
     private readonly LocalizationFormatService _localizationFormatService;
     private readonly ModifierDisplayService _modifierDisplayService;
     private readonly GameResourcesPathService _gameResourcesPathService;
+    private readonly ModifierService _modifierService;
     private ICollection<FrozenDictionary<string, CharacterTrait>> Traits => Resources.Values;
 
     /// <summary>
@@ -62,13 +63,15 @@ public sealed class GeneralTraitsService
     public GeneralTraitsService(
         LocalizationFormatService localizationFormatService,
         ModifierDisplayService modifierDisplayService,
-        GameResourcesPathService gameResourcesPathService
+        GameResourcesPathService gameResourcesPathService,
+        ModifierService modifierService
     )
         : base(Path.Combine(Keywords.Common, "unit_leader"), WatcherFilter.Text)
     {
         _localizationFormatService = localizationFormatService;
         _modifierDisplayService = modifierDisplayService;
         _gameResourcesPathService = gameResourcesPathService;
+        _modifierService = modifierService;
 
         _allTraitsLazy = new ResetLazy<CharacterTrait[]>(
             () => Traits.SelectMany(trait => trait.Values).ToArray()
@@ -91,10 +94,7 @@ public sealed class GeneralTraitsService
                     {
                         Name = trait.Name,
                         LocalizedName = GetLocalizationName(trait),
-                        Modifiers = string.Join(
-                            '\n',
-                            _modifierDisplayService.GetDescription(trait.AllModifiers)
-                        ),
+                        Modifiers = string.Join('\n', GetModifiersDescription(trait)),
                         FileOrigin = fileOrigin,
                         Type = trait.Type
                     }
@@ -103,6 +103,36 @@ public sealed class GeneralTraitsService
         }
 
         return traits;
+    }
+
+    public IEnumerable<string> GetModifiersDescription(CharacterTrait trait)
+    {
+        var descriptions = new List<string>(8);
+
+        foreach (var modifierCollection in trait.ModifiersCollection)
+        {
+            if (
+                modifierCollection.Key.Equals(
+                    CharacterTrait.TraitXpFactor,
+                    StringComparison.OrdinalIgnoreCase
+                )
+            )
+            {
+                foreach (var modifier in modifierCollection.Modifiers.OfType<LeafModifier>())
+                {
+                    //TODO: 实现从本地化中读取 trait_xp_factor 的本地化值
+                    descriptions.Add(
+                        $"{_localizationFormatService.GetFormatText(modifier.Key)} {Languages.Resources.TraitXpFactor}：{_modifierService.GetDisplayValue(modifier, "H%.0")}"
+                    );
+                }
+            }
+            else
+            {
+                descriptions.AddRange(_modifierDisplayService.GetDescription(modifierCollection.Modifiers));
+            }
+        }
+
+        return descriptions;
     }
 
     public bool TryGetTrait(string name, [NotNullWhen(true)] out CharacterTrait? trait)

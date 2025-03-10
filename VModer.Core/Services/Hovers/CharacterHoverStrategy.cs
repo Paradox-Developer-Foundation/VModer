@@ -19,7 +19,6 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
     public GameFileType FileType => GameFileType.Character;
 
     private readonly LocalizationService _localizationService;
-    private readonly ModifierService _modifierService;
     private readonly ModifierDisplayService _modifierDisplayService;
     private readonly LeaderTraitsService _leaderTraitsService;
     private readonly LocalizationFormatService _localizationFormatService;
@@ -36,7 +35,6 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         LeaderTraitsService leaderTraitsService,
         GeneralTraitsService generalTraitsService,
         LocalizationFormatService localizationFormatService,
-        ModifierService modifierService,
         CharacterSkillService characterSkillService,
         ImageService imageService
     )
@@ -46,7 +44,6 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         _leaderTraitsService = leaderTraitsService;
         _generalTraitsService = generalTraitsService;
         _localizationFormatService = localizationFormatService;
-        _modifierService = modifierService;
         _characterSkillService = characterSkillService;
         _imageService = imageService;
     }
@@ -275,6 +272,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         foreach (string traitKey in traits)
         {
             // 有可能需要解引用
+            // TODO: 特质查找器支持显示 Png 图标
             string traitName = _localizationFormatService.GetFormatText(traitKey);
             if (_imageService.TryGetLocalImagePathBySpriteName($"GFX_trait_{traitKey}", out string? imageUri))
             {
@@ -282,28 +280,26 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
             }
             builder.AppendListItem(traitName);
 
-            var modifiers = GetTraitModifiersByType(traitKey, type);
-            var infos = _modifierDisplayService.GetDescription(modifiers);
-            foreach (string info in infos)
+            IEnumerable<string> modifiers;
+            if (type == LookUpTraitType.Leader && _generalTraitsService.TryGetTrait(traitKey, out var trait))
             {
-                builder.AppendListItem(
-                    info,
-                    info.StartsWith(ModifierDisplayService.NodeModifierChildrenPrefix) ? 2 : 1
-                );
+                modifiers = _generalTraitsService.GetModifiersDescription(trait);
+            }
+            else
+            {
+                var traitModifiers = GetTraitModifiersByType(traitKey, type);
+                modifiers = _modifierDisplayService.GetDescription(traitModifiers);
             }
 
-            if (type != LookUpTraitType.Leader && _generalTraitsService.TryGetTrait(traitKey, out var trait))
+            foreach (string modifier in modifiers)
             {
-                foreach (var modifier in trait.TraitXpModifiers.OfType<LeafModifier>())
-                {
-                    //TODO: 实现从本地化中读取 trait_xp_factor 的本地化值
-                    builder.AppendListItem(
-                        $"{_localizationFormatService.GetFormatText(modifier.Key)} {Resources.TraitXpFactor}：{_modifierService.GetDisplayValue(modifier, "H%.0")}",
-                        1
-                    );
-                }
+                builder.AppendListItem(
+                    modifier,
+                    modifier.StartsWith(ModifierDisplayService.NodeModifierChildrenPrefix) ? 2 : 1
+                );
             }
         }
+
         builder.AppendHorizontalRule();
     }
 
