@@ -7,7 +7,6 @@ using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
 using VModer.Core.Dto;
 using VModer.Core.Extensions;
-using VModer.Core.Infrastructure;
 using VModer.Core.Models.Character;
 using VModer.Core.Models.Modifiers;
 using VModer.Core.Services.GameResource.Base;
@@ -19,7 +18,6 @@ namespace VModer.Core.Services.GameResource;
 public sealed class GeneralTraitsService
     : CommonResourcesService<GeneralTraitsService, FrozenDictionary<string, CharacterTrait>>
 {
-    private readonly ResetLazy<CharacterTrait[]> _allTraitsLazy;
     private readonly LocalizationFormatService _localizationFormatService;
     private readonly ModifierDisplayService _modifierDisplayService;
     private readonly GameResourcesPathService _gameResourcesPathService;
@@ -72,11 +70,6 @@ public sealed class GeneralTraitsService
         _modifierDisplayService = modifierDisplayService;
         _gameResourcesPathService = gameResourcesPathService;
         _modifierService = modifierService;
-
-        _allTraitsLazy = new ResetLazy<CharacterTrait[]>(
-            () => Traits.SelectMany(trait => trait.Values).ToArray()
-        );
-        OnResourceChanged += (_, _) => _allTraitsLazy.Reset();
     }
 
     [Time("获取所有将领特质")]
