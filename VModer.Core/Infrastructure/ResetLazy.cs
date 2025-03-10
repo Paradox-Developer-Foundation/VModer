@@ -12,6 +12,9 @@ public sealed class ResetLazy<
 
     public void Reset()
     {
-        _lazy = new Lazy<T>(valueFactory);
+        if (_lazy.IsValueCreated)
+        {
+            _lazy = new Lazy<T>(valueFactory);
+        }
     }
 }
