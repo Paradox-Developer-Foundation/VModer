@@ -89,16 +89,23 @@ public sealed class GeneralTraitsService
             var fileOrigin = _gameResourcesPathService.GetFileOrigin(fileResource.Key);
             foreach (var trait in fileResource.Value.Select(item => item.Value))
             {
-                traits.Add(
-                    new TraitDto
-                    {
-                        Name = trait.Name,
-                        LocalizedName = GetLocalizationName(trait),
-                        Modifiers = string.Join('\n', GetModifiersDescription(trait)),
-                        FileOrigin = fileOrigin,
-                        Type = trait.Type
-                    }
-                );
+                var dto = new TraitDto
+                {
+                    Name = trait.Name,
+                    LocalizedName = GetLocalizationName(trait),
+                    Modifiers = string.Join('\n', GetModifiersDescription(trait)),
+                    FileOrigin = fileOrigin,
+                    Type = trait.Type
+                };
+
+                if (
+                    _localizationFormatService.TryGetFormatText($"{trait.Name}_desc", out string? description)
+                )
+                {
+                    dto.Description = description;
+                }
+
+                traits.Add(dto);
             }
         }
 

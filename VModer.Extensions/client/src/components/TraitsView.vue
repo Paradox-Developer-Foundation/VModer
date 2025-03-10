@@ -28,9 +28,13 @@
     <ListBox :items="viewData">
       <template #tooltip="{ item }">
         <div>
-          <span>id: {{ item.Name }}</span><br />
+          <span>id: {{ item.Name }}</span>
+          <br />
           <span>origin: {{ FileOrigin[item.FileOrigin] }}</span>
-          <pre style="margin: 0; font-family: inherit;">{{ item.Modifiers }}</pre>
+          <pre style="margin: 0; font-family: inherit">{{ item.Modifiers }}</pre>
+
+          <br v-if="item.Description" />
+          <span v-if="item.Description">{{ item.Description }}</span>
         </div>
       </template>
 
@@ -43,13 +47,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import {
-  FileOrigin,
-  TraitType,
-  type TraitDto,
-  getTraitTypeValues,
-  hasFlag,
-} from "../dto/TraitDto";
+import { FileOrigin, TraitType, type TraitDto, getTraitTypeValues, hasFlag } from "../dto/TraitDto";
 import { WebviewApi } from "@tomjs/vscode-webview";
 import ListBox from "./ListBox.vue";
 import type { TraitViewI18n } from "../../extension/views/TraitsView";
@@ -92,7 +90,7 @@ vscode.on<TraitViewI18n>("i18n", (i18nData) => {
 function searchTrait() {
   const selectedTraitType = traitTypeSelection.value?.value ?? [];
   console.log(selectedTraitType);
-  
+
   if (
     searchValue.value === "" &&
     selectedOrigin.value === AllOrgin &&
@@ -120,7 +118,7 @@ function searchTrait() {
 }
 
 function copyTraitInfo(item: TraitDto) {
-  vscode.postMessage({type: "copyToClipboard", data: item.Name});
+  vscode.postMessage({ type: "copyToClipboard", data: item.Name });
 }
 </script>
 

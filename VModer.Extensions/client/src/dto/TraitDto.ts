@@ -4,6 +4,7 @@ interface TraitDto {
   Modifiers: string;
   FileOrigin: FileOrigin;
   Type: TraitType;
+  Description?: string;
 }
 
 /**
