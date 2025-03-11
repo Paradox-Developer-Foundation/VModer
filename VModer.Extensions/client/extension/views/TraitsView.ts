@@ -2,6 +2,7 @@ import { env, ExtensionContext, l10n, ViewColumn, WebviewPanel, window } from "v
 import { Disposable } from "vscode-languageclient";
 import { WebviewHelpers } from "./WebviewHelpers";
 import { LanguageClient } from "vscode-languageclient/node";
+import type { TraitViewI18n } from "../../src/types/TraitViewI18n";
 
 export class TraitView {
   public static currentPanel: TraitView | undefined;
@@ -86,15 +87,4 @@ export class TraitView {
       }
     }
   }
-}
-
-export interface TraitViewI18n {
-  search: string;
-  searchButton: string;
-  origin: string;
-  all: string;
-  gameOnly: string;
-  modOnly: string;
-  traitType: string;
-  copyTraitId: string;
 }

@@ -57,7 +57,7 @@ import { ref, onMounted, onUnmounted, useTemplateRef } from "vue";
 import { FileOrigin, TraitType, type TraitDto, getTraitTypeValues, hasFlag } from "../dto/TraitDto";
 import { WebviewApi } from "@tomjs/vscode-webview";
 import ListBox from "./ListBox.vue";
-import type { TraitViewI18n } from "../../extension/views/TraitsView";
+import type { TraitViewI18n } from "../types/TraitViewI18n";
 import type { VscodeContextMenu, VscodeMultiSelect } from "@vscode-elements/elements";
 
 const AllOrgin = "0";
