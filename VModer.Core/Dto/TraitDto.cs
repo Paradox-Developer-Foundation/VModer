@@ -6,11 +6,11 @@ namespace VModer.Core.Dto;
 
 public sealed class TraitDto
 {
-    public required string Name { get; set; }
-    public required string LocalizedName { get; set; }
-    public required string Modifiers { get; set; }
-    public required FileOrigin FileOrigin { get; set; }
-    public required TraitType Type { get; set; }
+    public required string Name { get; init; }
+    public required string LocalizedName { get; init; }
+    public required string Modifiers { get; init; }
+    public required FileOrigin FileOrigin { get; init; }
+    public required TraitType Type { get; init; }
 
     /// <summary>
     /// 特质描述信息
