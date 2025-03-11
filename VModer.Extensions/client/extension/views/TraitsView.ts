@@ -34,9 +34,9 @@ export class TraitView {
         gameOnly: l10n.t("TraitsView.GameOnly"),
         modOnly: l10n.t("TraitsView.ModOnly"),
         traitType: l10n.t("TraitsView.TraitType"),
+        copyTraitId: l10n.t("TraitsView.CopyTraitId"),
       };
 
-      // 发送数据到WebView
       panel.webview.onDidReceiveMessage(
         async (message) => {
           if (message == "init_complete") {
@@ -47,7 +47,7 @@ export class TraitView {
             });
           }
         },
-        undefined,
+        null,
         TraitView.currentPanel._disposables
       );
 
@@ -56,14 +56,14 @@ export class TraitView {
           if (message.type === "copyToClipboard") {
             try {
               await env.clipboard.writeText(message.data);
-              window.showInformationMessage("已复制到剪贴板");
+              window.showInformationMessage("已复制内容到剪贴板");
             } catch (err) {
               console.error("无法复制文本:", err);
               window.showErrorMessage("复制失败");
             }
           }
         },
-        undefined,
+        null,
         TraitView.currentPanel._disposables
       );
     }
@@ -96,4 +96,5 @@ export interface TraitViewI18n {
   gameOnly: string;
   modOnly: string;
   traitType: string;
+  copyTraitId: string;
 }

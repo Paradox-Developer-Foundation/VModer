@@ -10,14 +10,11 @@
       @mouseout="handleMouseOut"
       @mousemove="handleMouseMove"
     >
-      <!-- 使用命名插槽渲染列表项 -->
       <slot name="item" :item="item" :index="index">
-        <!-- 默认显示，当没有提供插槽内容时 -->
         <div>{{ String(item) }}</div>
       </slot>
     </div>
 
-    <!-- 使用插槽渲染tooltip -->
     <div
       class="tooltip"
       :class="{ show: isTooltipVisible }"
@@ -29,7 +26,6 @@
       }"
     >
       <slot name="tooltip" :item="currentTooltipItem" v-if="currentTooltipItem">
-        <!-- 默认tooltip内容 -->
         <div>{{ String(currentTooltipItem) }}</div>
       </slot>
     </div>
@@ -77,17 +73,17 @@ watch(
 );
 
 // 公开的方法
-const setItems = (newItems: T[]) => {
+function setItems(newItems: T[]) {
   items.value = newItems;
   emit("update:items", newItems);
-};
+}
 
-const getSelectedItem = (): T | null => {
+function getSelectedItem(): T | null {
   return selectedIndex.value >= 0 ? (items.value[selectedIndex.value] as T) : null;
-};
+}
 
 // 内部方法
-const handleItemClick = (event: MouseEvent) => {
+function handleItemClick(event: MouseEvent) {
   const target = event.target as HTMLElement;
   const listItem = target.closest(".list-item") as HTMLElement | null;
   if (!listItem) return;
@@ -97,33 +93,40 @@ const handleItemClick = (event: MouseEvent) => {
     selectedIndex.value = index;
     emit("selection-changed", getSelectedItem());
   }
-};
+}
 
-const handleMouseOver = (event: MouseEvent, item: T) => {
+function handleMouseOver(event: MouseEvent, item: T) {
   if (!props.showTooltip) return;
 
   clearTimeout(tooltipTimer as number);
   tooltipTimer = window.setTimeout(() => {
-    currentTooltipItem.value = item; // 设置当前tooltip项
+    currentTooltipItem.value = item;
     positionTooltip(event);
     isTooltipVisible.value = true;
   }, props.tooltipDelay);
-};
+}
 
-const handleMouseOut = () => {
+function handleMouseOut() {
   clearTimeout(tooltipTimer as number);
   isTooltipVisible.value = false;
-  currentTooltipItem.value = null; // 清空当前tooltip项
-};
+  currentTooltipItem.value = null;
+}
 
-const handleMouseMove = (event: MouseEvent) => {
+function handleMouseMove(event: MouseEvent) {
   if (isTooltipVisible.value) {
     positionTooltip(event);
   }
-};
+}
 
-const positionTooltip = (event: MouseEvent) => {
-  // 保持原有逻辑
+function setSelectedIndex(index: number) {
+  if (index < 0 || index >= items.value.length) {
+    return;
+  }
+
+  selectedIndex.value = index;
+}
+
+function positionTooltip(event: MouseEvent) {
   const offset = 10;
   const scrollX = window.scrollX || document.documentElement.scrollLeft;
   const scrollY = window.scrollY || document.documentElement.scrollTop;
@@ -147,12 +150,13 @@ const positionTooltip = (event: MouseEvent) => {
   }
 
   tooltipPosition.value = { x, y };
-};
+}
 
 // 暴露公共方法供父组件使用
 defineExpose({
   setItems,
   getSelectedItem,
+  setSelectedIndex,
 });
 </script>
 
