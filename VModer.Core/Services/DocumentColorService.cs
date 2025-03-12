@@ -27,8 +27,8 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
 
         var fileType = GameFileType.FromFilePath(filePath);
 
-        // 节点键不为 color 而是颜色代码, 无法直接替换
         // TODO: 实现字体颜色代码颜色选择器
+        // 节点键不为 color 而是颜色代码, 无法直接替换, 需要获取当前颜色代码
         if (fileType == GameFileType.CoreGfx)
         {
             return new ColorPresentationResponse([]);

@@ -19,7 +19,7 @@ using VModer.Languages;
 
 namespace VModer.Core;
 
-[JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Metadata)]
+[JsonSourceGenerationOptions]
 [JsonSerializable(typeof(List<TraitDto>))]
 internal partial class TraitContext : JsonSerializerContext;
 

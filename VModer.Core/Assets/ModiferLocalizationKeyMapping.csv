@@ -14,3 +14,8 @@ breakthrough_bonus_against,MODIFIER_BREAKTHROUGH_BONUS_AGAINST_A_COUNTRY,我国�
 compliance_gain,MODIFIER_COMPLIANCE_GAIN_ADD,每日顺从度增长
 experience_gain_air_factor,experience_gain_air,空军经验增长
 army_strength_factor,MODIFIER_ARMY_STRENGTH,HP
+navy_visibility,MODIFIER_NAVAL_VISIBILITY_FACTOR,可见度
+navy_carrier_air_targetting_factor,MODIFIER_NAVAL_CARRIER_AIR_TARGETTING_FACTOR,航母舰载机对空瞄准
+sortie_efficiency,CARRIER_SORTIE_EFFICIENCY_FACTOR,出击效率
+ships_at_battle_start,MODIFIER_SHIPS_AT_BATTLE_START_FACTOR,最早接战时的参战舰艇数
+fighter_sortie_efficiency,MODIFIER_CARRIER_FIGHTER_SORTIE_EFFICIENCY_FACTOR,战斗机出击效率
