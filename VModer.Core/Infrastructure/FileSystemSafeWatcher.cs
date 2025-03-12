@@ -248,7 +248,7 @@ public sealed class FileSystemSafeWatcher : IDisposable
     /// <returns>A System.IO.WaitForChangedResult that contains specific information on the change that occurred.</returns>
     public WaitForChangedResult WaitForChanged(WatcherChangeTypes changeType)
     {
-        throw new NotImplementedException();
+        throw new NotSupportedException();
     }
 
     /// <summary>
@@ -260,7 +260,7 @@ public sealed class FileSystemSafeWatcher : IDisposable
     /// <returns>A System.IO.WaitForChangedResult that contains specific information on the change that occurred.</returns>
     public WaitForChangedResult WaitForChanged(WatcherChangeTypes changeType, int timeout)
     {
-        throw new NotImplementedException();
+        throw new NotSupportedException();
     }
 
     #endregion

@@ -54,7 +54,7 @@ public sealed class TextDocumentHandler : TextDocumentHandlerBase, IHandler
 
     protected override Task Handle(WillSaveTextDocumentParams request, CancellationToken token)
     {
-        throw new NotImplementedException();
+        throw new NotSupportedException();
     }
 
     protected override Task<List<TextEdit>?> HandleRequest(
@@ -62,7 +62,7 @@ public sealed class TextDocumentHandler : TextDocumentHandlerBase, IHandler
         CancellationToken token
     )
     {
-        throw new NotImplementedException();
+        throw new NotSupportedException();
     }
 
     public override void RegisterCapability(
