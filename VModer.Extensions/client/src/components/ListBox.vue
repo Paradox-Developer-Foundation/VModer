@@ -72,7 +72,6 @@ watch(
   { deep: true }
 );
 
-// 公开的方法
 function setItems(newItems: T[]) {
   items.value = newItems;
   emit("update:items", newItems);
@@ -82,7 +81,6 @@ function getSelectedItem(): T | null {
   return selectedIndex.value >= 0 ? (items.value[selectedIndex.value] as T) : null;
 }
 
-// 内部方法
 function handleItemClick(event: MouseEvent) {
   const target = event.target as HTMLElement;
   const listItem = target.closest(".list-item") as HTMLElement | null;

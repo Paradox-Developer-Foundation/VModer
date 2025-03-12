@@ -127,18 +127,18 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
         bool isRemoved = Resources.Remove(gameFilePath);
         if (isRemoved)
         {
-            Log.Info("移除游戏资源成功: {GameFilePath}", gameFilePath);
+            Log.Info("{ServiceName}: 移除游戏资源成功: {GameFilePath}", _serviceName, gameFilePath);
         }
 
         ParseFileAndAddToResources(folderOrFilePath);
         OnOnResourceChanged(new ResourceChangedEventArgs(folderOrFilePath));
 
-        Log.Info("添加 Mod 资源成功: {FolderOrFilePath}", folderOrFilePath);
+        Log.Info("{ServiceName}: 添加 Mod 资源成功: {FolderOrFilePath}", _serviceName, folderOrFilePath);
     }
 
     void IResourcesService.Remove(string folderOrFilePath)
     {
-        Log.Debug("移除 Mod 资源: {FolderOrFilePath}", folderOrFilePath);
+        Log.Debug("{ServiceName}: 移除 Mod 资源: {FolderOrFilePath}", _serviceName, folderOrFilePath);
         if (Directory.Exists(folderOrFilePath))
         {
             foreach (
@@ -155,7 +155,7 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
 
         if (Resources.Remove(folderOrFilePath))
         {
-            Log.Info("移除 Mod 资源成功");
+            Log.Info("{ServiceName}: 移除 Mod 资源成功", _serviceName);
             string relativeFilePath = Path.GetRelativePath(
                 _settingService.ModRootFolderPath,
                 folderOrFilePath
@@ -171,7 +171,7 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
             ParseFileAndAddToResources(gameFilePath);
             OnOnResourceChanged(new ResourceChangedEventArgs(folderOrFilePath));
 
-            Log.Info("添加原版游戏资源: {GameFilePath}", gameFilePath);
+            Log.Info("{ServiceName}: 添加原版游戏资源: {GameFilePath}", _serviceName, gameFilePath);
         }
     }
 
@@ -188,7 +188,7 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
         bool isAdded = ParseFileAndAddToResources(folderOrFilePath);
         if (!isAdded)
         {
-            Log.Info("{ServiceName} 不加载此 Mod 资源", _serviceName);
+            Log.Info("{ServiceName}: 不加载此 Mod 资源", _serviceName);
             return;
         }
 
@@ -197,7 +197,7 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
         {
             OnOnResourceChanged(new ResourceChangedEventArgs(folderOrFilePath));
         }
-        Log.Info("{ServiceName} 重新加载 Mod 资源成功", _serviceName);
+        Log.Info("{ServiceName}: 重新加载 Mod 资源成功", _serviceName);
     }
 
     void IResourcesService.Renamed(string oldPath, string newPath)
@@ -205,7 +205,7 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
         Log.Debug("Mod 资源重命名: {OldPath} -> {NewPath}", oldPath, newPath);
         if (Directory.Exists(newPath))
         {
-            Log.Debug("跳过文件夹");
+            Log.Debug("{ServiceName}: 跳过文件夹", _serviceName);
             return;
         }
 
@@ -215,12 +215,12 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
         }
         else
         {
-            Log.Debug("{ServiceName} 跳过处理 {NewPath} 重命名", GetType().Name, newPath);
+            Log.Debug("{ServiceName}: 跳过处理 {NewPath} 重命名", _serviceName, newPath);
             return;
         }
         Resources.Remove(oldPath);
 
-        Log.Info("Mod 资源重命名成功");
+        Log.Info("{ServiceName}: Mod 资源重命名成功", _serviceName);
     }
 
     /// <summary>
@@ -247,7 +247,7 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
     {
         if (result is null)
         {
-            Log.Warn("文件 {FilePath} 解析失败", filePath);
+            Log.Warn("{ServiceName}: 文件 {FilePath} 解析失败", _serviceName, filePath);
             return false;
         }
 

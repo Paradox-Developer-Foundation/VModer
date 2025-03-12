@@ -13,7 +13,7 @@ public sealed class GameResourcesWatcherService : IDisposable
     /// key: 资源文件夹路径, value: 监听器列表
     /// </summary>
     private readonly Dictionary<string, List<FileSystemSafeWatcher>> _watchedPaths = new(8);
-    private readonly FileSystemSafeWatcher _watcher;
+    private readonly FileSystemSafeWatcher _modFolderWatcher;
 
     //TODO: 重构, 可以用这个类监测资源服务的变化并发出通知
     //监听者???, 消息总线?
@@ -33,12 +33,12 @@ public sealed class GameResourcesWatcherService : IDisposable
     public GameResourcesWatcherService(SettingsService settingService)
     {
         _settingService = settingService;
-        _watcher = new FileSystemSafeWatcher(_settingService.ModRootFolderPath, "*.*");
-        _watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.DirectoryName;
-        _watcher.Created += OnModResourceFolderCreatedOrRenamed;
-        _watcher.Renamed += OnModResourceFolderCreatedOrRenamed;
-        _watcher.IncludeSubdirectories = true;
-        _watcher.EnableRaisingEvents = true;
+        _modFolderWatcher = new FileSystemSafeWatcher(_settingService.ModRootFolderPath, "*.*");
+        _modFolderWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.DirectoryName;
+        _modFolderWatcher.Created += OnModResourceFolderCreatedOrRenamed;
+        _modFolderWatcher.Renamed += OnModResourceFolderCreatedOrRenamed;
+        _modFolderWatcher.IncludeSubdirectories = true;
+        _modFolderWatcher.EnableRaisingEvents = true;
     }
 
     private void OnModResourceFolderCreatedOrRenamed(object sender, FileSystemEventArgs args)
@@ -133,7 +133,7 @@ public sealed class GameResourcesWatcherService : IDisposable
 
     public void Dispose()
     {
-        _watcher.Dispose();
+        _modFolderWatcher.Dispose();
         foreach (var watcher in _watchedPaths.Values.SelectMany(watcherList => watcherList))
         {
             watcher.Dispose();
