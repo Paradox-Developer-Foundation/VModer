@@ -171,7 +171,6 @@ defineExpose({
 
 /* 列表项基础样式 */
 .list-item {
-  padding: 8px 12px;
   cursor: default;
   transition: background 0.2s;
   user-select: none;

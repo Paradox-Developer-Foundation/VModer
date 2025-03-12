@@ -39,7 +39,7 @@
       </template>
 
       <template #item="{ item, index }">
-        <div @click.right="(event) => openMenu(event, item, index)">
+        <div style="padding: 8px 12px;" @click.right="(event) => openMenu(event, item, index)">
           {{ item.LocalizedName }}
         </div>
       </template>
