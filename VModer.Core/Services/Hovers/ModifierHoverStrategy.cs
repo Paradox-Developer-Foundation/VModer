@@ -39,21 +39,21 @@ public sealed class ModifierHoverStrategy : IHoverStrategy
             return string.Empty;
         }
 
+        var builder = new MarkdownDocument();
         var child = node.FindPointedChildByPosition(localPosition);
-        IEnumerable<IModifier> modifiers = [];
         if (child.TryGetNode(out var childNode))
         {
-            modifiers = GetModifiersForNode(childNode);
+            foreach (
+                string description in _modifierDisplayService.GetDescription(GetModifiersForNode(childNode))
+            )
+            {
+                builder.AppendParagraph(description);
+            }
         }
         else if (child.TryGetLeaf(out var leaf))
         {
-            modifiers = [LeafModifier.FromLeaf(leaf)];
-        }
-
-        var builder = new MarkdownDocument();
-        foreach (string modifierInfo in _modifierDisplayService.GetDescription(modifiers))
-        {
-            builder.AppendParagraph(modifierInfo);
+            var leafModifier = LeafModifier.FromLeaf(leaf);
+            builder.AppendParagraph(_modifierDisplayService.GetDescription(leafModifier));
         }
 
         return builder.ToString();

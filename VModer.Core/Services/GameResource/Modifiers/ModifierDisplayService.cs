@@ -41,16 +41,21 @@ public sealed class ModifierDisplayService
     /// <returns></returns>
     public IReadOnlyCollection<string> GetDescription(IEnumerable<IModifier> modifiers)
     {
-        var inlines = new List<string>(8);
+        var descriptions = new List<string>(8);
 
         foreach (var modifier in modifiers)
         {
-            inlines.AddRange(GetDescription(modifier));
+            descriptions.AddRange(GetDescription(modifier));
         }
 
-        return inlines;
+        return descriptions;
     }
 
+    /// <summary>
+    /// 获取修饰符的描述, 每个元素对应一行
+    /// </summary>
+    /// <param name="modifier"></param>
+    /// <returns></returns>
     private IEnumerable<string> GetDescription(IModifier modifier)
     {
         IEnumerable<string> addedInlines;
@@ -59,21 +64,13 @@ public sealed class ModifierDisplayService
             case ModifierType.Leaf:
             {
                 var leafModifier = (LeafModifier)modifier;
-                if (IsCustomToolTip(leafModifier.Key))
-                {
-                    addedInlines = [_localisationFormatService.GetFormatText(leafModifier.Value)];
-                }
-                else
-                {
-                    addedInlines = [GetDescriptionForLeaf(leafModifier)];
-                }
-
+                addedInlines = [GetDescription(leafModifier)];
                 break;
             }
             case ModifierType.Node:
             {
                 var nodeModifier = (NodeModifier)modifier;
-                addedInlines = GetModifierDescriptionForNode(nodeModifier);
+                addedInlines = GetDescription(nodeModifier);
                 break;
             }
             default:
@@ -82,6 +79,21 @@ public sealed class ModifierDisplayService
         }
 
         return addedInlines;
+    }
+
+    public string GetDescription(LeafModifier modifier)
+    {
+        if (IsCustomToolTip(modifier.Key))
+        {
+            return _localisationFormatService.GetFormatText(modifier.Value);
+        }
+
+        return GetDescriptionForLeaf(modifier);
+    }
+
+    public IEnumerable<string> GetDescription(NodeModifier modifier)
+    {
+        return GetModifierDescriptionForNode(modifier);
     }
 
     private static bool IsCustomToolTip(string modifierKey)
