@@ -1,5 +1,4 @@
-﻿using System.Text;
-using NLog;
+﻿using NLog;
 using VModer.Core.Models;
 using VModer.Core.Models.Modifiers;
 using VModer.Core.Services.GameResource.Localization;
@@ -107,7 +106,12 @@ public sealed class ModifierDisplayService
         string modifierKey = _localisationKeyMappingService.TryGetValue(modifier.Key, out string? mappingKey)
             ? mappingKey
             : modifier.Key;
-        string modifierName = GetModifierFormatTextFromText(modifierKey);
+        string modifierName = string.Join(
+            string.Empty,
+            _localisationFormatService
+                .GetFormatTextInfo(_modifierService.GetLocalizationName(modifierKey))
+                .Select(x => x.DisplayText)
+        );
         string colon = modifierName.EndsWith(':') || modifierName.EndsWith('：') ? string.Empty : ": ";
         string number = modifier.Value;
 
@@ -121,23 +125,6 @@ public sealed class ModifierDisplayService
         }
 
         return $"{modifierName}{colon}{number}";
-    }
-
-    /// <summary>
-    /// 获取修饰符应用格式化后的本地化文本
-    /// </summary>
-    /// <param name="modifierKey"></param>
-    /// <returns></returns>
-    private string GetModifierFormatTextFromText(string modifierKey)
-    {
-        string modifierName = _modifierService.GetLocalizationName(modifierKey);
-
-        var sb = new StringBuilder();
-        foreach (var textInfo in _localisationFormatService.GetFormatTextInfo(modifierName))
-        {
-            sb.Append(textInfo.DisplayText);
-        }
-        return sb.ToString();
     }
 
     private List<string> GetModifierDescriptionForNode(NodeModifier nodeModifier)
@@ -171,23 +158,13 @@ public sealed class ModifierDisplayService
         var descriptions = new List<string>();
         foreach (var equipmentModifierNode in nodeModifier.Nodes)
         {
-            AddEquipmentNameToList(descriptions, equipmentModifierNode);
+            descriptions.Add($"{_localisationFormatService.GetFormatText(equipmentModifierNode.Key)}:");
             foreach (var modifier in equipmentModifierNode.Leaves)
             {
                 descriptions.Add($"{NodeModifierChildrenPrefix}{GetDescriptionForLeaf(modifier)}");
             }
         }
         return descriptions;
-    }
-
-    private void AddEquipmentNameToList(List<string> descriptions, NodeModifier equipmentModifierNode)
-    {
-        // 装备代码本地化值对应一个本地化键引用, 需要解引用
-        string equipmentKeyword = _localizationService.GetValue(equipmentModifierNode.Key);
-        var equipmentNames = _localisationFormatService.GetFormatTextInfo(equipmentKeyword);
-        descriptions.Add(
-            $"{string.Join(string.Empty, equipmentNames.Select(formatInfo => formatInfo.DisplayText))}:"
-        );
     }
 
     private List<string> GetTargetedModifierDescription(NodeModifier nodeModifier)
@@ -248,8 +225,12 @@ public sealed class ModifierDisplayService
             nodeModifier.Modifiers.Where(modifier => modifier.Type == ModifierType.Leaf),
             modifier =>
             {
-                string modifierName = _localizationService.GetValue($"STAT_ADJUSTER_{modifier.Key}");
-                string modifierFormat = _localizationService.GetValue($"STAT_ADJUSTER_{modifier.Key}_DIFF");
+                string modifierName = _localisationFormatService.GetFormatText(
+                    $"STAT_ADJUSTER_{modifier.Key}"
+                );
+                string modifierFormat = _localisationFormatService.GetFormatText(
+                    $"STAT_ADJUSTER_{modifier.Key}_DIFF"
+                );
                 return $"{NodeModifierChildrenPrefix}{modifierName}{_modifierService.GetDisplayValue((LeafModifier)modifier, modifierFormat)}";
             }
         );
@@ -272,7 +253,7 @@ public sealed class ModifierDisplayService
         Func<IModifier, string> converter
     )
     {
-        var list = new List<string> { $"{_localizationService.GetValue(key)}:" };
+        var list = new List<string> { $"{_localisationFormatService.GetFormatText(key)}:" };
 
         list.AddRange(modifiers.Select(converter));
 

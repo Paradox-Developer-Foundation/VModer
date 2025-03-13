@@ -18,7 +18,6 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
 {
     public GameFileType FileType => GameFileType.Character;
 
-    private readonly LocalizationService _localizationService;
     private readonly ModifierDisplayService _modifierDisplayService;
     private readonly LeaderTraitsService _leaderTraitsService;
     private readonly LocalizationFormatService _localizationFormatService;
@@ -30,7 +29,6 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
     public CharacterHoverStrategy(
-        LocalizationService localizationService,
         ModifierDisplayService modifierDisplayService,
         LeaderTraitsService leaderTraitsService,
         GeneralTraitsService generalTraitsService,
@@ -39,7 +37,6 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         ImageService imageService
     )
     {
-        _localizationService = localizationService;
         _modifierDisplayService = modifierDisplayService;
         _leaderTraitsService = leaderTraitsService;
         _generalTraitsService = generalTraitsService;
@@ -250,7 +247,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
                 if (leaf.Key.Equals("slot", StringComparison.OrdinalIgnoreCase))
                 {
                     builder.AppendParagraph(
-                        $"{Resources.Character_advisor_slot}: {_localizationService.GetValue(leaf.ValueText)}"
+                        $"{Resources.Character_advisor_slot}: {_localizationFormatService.GetFormatText(leaf.ValueText)}"
                     );
                 }
             }
@@ -271,7 +268,6 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
 
         foreach (string traitKey in traits)
         {
-            // 有可能需要解引用
             // TODO: 特质查找器支持显示 Png 图标
             string traitName = _localizationFormatService.GetFormatText(traitKey);
             if (_imageService.TryGetLocalImagePathBySpriteName($"GFX_trait_{traitKey}", out string? imageUri))
@@ -351,7 +347,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         if (ideology is not null)
         {
             builder.AppendParagraph(
-                $"{Resources.Ideology}: {_localizationService.GetValue(ideology.ValueText)}"
+                $"{Resources.Ideology}: {_localizationFormatService.GetFormatText(ideology.ValueText)}"
             );
         }
 

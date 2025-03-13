@@ -68,14 +68,7 @@ public sealed class LocalizationFormatService(
     {
         var result = new List<TextFormatInfo>(4);
 
-        if (LocalizationFormatParser.TryParse(text, out var formats))
-        {
-            ParseFormatToList(formats, result);
-        }
-        else
-        {
-            result.Add(new TextFormatInfo(text, Color.Black));
-        }
+        ParseFormat(text, result);
 
         return result;
     }
@@ -92,8 +85,9 @@ public sealed class LocalizationFormatService(
                     continue;
                 }
 
-                // 尝试当成本地化键处理
-                result.Add(new TextFormatInfo(localizationService.GetValue(format.Text), Color.Black));
+                // 递归处理所有本地化引用
+                string text = localizationService.GetValue(format.Text);
+                ParseFormat(text, result);
             }
             else if (format.Type == LocalizationFormatType.Icon)
             {
@@ -103,6 +97,18 @@ public sealed class LocalizationFormatService(
             {
                 result.Add(GetColorText(format));
             }
+        }
+    }
+
+    private void ParseFormat(string text, List<TextFormatInfo> result)
+    {
+        if (LocalizationFormatParser.TryParse(text, out var formats))
+        {
+            ParseFormatToList(formats, result);
+        }
+        else
+        {
+            result.Add(new TextFormatInfo(text, Color.Black));
         }
     }
 
