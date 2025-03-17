@@ -6,10 +6,8 @@ namespace VModer.Core.Infrastructure.Parser;
 
 public static class LocalizationFormatParser
 {
-    private static readonly Parser<char, char> CharExcept = Parser<char>.Token(c => c != '$');
-
     private static readonly Parser<char, LocalizationFormatInfo> PlaceholderParser = Char('$')
-        .Then(CharExcept.AtLeastOnceString())
+        .Then(AnyCharExcept('$').AtLeastOnceString())
         .Before(Char('$'))
         .Map(placeholder => new LocalizationFormatInfo(placeholder, LocalizationFormatType.Placeholder));
 
