@@ -85,4 +85,22 @@ public static class NodeExtensions
 
         return Child.Create(node);
     }
+    
+    /// <summary>
+    /// 判断<c>node</c>是否为 <c>rootNode</c> 下拥有指定 <c>containerKey</c> 节点的子<c>node</c>
+    /// </summary>
+    /// <param name="rootNode">文件根节点</param>
+    /// <param name="containerKey">容器键</param>
+    /// <param name="node">判断的节点</param>
+    /// <returns></returns> 
+    public static bool IsItemNode(this Node rootNode, string containerKey, Node node)
+    {
+        var containerNodes = rootNode.Nodes.Where(n =>
+            n.Key.Equals(containerKey, StringComparison.OrdinalIgnoreCase)
+        );
+
+        return containerNodes.Any(containerNode =>
+            containerNode.Nodes.Any(character => character.Position == node.Position)
+        );
+    }
 }

@@ -57,7 +57,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
 
         string result;
         // 当是人物节点时, 逐一进行分析并显示内容
-        if (IsCharacterNode(rootNode, adjacentNode))
+        if (rootNode.IsItemNode("characters", adjacentNode))
         {
             var builder = new MarkdownDocument();
 
@@ -113,16 +113,6 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         }
 
         return builder.ToString();
-    }
-
-    private static bool IsCharacterNode(Node rootNode, Node node)
-    {
-        var charactersNodes = rootNode.Nodes.Where(n =>
-            n.Key.Equals("characters", StringComparison.OrdinalIgnoreCase)
-        );
-        return charactersNodes.Any(charactersNode =>
-            charactersNode.Nodes.Any(character => character.Position.Equals(node.Position))
-        );
     }
 
     private void AddCharacterNameTitle(MarkdownDocument builder, Node characterNode)

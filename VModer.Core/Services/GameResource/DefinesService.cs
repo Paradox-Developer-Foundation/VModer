@@ -5,6 +5,8 @@ using VModer.Core.Services.GameResource.Base;
 namespace VModer.Core.Services.GameResource;
 
 // 使用 byte 是因为不需要分开存储各个文件中的变量, 而是集中在一个静态只读字段中, 使用 byte 只是为了最小化浪费内存
+// BUG: 当部分定义在 Mod 中被修改后, 如果之后删除了 Mod, 那么定义将无法被恢复到游戏定义值
+// 解决方案: 重新读取游戏文件?
 public sealed class DefinesService : ResourcesService<DefinesService, byte, byte>, IDisposable
 {
     private static readonly Lua GlobalLua = new();

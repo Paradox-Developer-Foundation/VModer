@@ -112,7 +112,13 @@ public sealed class ModifierDisplayService
                 .GetFormatTextInfo(_modifierService.GetLocalizationName(modifierKey))
                 .Select(x => x.DisplayText)
         );
-        string colon = modifierName.EndsWith(':') || modifierName.EndsWith('：') ? string.Empty : ": ";
+        string colon =
+            modifierName.EndsWith(':')
+            || modifierName.EndsWith('：')
+            || modifierName.EndsWith("： ")
+            || modifierName.EndsWith(": ")
+                ? string.Empty
+                : ": ";
         string number = modifier.Value;
 
         if (modifier.ValueType is GameValueType.Int or GameValueType.Float)

@@ -66,7 +66,7 @@ public sealed class ModifierService
 
         return false;
     }
-
+    
     public string GetLocalizationName(string modifierKey)
     {
         if (TryGetLocalizationName(modifierKey, out string? value))
@@ -74,7 +74,47 @@ public sealed class ModifierService
             return value;
         }
 
+        if (TryGetLocalizationNameInState(modifierKey, out value))
+        {
+            return value;
+        }
+
         return modifierKey;
+    }
+
+    private bool TryGetLocalizationNameInState(string modifier, [NotNullWhen(true)] out string? value)
+    {
+        if (_localizationService.TryGetValue($"STAT_ARMY_{modifier}", out value))
+        {
+            return true;
+        }
+
+        if (_localizationService.TryGetValue($"STAT_NAVY_{modifier}", out value))
+        {
+            return true;
+        }
+
+        if (_localizationService.TryGetValue($"STAT_COMMON_{modifier}", out value))
+        {
+            return true;
+        }
+
+        if (_localizationService.TryGetValue($"STAT_NAVY_HG_{modifier}", out value))
+        {
+            return true;
+        }
+
+        if (_localizationService.TryGetValue($"STAT_NAVY_LG_{modifier}", out value))
+        {
+            return true;
+        }
+
+        if (_localizationService.TryGetValue($"STAT_RAILWAY_{modifier}", out value))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     public bool TryGetLocalizationFormat(string modifier, [NotNullWhen(true)] out string? result)
@@ -85,6 +125,14 @@ public sealed class ModifierService
         }
 
         if (_localizationService.TryGetValue($"{modifier}_tt", out result))
+        {
+            return true;
+        }
+
+        if (
+            !modifier.StartsWith("modifier_")
+            && _localizationService.TryGetValue($"modifier_{modifier}_tt", out result)
+        )
         {
             return true;
         }

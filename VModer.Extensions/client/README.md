@@ -51,6 +51,10 @@ Language: ZH | [EN](https://github.com/textGamex/VModer/blob/main/README.md)
 
 右键菜单可复制特质 ID
 
+### Technology (科技)
+
+可视化 **Technology** 修饰符, 像 **Modifier** 一样, 支持节点和单一修饰符的显示
+
 ## 使用指南
 
 为启动扩展, 您需要确保您的语言模式为`hoi4`, [`CWTools`](https://marketplace.visualstudio.com/items?itemName=tboby.cwtools-vscode)
