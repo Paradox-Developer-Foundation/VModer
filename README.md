@@ -1,9 +1,16 @@
 # VModer
 
+Provides CWTools missing features for Hearts of iron IV , for example, real-time display of code modifier effects.
+
 English | [简体中文](VModer.Extensions/client/README.md)
 
 ---
-Provides CWTools missing features for Hearts of iron IV
+
+## sponsor
+
+If you feel this extension helps you, You can buy me a cup of milk tea through AiDianFa, which will help me continue to develop this extension
+
+[AiDianFa(ID: textGamex)](https://afdian.com/a/textGamex)
 
 ---
 
@@ -13,14 +20,51 @@ Provides CWTools missing features for Hearts of iron IV
 
 [Issue feedback/feature request](https://github.com/textGamex/VModer/issues/new)
 
+## Function
+
+### Modifier
+
+Supports visualization of all `modifier` and `modifiers` statements and files in the `common\modifiers` folder.
+
+### Character
+
+Trait Effect, Trait Icon, Council Position, Ideology
+
+Trait effects can now display trait blocks and individual trait effects
+
+### Color Selector
+
+Support national colors, ideological color definitions, support HSV and RGB conversion
+
+Automatically calculate the result after applying color modifiers, so what you see is what you get.
+
+### Error Analysis
+
+Supplementary section Error analysis types that CWTools cannot provide
+
+- Building grade analysis (State files only)
+- Character Skill level analysis (Only in the Character folder)
+
+### Trait Previewer
+
+Displays all traits defined in games and mods, and can be filtered by source (game, mod), trait type, and display trait modification effects
+
+Right-click menu to copy trait ID
+
+### Technology 
+
+Visualization **Technology** modifier, like **Modifier**, supports display of nodes and single modifiers
+
 ## Usage Guidelines
 
-To enable the extension, you need to make sure your language mode is `hoi4`, [`CWTools`](https://marketplace.visualstudio.com/items?itemName=tboby.cwtools-vscode)
-or[`Paradox Highlight`](https://marketplace.visualstudio.com/items?itemName=dragon-archer.paradox-highlight)Extensions provide this language mode,
+To enable the extension, you need to make sure your language mode is`hoi4`, [`CWTools`](https://marketplace.visualstudio.com/items?itemName=tboby.cwtools-vscode)
+or [`Paradox Highlight`](https://marketplace.visualstudio.com/items?itemName=dragon-archer.paradox-highlight)Extensions provide this language mode,
 
 You can also choose to install other extensions that provide `hoi4` language mode.
 
-## Function
+Also, you need to make sure that the workspace is open.
+
+## Function Display
 
 ### Modifier Visualization
 
@@ -46,18 +90,13 @@ You can also choose to install other extensions that provide `hoi4` language mod
 > 
 >![](https://www.helloimg.com/i/2025/01/18/678a83910610a.png)
 
+### Trait Previewer
+
+![trait](https://www.helloimg.com/i/2025/03/12/67d18f36cdfaf.png)
+
 ### Color Picker
 
 ![ColorPicker](https://www.helloimg.com/i/2025/01/18/678b34fe8e854.png)
 
-### Error Analysis
 
-- Building grade analysis
-- Character Skill level analysis
 
-## sponsor
-
-If you feel this extension helps you, you can buy me a cup of milk tea through this
-[Sponsored Links](https://afdian.com/a/textGamex)
-
-![QR](https://www.helloimg.com/i/2025/01/14/67860b62b54f5.jpg)
