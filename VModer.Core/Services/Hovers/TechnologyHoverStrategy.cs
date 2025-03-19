@@ -30,7 +30,6 @@ public sealed class TechnologyHoverStrategy(
         "desc"
     ];
 
-    // TODO: 当鼠标放到一个非 Modifier Leaf 上时, 会错误的显示描述
     public string GetHoverText(Node rootNode, HoverParams request)
     {
         var localPosition = request.Position.ToLocalPosition();
@@ -41,11 +40,11 @@ public sealed class TechnologyHoverStrategy(
         var modifiers = new List<IModifier>(4);
         if (pointedChild.TryGetNode(out var node) && rootNode.IsItemNode("technologies", adjacentNode))
         {
-            GetModifiersForNode(node, modifiers);
+            GetModifiersForNode(node, modifiers, rootNode);
         }
         else
         {
-            ProcessChildForModifiers(pointedChild, modifiers);
+            ProcessChildForModifiers(pointedChild, modifiers, adjacentNode, rootNode);
         }
 
         var descriptions = modifierDisplayService.GetDescription(modifiers);
@@ -62,15 +61,15 @@ public sealed class TechnologyHoverStrategy(
         return builder.ToString();
     }
 
-    private void GetModifiersForNode(Node node, List<IModifier> modifiers)
+    private void GetModifiersForNode(Node node, List<IModifier> modifiers, Node rootNode)
     {
         foreach (var child in node.AllArray)
         {
-            ProcessChildForModifiers(child, modifiers);
+            ProcessChildForModifiers(child, modifiers, node, rootNode);
         }
     }
 
-    private void ProcessChildForModifiers(Child child, List<IModifier> modifiers)
+    private void ProcessChildForModifiers(Child child, List<IModifier> modifiers, Node parent, Node rootNode)
     {
         if (
             child.TryGetLeaf(out var leaf)
@@ -78,6 +77,7 @@ public sealed class TechnologyHoverStrategy(
                 LeafKeywords,
                 keyword => keyword.Equals(leaf.Key, StringComparison.OrdinalIgnoreCase)
             )
+            && (unitService.Contains(parent.Key) || rootNode.IsItemNode("technologies", parent))
         )
         {
             modifiers.Add(LeafModifier.FromLeaf(leaf));
