@@ -264,7 +264,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
             {
                 traitName = $"![icon]({imageUri}){traitName}";
             }
-            builder.AppendListItem(traitName);
+            builder.AppendListItem(traitName, 0);
 
             IEnumerable<string> modifiers;
             if (type == LookUpTraitType.Leader && _generalTraitsService.TryGetTrait(traitKey, out var trait))

@@ -12,7 +12,7 @@ public static class MarkdownExtensions
     /// <param name="text"></param>
     /// <param name="level">层级</param>
     /// <exception cref="ArgumentOutOfRangeException">如果<c>level</c>小于0</exception>
-    public static IMarkdownDocument AppendListItem(this MarkdownDocument document, string text, int level = 0)
+    public static IMarkdownDocument AppendListItem(this MarkdownDocument document, string text, int level)
     {
         return document.Append(new MarkdownListItem(text, level));
     }
