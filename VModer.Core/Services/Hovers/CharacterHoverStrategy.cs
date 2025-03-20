@@ -173,7 +173,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
                     skillSet[leaf.Key] = value;
                 }
             }
-            else if (child.TryGetNode(out var childNode))
+            else if (child.TryGetNode(out var childNode) && childNode.Key.Equals("traits", StringComparison.OrdinalIgnoreCase))
             {
                 AddTraitsDescription(childNode, builder, LookUpTraitType.General);
             }
@@ -228,7 +228,10 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         builder.AppendHeader(Resources.Character_advisor, CharacterTypeLevel);
         foreach (var child in node.AllArray)
         {
-            if (child.TryGetNode(out var childNode))
+            if (
+                child.TryGetNode(out var childNode)
+                && childNode.Key.Equals("traits", StringComparison.OrdinalIgnoreCase)
+            )
             {
                 AddTraitsDescription(childNode, builder, LookUpTraitType.Leader);
             }
@@ -248,11 +251,6 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
 
     private void AddTraitsDescription(Node traitsNode, MarkdownDocument builder, LookUpTraitType type)
     {
-        if (!traitsNode.Key.Equals("traits", StringComparison.OrdinalIgnoreCase))
-        {
-            return;
-        }
-
         var traits = traitsNode.LeafValues.Select(trait => trait.Key);
         builder.AppendHeader($"{Resources.Traits}:", 4);
 
