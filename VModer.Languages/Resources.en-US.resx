@@ -44,4 +44,7 @@
     <data name="CleanupSuccessful" xml:space="preserve">
         <value>Cleanup successful</value>
     </data>
+    <data name="Categories" xml:space="preserve">
+        <value>Categories:</value>
+    </data>
 </root>

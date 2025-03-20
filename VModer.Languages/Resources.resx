@@ -51,4 +51,7 @@
     <data name="CleanupSuccessful" xml:space="preserve">
         <value>清理成功</value>
     </data>
+    <data name="Categories" xml:space="preserve">
+        <value>类别:</value>
+    </data>
 </root>

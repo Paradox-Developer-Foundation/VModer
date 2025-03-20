@@ -3,11 +3,13 @@ using Markdown;
 using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
 using VModer.Core.Extensions;
+using VModer.Core.Infrastructure.Markdown;
 using VModer.Core.Models;
 using VModer.Core.Models.Modifiers;
 using VModer.Core.Services.GameResource;
 using VModer.Core.Services.GameResource.Localization;
 using VModer.Core.Services.GameResource.Modifiers;
+using VModer.Languages;
 
 namespace VModer.Core.Services.Hovers;
 
@@ -86,11 +88,16 @@ public sealed class TechnologyHoverStrategy(
             }
             else if (node.Key.Equals("categories", StringComparison.OrdinalIgnoreCase))
             {
-                builder.AppendParagraph("类别:");
-                foreach (var leafValue in node.LeafValues)
+                builder.Insert(0, new MarkdownHorizontalRule());
+                foreach (var leafValue in node.LeafValues.Reverse())
                 {
-                    builder.AppendListItem(localizationFormatService.GetFormatText(leafValue.ValueText), 1);
+                    builder.Insert(
+                        0,
+                        new MarkdownListItem(localizationFormatService.GetFormatText(leafValue.ValueText), 1)
+                    );
                 }
+
+                builder.Insert(0, new MarkdownHeader(Resources.Categories, 3));
             }
         }
 
