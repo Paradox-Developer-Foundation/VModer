@@ -6,13 +6,15 @@ using VModer.Core.Extensions;
 using VModer.Core.Models;
 using VModer.Core.Models.Modifiers;
 using VModer.Core.Services.GameResource;
+using VModer.Core.Services.GameResource.Localization;
 using VModer.Core.Services.GameResource.Modifiers;
 
 namespace VModer.Core.Services.Hovers;
 
 public sealed class TechnologyHoverStrategy(
     ModifierDisplayService modifierDisplayService,
-    UnitService unitService
+    UnitService unitService,
+    LocalizationFormatService localizationFormatService
 ) : IHoverStrategy
 {
     public GameFileType FileType => GameFileType.Technology;
@@ -37,39 +39,28 @@ public sealed class TechnologyHoverStrategy(
 
         var pointedChild = adjacentNode.FindPointedChildByPosition(localPosition);
 
-        var modifiers = new List<IModifier>(4);
+        var builder = new MarkdownDocument();
         if (pointedChild.TryGetNode(out var node) && rootNode.IsItemNode("technologies", adjacentNode))
         {
-            GetModifiersForNode(node, modifiers, rootNode);
+            GetModifiersForTechnologyNode(rootNode, node, builder);
         }
         else
         {
-            ProcessChildForModifiers(pointedChild, modifiers, adjacentNode, rootNode);
-        }
-
-        var descriptions = modifierDisplayService.GetDescription(modifiers);
-        var builder = new MarkdownDocument(descriptions.Count);
-        foreach (string modifier in descriptions)
-        {
-            builder.AppendParagraph(
-                modifier.StartsWith(ModifierDisplayService.NodeModifierChildrenPrefix)
-                    ? $"- {modifier}"
-                    : modifier
-            );
+            ProcessChildForModifiers(pointedChild, adjacentNode, rootNode, builder);
         }
 
         return builder.ToString();
     }
 
-    private void GetModifiersForNode(Node node, List<IModifier> modifiers, Node rootNode)
+    private void GetModifiersForTechnologyNode(Node rootNode, Node node, MarkdownDocument builder)
     {
         foreach (var child in node.AllArray)
         {
-            ProcessChildForModifiers(child, modifiers, node, rootNode);
+            ProcessChildForModifiers(child, node, rootNode, builder);
         }
     }
 
-    private void ProcessChildForModifiers(Child child, List<IModifier> modifiers, Node parent, Node rootNode)
+    private void ProcessChildForModifiers(Child child, Node parent, Node rootNode, MarkdownDocument builder)
     {
         if (
             child.TryGetLeaf(out var leaf)
@@ -80,11 +71,38 @@ public sealed class TechnologyHoverStrategy(
             && (unitService.Contains(parent.Key) || rootNode.IsItemNode("technologies", parent))
         )
         {
-            modifiers.Add(LeafModifier.FromLeaf(leaf));
+            AddDescription(modifierDisplayService.GetDescription(LeafModifier.FromLeaf(leaf)));
         }
-        else if (child.TryGetNode(out var childNode) && unitService.Contains(childNode.Key))
+        else if (child.TryGetNode(out var node))
         {
-            modifiers.Add(NodeModifier.FromNode(childNode));
+            if (unitService.Contains(node.Key))
+            {
+                foreach (
+                    string description in modifierDisplayService.GetDescription(NodeModifier.FromNode(node))
+                )
+                {
+                    AddDescription(description);
+                }
+            }
+            else if (node.Key.Equals("categories", StringComparison.OrdinalIgnoreCase))
+            {
+                builder.AppendParagraph("类别:");
+                foreach (var leafValue in node.LeafValues)
+                {
+                    builder.AppendListItem(localizationFormatService.GetFormatText(leafValue.ValueText), 1);
+                }
+            }
+        }
+
+        return;
+
+        void AddDescription(string description)
+        {
+            builder.AppendParagraph(
+                description.StartsWith(ModifierDisplayService.NodeModifierChildrenPrefix)
+                    ? $"- {description}"
+                    : description
+            );
         }
     }
 }
