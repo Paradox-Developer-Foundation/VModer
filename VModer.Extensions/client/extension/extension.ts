@@ -148,10 +148,10 @@ export async function activate(context: ExtensionContext) {
     );
 }
 
-async function updateStatusBarItem(
+function updateStatusBarItem(
     statusBarItem: StatusBarItem,
     client: LanguageClient
-): Promise<void> {
+) {
     if (client.isRunning()) {
         statusBarItem.text = "$(notebook-state-success) VModer";
         statusBarItem.tooltip = "VModer is running";

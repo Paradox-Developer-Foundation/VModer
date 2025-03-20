@@ -34,17 +34,20 @@ public sealed class TechnologyHoverStrategy(
         "desc"
     ];
 
+    private const string TechnologiesKeyword = "technologies";
+    private const string CategoriesKeyword = "categories";
+
     public string GetHoverText(Node rootNode, HoverParams request)
     {
         var localPosition = request.Position.ToLocalPosition();
         var adjacentNode = rootNode.FindAdjacentNodeByPosition(localPosition);
 
         string hoverText;
-        if (rootNode.IsItemNode("technologies", adjacentNode))
+        if (rootNode.IsItemNode(TechnologiesKeyword, adjacentNode))
         {
             hoverText = GetTechnologyNodeText(rootNode, adjacentNode);
         }
-        else if (adjacentNode.Key.Equals("categories", StringComparison.OrdinalIgnoreCase))
+        else if (adjacentNode.Key.Equals(CategoriesKeyword, StringComparison.OrdinalIgnoreCase))
         {
             hoverText = GetCategoriesDescriptionText(adjacentNode, localPosition);
         }
@@ -72,10 +75,10 @@ public sealed class TechnologyHoverStrategy(
         return builder.ToString();
     }
 
-    private string GetCategoriesDescriptionText(Node adjacentNode, LocalPosition localPosition)
+    private string GetCategoriesDescriptionText(Node categoriesNode, LocalPosition localPosition)
     {
         var builder = new MarkdownDocument();
-        var pointedChild = adjacentNode.FindPointedChildByPosition(localPosition);
+        var pointedChild = categoriesNode.FindPointedChildByPosition(localPosition);
         if (pointedChild.TryGetNode(out var node))
         {
             AddCategoriesDescription(node.LeafValues, builder);
@@ -97,7 +100,8 @@ public sealed class TechnologyHoverStrategy(
                 LeafKeywords,
                 keyword => keyword.Equals(leaf.Key, StringComparison.OrdinalIgnoreCase)
             )
-            && (unitService.Contains(parent.Key) || rootNode.IsItemNode("technologies", parent))
+            // 防止错误地显示某些判断条件的Hover
+            && (unitService.Contains(parent.Key) || rootNode.IsItemNode(TechnologiesKeyword, parent))
         )
         {
             AddDescription(modifierDisplayService.GetDescription(LeafModifier.FromLeaf(leaf)));
@@ -113,7 +117,7 @@ public sealed class TechnologyHoverStrategy(
                     AddDescription(description);
                 }
             }
-            else if (node.Key.Equals("categories", StringComparison.OrdinalIgnoreCase))
+            else if (node.Key.Equals(CategoriesKeyword, StringComparison.OrdinalIgnoreCase))
             {
                 AddCategoriesDescription(node.LeafValues, builder);
             }
