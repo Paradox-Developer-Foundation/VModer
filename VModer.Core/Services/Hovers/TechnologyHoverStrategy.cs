@@ -39,27 +39,54 @@ public sealed class TechnologyHoverStrategy(
         var localPosition = request.Position.ToLocalPosition();
         var adjacentNode = rootNode.FindAdjacentNodeByPosition(localPosition);
 
-        var pointedChild = adjacentNode.FindPointedChildByPosition(localPosition);
-
-        var builder = new MarkdownDocument();
-        if (pointedChild.TryGetNode(out var node) && rootNode.IsItemNode("technologies", adjacentNode))
+        string hoverText;
+        if (rootNode.IsItemNode("technologies", adjacentNode))
         {
-            GetModifiersForTechnologyNode(rootNode, node, builder);
+            hoverText = GetTechnologyNodeText(rootNode, adjacentNode);
         }
+        else if (adjacentNode.Key.Equals("categories", StringComparison.OrdinalIgnoreCase))
+        {
+            hoverText = GetCategoriesDescriptionText(adjacentNode, localPosition);
+        }
+        // 当为具体的修饰符时
         else
         {
+            var builder = new MarkdownDocument();
+            var pointedChild = adjacentNode.FindPointedChildByPosition(localPosition);
+
             ProcessChildForModifiers(pointedChild, adjacentNode, rootNode, builder);
+            hoverText = builder.ToString();
+        }
+
+        return hoverText;
+    }
+
+    private string GetTechnologyNodeText(Node rootNode, Node node)
+    {
+        var builder = new MarkdownDocument();
+        foreach (var child in node.AllArray)
+        {
+            ProcessChildForModifiers(child, node, rootNode, builder);
         }
 
         return builder.ToString();
     }
 
-    private void GetModifiersForTechnologyNode(Node rootNode, Node node, MarkdownDocument builder)
+    private string GetCategoriesDescriptionText(Node adjacentNode, LocalPosition localPosition)
     {
-        foreach (var child in node.AllArray)
+        var builder = new MarkdownDocument();
+        var pointedChild = adjacentNode.FindPointedChildByPosition(localPosition);
+        if (pointedChild.TryGetNode(out var node))
         {
-            ProcessChildForModifiers(child, node, rootNode, builder);
+            AddCategoriesDescription(node.LeafValues, builder);
         }
+        // 当光标放在某一个类别上时
+        else if (pointedChild.TryGetLeafValue(out var leafValue))
+        {
+            AddCategoriesDescription([leafValue], builder);
+        }
+
+        return builder.ToString();
     }
 
     private void ProcessChildForModifiers(Child child, Node parent, Node rootNode, MarkdownDocument builder)
@@ -88,16 +115,7 @@ public sealed class TechnologyHoverStrategy(
             }
             else if (node.Key.Equals("categories", StringComparison.OrdinalIgnoreCase))
             {
-                builder.Insert(0, new MarkdownHorizontalRule());
-                foreach (var leafValue in node.LeafValues.Reverse())
-                {
-                    builder.Insert(
-                        0,
-                        new MarkdownListItem(localizationFormatService.GetFormatText(leafValue.ValueText), 1)
-                    );
-                }
-
-                builder.Insert(0, new MarkdownHeader(Resources.Categories, 3));
+                AddCategoriesDescription(node.LeafValues, builder);
             }
         }
 
@@ -109,6 +127,19 @@ public sealed class TechnologyHoverStrategy(
                 description.StartsWith(ModifierDisplayService.NodeModifierChildrenPrefix)
                     ? $"- {description}"
                     : description
+            );
+        }
+    }
+
+    private void AddCategoriesDescription(IEnumerable<LeafValue> leafValues, MarkdownDocument builder)
+    {
+        builder.Insert(0, new MarkdownHeader(Resources.Categories, 3));
+        builder.Insert(1, new MarkdownHorizontalRule());
+        foreach (var leafValue in leafValues.Reverse())
+        {
+            builder.Insert(
+                1,
+                new MarkdownListItem(localizationFormatService.GetFormatText(leafValue.ValueText), 1)
             );
         }
     }
