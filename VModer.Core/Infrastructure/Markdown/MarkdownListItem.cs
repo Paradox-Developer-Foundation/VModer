@@ -17,6 +17,6 @@ public sealed class MarkdownListItem : MarkdownTextElement, IMarkdownBlockElemen
     public override string ToString()
     {
         string prefix = new(' ', _level * 2);
-        return $"{prefix}- {Text}";
+        return $"{prefix}- {Text}{Environment.NewLine}";
     }
 }
