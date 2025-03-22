@@ -12,3 +12,4 @@ operation_outcome,+%0,行动效率
 operation_cost,-%0,行动花费
 MODIFIER_COMPLIANCE_GAIN_ADD,+=%.0,每日顺从度增长
 political_power_cost,-=2,每日消耗的政治点数
+MODIFIER_GLOBAL_MONTHLY_POPULATION,+=%1,每月人口
