@@ -106,12 +106,7 @@ public sealed class ModifierDisplayService
         string modifierKey = _localisationKeyMappingService.TryGetValue(modifier.Key, out string? mappingKey)
             ? mappingKey
             : modifier.Key;
-        string modifierName = string.Join(
-            string.Empty,
-            _localisationFormatService
-                .GetFormatTextInfo(_modifierService.GetLocalizationName(modifierKey))
-                .Select(x => x.DisplayText)
-        );
+        string modifierName = _localisationFormatService.GetFormatText(modifierKey);
         string colon =
             modifierName.EndsWith(':')
             || modifierName.EndsWith('：')
