@@ -139,6 +139,8 @@ public sealed class TechnologyHoverStrategy(
     {
         builder.Insert(0, new MarkdownHeader(Resources.Categories, 3));
         builder.Insert(1, new MarkdownHorizontalRule());
+
+        // 在我们需要反转一下, 以确保显示顺序和实际顺序一致
         foreach (var leafValue in leafValues.Reverse())
         {
             builder.Insert(
