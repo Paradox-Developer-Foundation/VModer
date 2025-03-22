@@ -1,3 +1,27 @@
+## 0.7.0
+
+### Technology
+
+支持显示 **Technology** (`common\technologies`文件夹下) 的修饰符, 就像 **Modifier** 一样, 支持节点和单一修饰符的显示
+
+---
+
+### 遥测功能
+
+此版本接入了遥测以帮助我们了解扩展的使用情况和改进用户体验。收集的数据包括：
+
+- 功能使用情况（如特质预览器使用次数）
+- 错误报告
+- 性能指标
+
+**关闭遥测方法**：在VS Code设置中将`telemetry.telemetryLevel`设置为`off`，或在用户设置中添加`"vmoder.enableTelemetry": false`
+
+### 其他更新
+
+- perf: 优化部分情景下内存使用
+- fix: 部分情况下无法显示引用字符串
+- fix: 添加缺失的 `monthly_population` Modifier 格式化符
+
 ## 0.6.0
 
 ### 全新的特质预览器
