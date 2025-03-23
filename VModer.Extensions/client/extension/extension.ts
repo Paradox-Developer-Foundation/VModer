@@ -32,6 +32,12 @@ export async function activate(context: ExtensionContext) {
   const reporter = new TelemetryReporter(connectionString);
   context.subscriptions.push(reporter);
 
+  try {
+    reporter.sendTelemetryEvent("activate");
+  } catch (error) {
+    console.log(error);
+  }
+
   const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Right, 100000);
   const openLogs = commands.registerCommand("vmoder.openLogs", () => {
     const dirPath = path.dirname(command);
