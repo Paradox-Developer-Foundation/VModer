@@ -32,6 +32,10 @@ Language: ZH | [EN](https://github.com/textGamex/VModer/blob/main/README.md)
 
 特质效果可显示特质块和单独特质效果的显示
 
+### Technology (科技)
+
+可视化 **Technology** 修饰符, 像 **Modifier** 一样, 支持节点和单一修饰符的显示
+
 ### 颜色选择器
 
 支持国家颜色, 意识形态颜色定义, 支持 HSV 和 RGB 转换
@@ -50,10 +54,6 @@ Language: ZH | [EN](https://github.com/textGamex/VModer/blob/main/README.md)
 显示游戏和 MOD 中所有定义的特质, 并可以按来源(游戏, MOD), 特质类型筛选, 显示特质修饰效果
 
 右键菜单可复制特质 ID
-
-### Technology (科技)
-
-可视化 **Technology** 修饰符, 像 **Modifier** 一样, 支持节点和单一修饰符的显示
 
 ## 使用指南
 
