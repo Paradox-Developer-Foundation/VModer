@@ -16,13 +16,13 @@ using VModer.Core.Services.GameResource.Modifiers;
 namespace VModer.Core.Services.GameResource;
 
 public sealed class GeneralTraitsService
-    : CommonResourcesService<GeneralTraitsService, FrozenDictionary<string, CharacterTrait>>
+    : CommonResourcesService<GeneralTraitsService, FrozenDictionary<string, GeneralTrait>>
 {
     private readonly LocalizationFormatService _localizationFormatService;
     private readonly ModifierDisplayService _modifierDisplayService;
     private readonly GameResourcesPathService _gameResourcesPathService;
     private readonly ModifierService _modifierService;
-    private ICollection<FrozenDictionary<string, CharacterTrait>> Traits => Resources.Values;
+    private ICollection<FrozenDictionary<string, GeneralTrait>> Traits => Resources.Values;
 
     /// <summary>
     /// 特质修饰符节点名称
@@ -105,7 +105,7 @@ public sealed class GeneralTraitsService
         return traits;
     }
 
-    public IEnumerable<string> GetModifiersDescription(CharacterTrait trait)
+    public IEnumerable<string> GetModifiersDescription(GeneralTrait trait)
     {
         var descriptions = new List<string>(8);
 
@@ -113,7 +113,7 @@ public sealed class GeneralTraitsService
         {
             if (
                 modifierCollection.Key.Equals(
-                    CharacterTrait.TraitXpFactor,
+                    GeneralTrait.TraitXpFactor,
                     StringComparison.OrdinalIgnoreCase
                 )
             )
@@ -135,7 +135,7 @@ public sealed class GeneralTraitsService
         return descriptions;
     }
 
-    public bool TryGetTrait(string name, [NotNullWhen(true)] out CharacterTrait? trait)
+    public bool TryGetTrait(string name, [NotNullWhen(true)] out GeneralTrait? trait)
     {
         foreach (var traitMap in Traits)
         {
@@ -149,12 +149,12 @@ public sealed class GeneralTraitsService
         return false;
     }
 
-    private string GetLocalizationName(CharacterTrait characterTrait)
+    private string GetLocalizationName(GeneralTrait generalTrait)
     {
-        return _localizationFormatService.GetFormatText(characterTrait.Name);
+        return _localizationFormatService.GetFormatText(generalTrait.Name);
     }
 
-    protected override FrozenDictionary<string, CharacterTrait>? ParseFileToContent(Node rootNode)
+    protected override FrozenDictionary<string, GeneralTrait>? ParseFileToContent(Node rootNode)
     {
         // Character Traits 和 技能等级修正 在同一个文件夹中, 这里我们只处理 Character Traits 文件
         var traitsNodes = Array.FindAll(
@@ -170,7 +170,7 @@ public sealed class GeneralTraitsService
         }
 
         // 在 1.14 版本中, 人物特质文件中大约有 145 个特质
-        var dictionary = new Dictionary<string, CharacterTrait>(163, StringComparer.OrdinalIgnoreCase);
+        var dictionary = new Dictionary<string, GeneralTrait>(163, StringComparer.OrdinalIgnoreCase);
         foreach (var traitsChild in traitsNodes)
         {
             traitsChild.TryGetNode(out var traitsNode);
@@ -189,9 +189,9 @@ public sealed class GeneralTraitsService
     /// </summary>
     /// <param name="traitsNode">文件中的 leader_traits 节点</param>
     /// <returns></returns>
-    private ReadOnlySpan<CharacterTrait> ParseTraitsNode(Node traitsNode)
+    private ReadOnlySpan<GeneralTrait> ParseTraitsNode(Node traitsNode)
     {
-        var traits = new List<CharacterTrait>(traitsNode.AllArray.Length);
+        var traits = new List<GeneralTrait>(traitsNode.AllArray.Length);
 
         foreach (var child in traitsNode.AllArray)
         {
@@ -220,7 +220,7 @@ public sealed class GeneralTraitsService
                         Array.Exists(
                             ModifierNodeKeys,
                             keyword => StringComparer.OrdinalIgnoreCase.Equals(keyword, key)
-                        ) || StringComparer.OrdinalIgnoreCase.Equals(key, CharacterTrait.TraitXpFactor)
+                        ) || StringComparer.OrdinalIgnoreCase.Equals(key, GeneralTrait.TraitXpFactor)
                     )
                 )
                 {
@@ -241,7 +241,7 @@ public sealed class GeneralTraitsService
 
             if (skillModifiers.Count != 0)
             {
-                modifiers.Add(new ModifierCollection(CharacterTrait.TraitSkillModifiersKey, skillModifiers));
+                modifiers.Add(new ModifierCollection(GeneralTrait.TraitSkillModifiersKey, skillModifiers));
             }
 
             if (customModifiersTooltip.Count != 0)
@@ -250,7 +250,7 @@ public sealed class GeneralTraitsService
                     new ModifierCollection(LeafModifier.CustomEffectTooltipKey, customModifiersTooltip)
                 );
             }
-            traits.Add(new CharacterTrait(traitName, traitType, modifiers));
+            traits.Add(new GeneralTrait(traitName, traitType, modifiers));
         }
 
         return CollectionsMarshal.AsSpan(traits);

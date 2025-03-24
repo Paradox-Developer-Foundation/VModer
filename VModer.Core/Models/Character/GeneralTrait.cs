@@ -3,9 +3,9 @@
 namespace VModer.Core.Models.Character;
 
 /// <summary>
-/// 人物特质
+/// 除去领导人之外的特质
 /// </summary>
-public sealed class CharacterTrait
+public sealed class GeneralTrait
 {
     public string Name { get; }
     public TraitType Type { get; }
@@ -19,7 +19,7 @@ public sealed class CharacterTrait
 
     public ModifierCollection[] ModifiersCollection { get; }
 
-    public CharacterTrait(string name, TraitType type, IEnumerable<ModifierCollection> modifiers)
+    public GeneralTrait(string name, TraitType type, IEnumerable<ModifierCollection> modifiers)
     {
         Name = name;
         Type = type;
