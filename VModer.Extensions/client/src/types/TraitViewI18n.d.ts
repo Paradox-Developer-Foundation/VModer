@@ -7,4 +7,5 @@ export interface TraitViewI18n {
 	modOnly: string;
 	traitType: string;
 	copyTraitId: string;
+	openInFile: string;
 }

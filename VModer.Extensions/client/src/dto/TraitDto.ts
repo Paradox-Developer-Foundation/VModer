@@ -1,10 +1,14 @@
+import type { DocumentRange } from '../types/DocumentRange';
+
 interface TraitDto {
+  FilePath: string;
   Name: string;
   LocalizedName: string;
   Modifiers: string;
   FileOrigin: FileOrigin;
   Type: TraitType;
   Description?: string;
+  Position: DocumentRange;
 }
 
 /**

@@ -10,5 +10,6 @@
   "TraitsView.ModOnly": "Mod Only",
   "TraitsView.TraitType": "Trait Type:",
   "TraitsView.Title": "Character Traits Query",
-  "TraitsView.CopyTraitId": "Copy Trait ID"
+  "TraitsView.CopyTraitId": "Copy Trait ID",
+  "TraitsView.OpenInFile": "Open in File"
 }

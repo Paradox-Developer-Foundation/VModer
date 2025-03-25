@@ -10,5 +10,6 @@
   "TraitsView.ModOnly": "仅模组",
   "TraitsView.TraitType": "特质类型:",
   "TraitsView.Title": "人物特质查询",
-  "TraitsView.CopyTraitId": "复制特质ID"
+  "TraitsView.CopyTraitId": "复制特质ID",
+  "TraitsView.OpenInFile": "在文件中打开"
 }

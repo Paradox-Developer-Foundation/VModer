@@ -88,7 +88,9 @@ public sealed class GeneralTraitsService
                     LocalizedName = GetLocalizationName(trait),
                     Modifiers = string.Join('\n', GetModifiersDescription(trait)),
                     FileOrigin = fileOrigin,
-                    Type = trait.Type
+                    Type = trait.Type,
+                    Position = trait.Position.ToDocumentRange(),
+                    FilePath = fileResource.Key
                 };
 
                 if (
@@ -111,12 +113,7 @@ public sealed class GeneralTraitsService
 
         foreach (var modifierCollection in trait.ModifiersCollection)
         {
-            if (
-                modifierCollection.Key.Equals(
-                    GeneralTrait.TraitXpFactor,
-                    StringComparison.OrdinalIgnoreCase
-                )
-            )
+            if (modifierCollection.Key.Equals(GeneralTrait.TraitXpFactor, StringComparison.OrdinalIgnoreCase))
             {
                 foreach (var modifier in modifierCollection.Modifiers.OfType<LeafModifier>())
                 {
@@ -200,60 +197,66 @@ public sealed class GeneralTraitsService
                 continue;
             }
 
-            string traitName = traitNode.Key;
-
-            var modifiers = new List<ModifierCollection>(4);
-            var skillModifiers = new List<LeafModifier>();
-            var customModifiersTooltip = new List<LeafModifier>();
-            var traitType = TraitType.None;
-            foreach (var traitAttribute in traitNode.AllArray)
-            {
-                string? key = traitAttribute.GetKeyOrNull();
-                // type 可以为 Leaf 或 Node
-                if (StringComparer.OrdinalIgnoreCase.Equals(key, "type"))
-                {
-                    traitType = GetTraitType(traitAttribute);
-                }
-                else if (
-                    traitAttribute.TryGetNode(out var node)
-                    && (
-                        Array.Exists(
-                            ModifierNodeKeys,
-                            keyword => StringComparer.OrdinalIgnoreCase.Equals(keyword, key)
-                        ) || StringComparer.OrdinalIgnoreCase.Equals(key, GeneralTrait.TraitXpFactor)
-                    )
-                )
-                {
-                    modifiers.Add(ParseModifier(node));
-                }
-                else if (
-                    traitAttribute.TryGetLeaf(out var leaf)
-                    && StringComparer.OrdinalIgnoreCase.Equals(LeafModifier.CustomEffectTooltipKey, key)
-                )
-                {
-                    customModifiersTooltip.Add(LeafModifier.FromLeaf(leaf));
-                }
-                else if (IsSkillModifier(traitAttribute, out leaf))
-                {
-                    skillModifiers.Add(LeafModifier.FromLeaf(leaf));
-                }
-            }
-
-            if (skillModifiers.Count != 0)
-            {
-                modifiers.Add(new ModifierCollection(GeneralTrait.TraitSkillModifiersKey, skillModifiers));
-            }
-
-            if (customModifiersTooltip.Count != 0)
-            {
-                modifiers.Add(
-                    new ModifierCollection(LeafModifier.CustomEffectTooltipKey, customModifiersTooltip)
-                );
-            }
-            traits.Add(new GeneralTrait(traitName, traitType, modifiers));
+            traits.Add(ParseTraitNode(traitNode));
         }
 
         return CollectionsMarshal.AsSpan(traits);
+    }
+
+    private GeneralTrait ParseTraitNode(Node traitNode)
+    {
+        string traitName = traitNode.Key;
+
+        var modifiers = new List<ModifierCollection>(4);
+        var skillModifiers = new List<LeafModifier>();
+        var customModifiersTooltip = new List<LeafModifier>();
+        var traitType = TraitType.None;
+        foreach (var traitAttribute in traitNode.AllArray)
+        {
+            string? key = traitAttribute.GetKeyOrNull();
+            // type 可以为 Leaf 或 Node
+            if (StringComparer.OrdinalIgnoreCase.Equals(key, "type"))
+            {
+                traitType = GetTraitType(traitAttribute);
+            }
+            else if (
+                traitAttribute.TryGetNode(out var node)
+                && (
+                    Array.Exists(
+                        ModifierNodeKeys,
+                        keyword => StringComparer.OrdinalIgnoreCase.Equals(keyword, key)
+                    ) || StringComparer.OrdinalIgnoreCase.Equals(key, GeneralTrait.TraitXpFactor)
+                )
+            )
+            {
+                modifiers.Add(ParseModifier(node));
+            }
+            else if (
+                traitAttribute.TryGetLeaf(out var leaf)
+                && StringComparer.OrdinalIgnoreCase.Equals(LeafModifier.CustomEffectTooltipKey, key)
+            )
+            {
+                customModifiersTooltip.Add(LeafModifier.FromLeaf(leaf));
+            }
+            else if (IsSkillModifier(traitAttribute, out leaf))
+            {
+                skillModifiers.Add(LeafModifier.FromLeaf(leaf));
+            }
+        }
+
+        if (skillModifiers.Count != 0)
+        {
+            modifiers.Add(new ModifierCollection(GeneralTrait.TraitSkillModifiersKey, skillModifiers));
+        }
+
+        if (customModifiersTooltip.Count != 0)
+        {
+            modifiers.Add(
+                new ModifierCollection(LeafModifier.CustomEffectTooltipKey, customModifiersTooltip)
+            );
+        }
+
+        return new GeneralTrait(traitName, traitType, modifiers, traitNode.Position);
     }
 
     private TraitType GetTraitType(Child traitAttribute)

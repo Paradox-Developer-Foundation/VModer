@@ -1,8 +1,20 @@
-import { env, ExtensionContext, l10n, ViewColumn, WebviewPanel, window } from "vscode";
+import {
+  env,
+  ExtensionContext,
+  l10n,
+  Selection,
+  Uri,
+  ViewColumn,
+  WebviewPanel,
+  window,
+  workspace,
+} from "vscode";
 import { Disposable } from "vscode-languageclient";
 import { WebviewHelpers } from "./WebviewHelpers";
 import { LanguageClient } from "vscode-languageclient/node";
 import type { TraitViewI18n } from "../../src/types/TraitViewI18n";
+import type { OpenInFileMessage } from '../../src/types/OpenInFileMessage';
+import type { DocumentRange } from '../../src/types/DocumentRange';
 
 export class TraitView {
   public static currentPanel: TraitView | undefined;
@@ -20,10 +32,15 @@ export class TraitView {
     if (TraitView.currentPanel) {
       TraitView.currentPanel._panel.reveal(ViewColumn.One);
     } else {
-      const panel = window.createWebviewPanel("traitsView", l10n.t("TraitsView.Title"), ViewColumn.One, {
-        enableScripts: true,
-        retainContextWhenHidden: true,
-      });
+      const panel = window.createWebviewPanel(
+        "traitsView",
+        l10n.t("TraitsView.Title"),
+        ViewColumn.One,
+        {
+          enableScripts: true,
+          retainContextWhenHidden: true,
+        }
+      );
 
       TraitView.currentPanel = new TraitView(panel, context);
 
@@ -36,10 +53,11 @@ export class TraitView {
         modOnly: l10n.t("TraitsView.ModOnly"),
         traitType: l10n.t("TraitsView.TraitType"),
         copyTraitId: l10n.t("TraitsView.CopyTraitId"),
+        openInFile: l10n.t("TraitsView.OpenInFile"),
       };
 
       panel.webview.onDidReceiveMessage(
-        async (message) => {
+        async (message: string) => {
           if (message == "init_complete") {
             panel.webview.postMessage({ type: "i18n", data: i18n });
             panel.webview.postMessage({
@@ -53,7 +71,7 @@ export class TraitView {
       );
 
       panel.webview.onDidReceiveMessage(
-        async (message) => {
+        async (message: ReceiveMessage<string>) => {
           if (message.type === "copyToClipboard") {
             try {
               await env.clipboard.writeText(message.data);
@@ -61,6 +79,32 @@ export class TraitView {
             } catch (err) {
               console.error("无法复制文本:", err);
               window.showErrorMessage("复制失败");
+            }
+          }
+        },
+        null,
+        TraitView.currentPanel._disposables
+      );
+
+      panel.webview.onDidReceiveMessage(
+        async (message: ReceiveMessage<OpenInFileMessage>) => {
+          if (message.type === "openInFile") {
+            try {
+              const fileUri = Uri.file(message.data.filePath);
+
+              const position: DocumentRange = JSON.parse(message.data.position);
+              // 创建选择区域
+              const selection = new Selection(
+                position.start,
+                position.end
+              );
+
+              // 打开文档并选中指定区域
+              const document = await workspace.openTextDocument(fileUri);
+              await window.showTextDocument(document, { selection });
+            } catch (error) {
+              console.error("无法打开文件:", error);
+              window.showErrorMessage("无法打开文件");
             }
           }
         },

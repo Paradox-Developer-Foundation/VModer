@@ -39,16 +39,13 @@
       </template>
 
       <template #item="{ item, index }">
-        <div style="padding: 8px 12px;" @click.right="(event) => openMenu(event, item, index)">
+        <div style="padding: 8px 12px" @click.right="(event) => openMenu(event, item, index)">
           {{ item.LocalizedName }}
         </div>
       </template>
     </ListBox>
 
-    <vscode-context-menu
-      ref="contextMenu"
-      style="position: fixed"
-    ></vscode-context-menu>
+    <vscode-context-menu ref="contextMenu" style="position: fixed"></vscode-context-menu>
   </div>
 </template>
 
@@ -59,6 +56,7 @@ import { WebviewApi } from "@tomjs/vscode-webview";
 import ListBox from "./ListBox.vue";
 import type { TraitViewI18n } from "../types/TraitViewI18n";
 import type { VscodeContextMenu, VscodeMultiSelect } from "@vscode-elements/elements";
+import type { OpenInFileMessage } from "../types/OpenInFileMessage";
 
 const AllOrgin = "0";
 const traitTypes: TraitType[] = getTraitTypeValues();
@@ -72,6 +70,7 @@ const i18n = ref<TraitViewI18n>({
   modOnly: "Mod Only",
   traitType: "Trait Type:",
   copyTraitId: "Copy Trait ID",
+  openInFile: "Open in File",
 });
 
 const searchValue = ref("");
@@ -79,7 +78,7 @@ const selectedOrigin = ref(AllOrgin);
 const traitTypeSelection = ref<VscodeMultiSelect | null>(null);
 const contextMenu = ref<VscodeContextMenu | null>(null);
 
-const listBox = useTemplateRef('listBox');
+const listBox = useTemplateRef("listBox");
 
 const viewData = ref<TraitDto[]>([]);
 let rawTraits: TraitDto[] = [];
@@ -87,13 +86,19 @@ let currentItem: TraitDto | null = null;
 
 onMounted(() => {
   vscode.postMessage("init_complete");
-  contextMenu.value!.data.push({
-    label: "复制特质ID",
-    value: "copyTraitId",
-  });
+
   contextMenu.value!.addEventListener("vsc-context-menu-select", (event) => {
-    if (event.detail.value === "copyTraitId" && currentItem) {
+    if (!currentItem) {
+      return;
+    }
+
+    if (event.detail.value === "copyTraitId") {
       vscode.postMessage({ type: "copyToClipboard", data: currentItem.Name });
+    } else if (event.detail.value === "openInFile") {
+      vscode.postMessage<ReceiveMessage<OpenInFileMessage>>({
+        type: "openInFile",
+        data: { position: JSON.stringify(currentItem.Position), filePath: currentItem.FilePath },
+      });
     }
   });
 });
@@ -124,11 +129,11 @@ function openMenu(event: MouseEvent, item: TraitDto, itemIndex: number) {
   contextMenu.value.style.left = `${event.clientX}px`;
   contextMenu.value.style.top = `${event.clientY}px`;
   contextMenu.value.show = true;
-  
+
   const newClickListener = (_: MouseEvent) => {
     closeContextMenu();
   };
-  
+
   documentClickListener.value = newClickListener;
 
   setTimeout(() => {
@@ -144,6 +149,17 @@ vscode.on<TraitDto[]>("traits", (receivedTraits) => {
 
 vscode.on<TraitViewI18n>("i18n", (i18nData) => {
   i18n.value = i18nData;
+
+  contextMenu.value!.data = [
+    {
+      label: i18n.value.copyTraitId,
+      value: "copyTraitId",
+    },
+    {
+      label: i18n.value.openInFile,
+      value: "openInFile"
+    },
+  ];
 });
 
 function searchTrait() {

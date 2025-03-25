@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using EmmyLua.LanguageServer.Framework.Protocol.Model;
 using VModer.Core.Models.Character;
 using VModer.Core.Services;
 
@@ -17,4 +18,7 @@ public sealed class TraitDto
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Description { get; set; }
+
+    public required DocumentRange Position { get; init; }
+    public required string FilePath { get; init; }
 }
