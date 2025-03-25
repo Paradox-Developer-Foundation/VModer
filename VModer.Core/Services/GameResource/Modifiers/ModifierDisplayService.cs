@@ -234,7 +234,7 @@ public sealed class ModifierDisplayService
                 string modifierName = _localisationFormatService.GetFormatText(
                     $"STAT_ADJUSTER_{modifier.Key}"
                 );
-                string modifierFormat = _localisationFormatService.GetFormatText(
+                string modifierFormat = _localizationService.GetValue(
                     $"STAT_ADJUSTER_{modifier.Key}_DIFF"
                 );
                 return $"{NodeModifierChildrenPrefix}{modifierName}{_modifierService.GetDisplayValue((LeafModifier)modifier, modifierFormat)}";
