@@ -8,4 +8,5 @@ export interface TraitViewI18n {
 	traitType: string;
 	copyTraitId: string;
 	openInFile: string;
+	refresh: string;
 }

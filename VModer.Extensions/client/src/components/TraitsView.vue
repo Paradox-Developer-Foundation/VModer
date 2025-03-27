@@ -22,6 +22,7 @@
         }}</vscode-option>
       </vscode-multi-select>
 
+      <vscode-button @click="vscode.postMessage('refreshTraits')">{{ i18n.refresh }}</vscode-button>
       <label>Count: {{ viewData.length }} </label>
     </div>
 
@@ -71,6 +72,7 @@ const i18n = ref<TraitViewI18n>({
   traitType: "Trait Type:",
   copyTraitId: "Copy Trait ID",
   openInFile: "Open in File",
+  refresh: "Refresh"
 });
 
 const searchValue = ref("");
@@ -86,6 +88,7 @@ let currentItem: TraitDto | null = null;
 
 onMounted(() => {
   vscode.postMessage("init_complete");
+  vscode.postMessage("refreshTraits");
 
   contextMenu.value!.addEventListener("vsc-context-menu-select", (event) => {
     if (!currentItem) {
@@ -145,6 +148,9 @@ vscode.on<TraitDto[]>("traits", (receivedTraits) => {
   rawTraits = receivedTraits;
 
   viewData.value = rawTraits;
+
+  // 当数据发来后，刷新列表
+  searchTrait();
 });
 
 vscode.on<TraitViewI18n>("i18n", (i18nData) => {

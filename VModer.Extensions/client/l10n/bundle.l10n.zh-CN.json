@@ -11,5 +11,6 @@
   "TraitsView.TraitType": "特质类型:",
   "TraitsView.Title": "人物特质查询",
   "TraitsView.CopyTraitId": "复制特质ID",
-  "TraitsView.OpenInFile": "在文件中打开"
+  "TraitsView.OpenInFile": "在文件中打开",
+  "TraitsView.Refresh": "刷新"
 }

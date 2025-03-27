@@ -13,8 +13,8 @@ import { Disposable } from "vscode-languageclient";
 import { WebviewHelpers } from "./WebviewHelpers";
 import { LanguageClient } from "vscode-languageclient/node";
 import type { TraitViewI18n } from "../../src/types/TraitViewI18n";
-import type { OpenInFileMessage } from '../../src/types/OpenInFileMessage';
-import type { DocumentRange } from '../../src/types/DocumentRange';
+import type { OpenInFileMessage } from "../../src/types/OpenInFileMessage";
+import type { DocumentRange } from "../../src/types/DocumentRange";
 
 export class TraitView {
   public static currentPanel: TraitView | undefined;
@@ -54,13 +54,15 @@ export class TraitView {
         traitType: l10n.t("TraitsView.TraitType"),
         copyTraitId: l10n.t("TraitsView.CopyTraitId"),
         openInFile: l10n.t("TraitsView.OpenInFile"),
+        refresh: l10n.t("TraitsView.Refresh"),
       };
 
       panel.webview.onDidReceiveMessage(
         async (message: string) => {
           if (message == "init_complete") {
             panel.webview.postMessage({ type: "i18n", data: i18n });
-            panel.webview.postMessage({
+          } else if (message == "refreshTraits") {
+            await panel.webview.postMessage({
               type: "traits",
               data: await client.sendRequest("getAllTrait"),
             });
@@ -94,10 +96,7 @@ export class TraitView {
 
               const position: DocumentRange = JSON.parse(message.data.position);
               // 创建选择区域
-              const selection = new Selection(
-                position.start,
-                position.end
-              );
+              const selection = new Selection(position.start, position.end);
 
               // 打开文档并选中指定区域
               const document = await workspace.openTextDocument(fileUri);

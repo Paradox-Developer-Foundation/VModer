@@ -11,5 +11,6 @@
   "TraitsView.TraitType": "Trait Type:",
   "TraitsView.Title": "Character Traits Query",
   "TraitsView.CopyTraitId": "Copy Trait ID",
-  "TraitsView.OpenInFile": "Open in File"
+  "TraitsView.OpenInFile": "Open in File",
+  "TraitsView.Refresh": "Refresh"
 }
