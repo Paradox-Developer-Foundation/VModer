@@ -148,16 +148,10 @@ public sealed class LocalizationFormatService(
 
             if (localizationTextColorsService.TryGetColor(format.Text[0], out var colorInfo))
             {
-                if (!_colors.TryGetValue(format.Text[0], out var brush))
-                {
-                    _colors.Add(format.Text[0], brush);
-                }
-                return new TextFormatInfo(format.Text[1..], brush);
+                return new TextFormatInfo(format.Text[1..], colorInfo.Color);
             }
         }
 
         return new TextFormatInfo(format.Text, Color.Black);
     }
-
-    private readonly Dictionary<char, Color> _colors = [];
 }
