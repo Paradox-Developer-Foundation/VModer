@@ -17,16 +17,16 @@
 
       <label for="traitTypeSelection">{{ i18n.traitType }}</label>
       <vscode-multi-select id="traitTypeSelection" ref="traitTypeSelection" @change="searchTrait">
-        <vscode-option v-for="type in traitTypes" :value="type" selected="ture">{{
+        <vscode-option v-for="type in traitTypes" :value="type" selected="true">{{
           TraitType[type]
         }}</vscode-option>
       </vscode-multi-select>
 
-      <vscode-button @click="vscode.postMessage('refreshTraits')">{{ i18n.refresh }}</vscode-button>
+      <vscode-button @click="refreshTraits">{{ i18n.refresh }}</vscode-button>
       <label>Count: {{ viewData.length }} </label>
     </div>
 
-    <ListBox ref="listBox" :items="viewData">
+    <ListBox v-if="!isLoading" ref="listBox" :items="viewData">
       <template #tooltip="{ item }">
         <div>
           <span>id: {{ item.Name }}</span>
@@ -45,6 +45,8 @@
         </div>
       </template>
     </ListBox>
+
+    <h1 v-else style="text-align: center;">加载中...</h1>
 
     <vscode-context-menu ref="contextMenu" style="position: fixed"></vscode-context-menu>
   </div>
@@ -72,7 +74,8 @@ const i18n = ref<TraitViewI18n>({
   traitType: "Trait Type:",
   copyTraitId: "Copy Trait ID",
   openInFile: "Open in File",
-  refresh: "Refresh"
+  refresh: "Refresh",
+  loading: "Loading...",
 });
 
 const searchValue = ref("");
@@ -83,6 +86,7 @@ const contextMenu = ref<VscodeContextMenu | null>(null);
 const listBox = useTemplateRef("listBox");
 
 const viewData = ref<TraitDto[]>([]);
+const isLoading = ref(true);
 let rawTraits: TraitDto[] = [];
 let currentItem: TraitDto | null = null;
 
@@ -151,6 +155,7 @@ vscode.on<TraitDto[]>("traits", (receivedTraits) => {
 
   // 当数据发来后，刷新列表
   searchTrait();
+  isLoading.value = false;
 });
 
 vscode.on<TraitViewI18n>("i18n", (i18nData) => {
@@ -195,6 +200,11 @@ function searchTrait() {
       includesSearchValue(item) &&
       traitTypeFlags.some((traitFlag) => hasFlag(item.Type, traitFlag))
   );
+}
+
+function refreshTraits() {
+  isLoading.value = true;
+  vscode.postMessage("refreshTraits");
 }
 
 onUnmounted(() => {

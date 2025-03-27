@@ -9,4 +9,5 @@ export interface TraitViewI18n {
 	copyTraitId: string;
 	openInFile: string;
 	refresh: string;
+	loading: string;
 }

@@ -55,6 +55,7 @@ export class TraitView {
         copyTraitId: l10n.t("TraitsView.CopyTraitId"),
         openInFile: l10n.t("TraitsView.OpenInFile"),
         refresh: l10n.t("TraitsView.Refresh"),
+        loading: l10n.t("TraitsView.Loading"),
       };
 
       panel.webview.onDidReceiveMessage(
