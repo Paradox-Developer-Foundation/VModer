@@ -106,18 +106,32 @@ var logger = LogManager.GetCurrentClassLogger();
 var host = builder.Build();
 App.Services = host.Services;
 
+TaskScheduler.UnobservedTaskException += async (_, e) =>
+{
+    await SendServerErrorMessage().ConfigureAwait(false);
+    logger.Error(e.Exception, "未观察到的异常");
+    e.SetObserved();
+};
+
 try
 {
     await host.RunAsync().ConfigureAwait(false);
 }
 catch (Exception e)
 {
-    await server
-        .Client.ShowMessage(new ShowMessageParams { Type = MessageType.Error, Message = "VModer 运行时错误" })
-        .ConfigureAwait(false);
+    await SendServerErrorMessage().ConfigureAwait(false);
     logger.Error(e);
 }
 finally
 {
     LogManager.Flush();
+}
+
+return;
+
+async Task SendServerErrorMessage()
+{
+    await server
+        .Client.ShowMessage(new ShowMessageParams { Type = MessageType.Error, Message = "VModer 运行时错误" })
+        .ConfigureAwait(false);
 }
