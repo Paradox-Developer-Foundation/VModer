@@ -30,10 +30,6 @@ const connectionString =
 
 export async function activate(context: ExtensionContext) {
   const reporter = new TelemetryReporter(connectionString);
-  // 防止在开发模式下发送遥测数据
-  if (context.extensionMode === ExtensionMode.Development) {
-    reporter.telemetryLevel = 'off';
-  }
   context.subscriptions.push(reporter);
 
   try {
