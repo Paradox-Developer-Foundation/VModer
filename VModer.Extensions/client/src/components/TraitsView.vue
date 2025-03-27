@@ -46,7 +46,7 @@
       </template>
     </ListBox>
 
-    <h1 v-else style="text-align: center;">加载中...</h1>
+    <h1 v-else style="text-align: center;">{{ i18n.loading }}</h1>
 
     <vscode-context-menu ref="contextMenu" style="position: fixed"></vscode-context-menu>
   </div>
