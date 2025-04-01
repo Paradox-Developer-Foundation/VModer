@@ -55,6 +55,10 @@ Language: ZH | [EN](https://github.com/textGamex/VModer/blob/main/README.md)
 
 右键菜单可复制特质 ID
 
+### 国家定义文件
+
+显示`set_technology`内科技的本地化值
+
 ## 使用指南
 
 为启动扩展, 您需要确保您的语言模式为`hoi4`, [`CWTools`](https://marketplace.visualstudio.com/items?itemName=tboby.cwtools-vscode)
