@@ -31,7 +31,8 @@ public sealed class TechnologyHoverStrategy(
         "doctrine",
         "doctrine_name",
         "is_special_project_tech",
-        "desc"
+        "desc",
+        "show_effect_as_desc"
     ];
 
     private const string TechnologiesKeyword = "technologies";
