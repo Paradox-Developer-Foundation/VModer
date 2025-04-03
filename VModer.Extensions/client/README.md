@@ -2,7 +2,7 @@
 
 为 Hearts of iron IV (钢铁雄心4) 提供 CWTools 缺失的功能, 例如实时显示 Modifier 效果.
 
-Language: ZH | [EN](https://github.com/textGamex/VModer/blob/main/README.md)
+Language: 简体中文 | [English](https://github.com/textGamex/VModer/blob/main/README.md)
 
 ---
 
@@ -20,6 +20,19 @@ Language: ZH | [EN](https://github.com/textGamex/VModer/blob/main/README.md)
 
 [问题反馈/功能请求](https://github.com/textGamex/VModer/issues/new)
 
+---
+
+## 使用指南
+
+为启动扩展, 您需要确保您的语言模式为`hoi4`, [`CWTools`](https://marketplace.visualstudio.com/items?itemName=tboby.cwtools-vscode)
+或[`Paradox Highlight`](https://marketplace.visualstudio.com/items?itemName=dragon-archer.paradox-highlight)扩展提供此语言模式,
+
+您也可以选择安装其他提供`hoi4`语言模式的扩展.
+
+此外, 您还需要确保打开了工作区.
+
+---
+
 ## 功能
 
 ### Modifier
@@ -36,6 +49,8 @@ Language: ZH | [EN](https://github.com/textGamex/VModer/blob/main/README.md)
 
 可视化 **Technology** 修饰符, 像 **Modifier** 一样, 支持节点和单一修饰符的显示
 
+显示 Technology 本地化名称
+
 ### 颜色选择器
 
 支持国家颜色, 意识形态颜色定义, 支持 HSV 和 RGB 转换
@@ -51,22 +66,16 @@ Language: ZH | [EN](https://github.com/textGamex/VModer/blob/main/README.md)
 
 ### 特质预览器
 
-显示游戏和 MOD 中所有定义的特质, 并可以按来源(游戏, MOD), 特质类型筛选, 显示特质修饰效果
+显示游戏和 MOD 中所有定义的特质和定义的 Icon, 并可以按来源(游戏, MOD), 特质类型筛选, 显示特质修饰效果
 
-右键菜单可复制特质 ID
+右键菜单功能
+
+- 可复制特质 ID
+- 在文件中打开此特质
 
 ### 国家定义文件
 
 显示`set_technology`内科技的本地化值
-
-## 使用指南
-
-为启动扩展, 您需要确保您的语言模式为`hoi4`, [`CWTools`](https://marketplace.visualstudio.com/items?itemName=tboby.cwtools-vscode)
-或[`Paradox Highlight`](https://marketplace.visualstudio.com/items?itemName=dragon-archer.paradox-highlight)扩展提供此语言模式,
-
-您也可以选择安装其他提供`hoi4`语言模式的扩展.
-
-此外, 您还需要确保打开了工作区.
 
 ## 功能展示
 
