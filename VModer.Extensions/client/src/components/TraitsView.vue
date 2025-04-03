@@ -40,13 +40,17 @@
       </template>
 
       <template #item="{ item, index }">
-        <div style="padding: 8px 12px" @click.right="(event) => openMenu(event, item, index)">
+        <div
+          style="padding: 8px 12px; display: flex; align-items: center"
+          @click.right="(event) => openMenu(event, item, index)"
+        >
+          <img style="margin-right: 8px" :src="item.IconPath" v-show="item.IconPath" />
           {{ item.LocalizedName }}
         </div>
       </template>
     </ListBox>
 
-    <h1 v-else style="text-align: center;">{{ i18n.loading }}</h1>
+    <h1 v-else style="text-align: center">{{ i18n.loading }}</h1>
 
     <vscode-context-menu ref="contextMenu" style="position: fixed"></vscode-context-menu>
   </div>
@@ -168,7 +172,7 @@ vscode.on<TraitViewI18n>("i18n", (i18nData) => {
     },
     {
       label: i18n.value.openInFile,
-      value: "openInFile"
+      value: "openInFile",
     },
   ];
 });

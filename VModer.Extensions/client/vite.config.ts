@@ -12,7 +12,7 @@ export default defineConfig({
                 },
             },
         }),
-        vscode({ extension: { entry: "extension/extension.ts" } })
+        vscode({ extension: { entry: "extension/extension.ts" }, webview: {csp: `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src {{cspSource}}; style-src {{cspSource}} 'unsafe-inline'; script-src 'nonce-{{nonce}}' 'unsafe-eval';">` } })
     ],
     build: {
         rollupOptions: {

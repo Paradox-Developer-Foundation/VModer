@@ -3,7 +3,7 @@
     "compilerOptions": {
         "lib": ["DOM", "ESNext"]
     },
-    "include": ["src"],
+    "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts","src/**/*.vue"],
     "exclude": ["node_modules", ".vscode-test"],
     "references": [{ "path": "./tsconfig.node.json" }]
 }

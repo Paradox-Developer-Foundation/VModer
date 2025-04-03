@@ -256,9 +256,8 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
 
         foreach (string traitKey in traits)
         {
-            // TODO: 特质查找器支持显示 Png 图标
             string traitName = _localizationFormatService.GetFormatText(traitKey);
-            if (_imageService.TryGetLocalImagePathBySpriteName($"GFX_trait_{traitKey}", out string? imageUri))
+            if (_imageService.TryGetLocalImagePathBySpriteName(_generalTraitsService.GetSpriteName(traitKey), out string? imageUri))
             {
                 traitName = $"![icon]({imageUri}){traitName}";
             }

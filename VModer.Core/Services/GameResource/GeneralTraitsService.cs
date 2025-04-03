@@ -22,6 +22,7 @@ public sealed class GeneralTraitsService
     private readonly ModifierDisplayService _modifierDisplayService;
     private readonly GameResourcesPathService _gameResourcesPathService;
     private readonly ModifierService _modifierService;
+    private readonly ImageService _imageService;
     private ICollection<FrozenDictionary<string, GeneralTrait>> Traits => Resources.Values;
 
     /// <summary>
@@ -62,7 +63,8 @@ public sealed class GeneralTraitsService
         LocalizationFormatService localizationFormatService,
         ModifierDisplayService modifierDisplayService,
         GameResourcesPathService gameResourcesPathService,
-        ModifierService modifierService
+        ModifierService modifierService,
+        ImageService imageService
     )
         : base(Path.Combine(Keywords.Common, "unit_leader"), WatcherFilter.Text)
     {
@@ -70,6 +72,7 @@ public sealed class GeneralTraitsService
         _modifierDisplayService = modifierDisplayService;
         _gameResourcesPathService = gameResourcesPathService;
         _modifierService = modifierService;
+        _imageService = imageService;
     }
 
     [Time("获取所有将领特质")]
@@ -93,6 +96,11 @@ public sealed class GeneralTraitsService
                     FilePath = fileResource.Key
                 };
 
+                if (_imageService.TryGetLocalImagePathBySpriteName(GetSpriteName(trait.Name), out string? uri))
+                {
+                    dto.IconPath = uri;
+                }
+
                 if (
                     _localizationFormatService.TryGetFormatText($"{trait.Name}_desc", out string? description)
                 )
@@ -105,6 +113,11 @@ public sealed class GeneralTraitsService
         }
 
         return traits;
+    }
+
+    public string GetSpriteName(string traitKey)
+    {
+        return $"GFX_trait_{traitKey}";
     }
 
     public IEnumerable<string> GetModifiersDescription(GeneralTrait trait)

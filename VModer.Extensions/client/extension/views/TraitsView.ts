@@ -15,6 +15,7 @@ import { LanguageClient } from "vscode-languageclient/node";
 import type { TraitViewI18n } from "../../src/types/TraitViewI18n";
 import type { OpenInFileMessage } from "../../src/types/OpenInFileMessage";
 import type { DocumentRange } from "../../src/types/DocumentRange";
+import type { TraitDto } from "../../src/dto/TraitDto";
 
 export class TraitView {
   public static currentPanel: TraitView | undefined;
@@ -63,9 +64,20 @@ export class TraitView {
           if (message == "init_complete") {
             panel.webview.postMessage({ type: "i18n", data: i18n });
           } else if (message == "refreshTraits") {
+            const traits = await client.sendRequest<TraitDto[]>("getAllTrait");
+
+            traits.forEach((trait) => {
+              if (trait.IconPath) {
+                if (trait.IconPath) {
+                  const iconPath = panel.webview.asWebviewUri(Uri.parse(trait.IconPath));
+                  trait.IconPath = iconPath.toString();
+                }
+              }
+            });
+
             await panel.webview.postMessage({
               type: "traits",
-              data: await client.sendRequest("getAllTrait"),
+              data: traits,
             });
           }
         },

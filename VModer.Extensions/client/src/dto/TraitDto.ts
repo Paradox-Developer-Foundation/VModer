@@ -9,6 +9,8 @@ interface TraitDto {
   Type: TraitType;
   Description?: string;
   Position: DocumentRange;
+  /** file:// 形式的 Uri */
+  IconPath?: string;
 }
 
 /**

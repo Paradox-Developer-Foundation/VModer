@@ -21,4 +21,6 @@ public sealed class TraitDto
 
     public required DocumentRange Position { get; init; }
     public required string FilePath { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? IconPath { get; set; }
 }
