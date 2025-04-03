@@ -72,6 +72,9 @@ public sealed class TechnologyHoverStrategy(
             ProcessChildForModifiers(child, node, rootNode, builder);
         }
 
+        // 类别信息会被直接插入到头部, 所以我们需要在处理结束后再将科技名称插入到头部
+        builder.Insert(0, new MarkdownHeader(localizationFormatService.GetFormatText(node.Key), 3));
+        builder.Insert(1, new MarkdownHorizontalRule());
         return builder.ToString();
     }
 
