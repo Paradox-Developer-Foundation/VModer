@@ -264,7 +264,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
             builder.AppendListItem(traitName, 0);
 
             IEnumerable<string> modifiers;
-            if (type == LookUpTraitType.Leader && _generalTraitsService.TryGetTrait(traitKey, out var trait))
+            if (type != LookUpTraitType.Leader && _generalTraitsService.TryGetTrait(traitKey, out var trait))
             {
                 modifiers = _generalTraitsService.GetModifiersDescription(trait);
             }
