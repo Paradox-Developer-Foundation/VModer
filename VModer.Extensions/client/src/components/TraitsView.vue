@@ -65,7 +65,7 @@ import type { TraitViewI18n } from "../types/TraitViewI18n";
 import type { VscodeContextMenu, VscodeMultiSelect } from "@vscode-elements/elements";
 import type { OpenInFileMessage } from "../types/OpenInFileMessage";
 
-const AllOrgin = "0";
+const AllOrigin = "0";
 const traitTypes: TraitType[] = getTraitTypeValues();
 const vscode = new WebviewApi();
 const i18n = ref<TraitViewI18n>({
@@ -83,7 +83,7 @@ const i18n = ref<TraitViewI18n>({
 });
 
 const searchValue = ref("");
-const selectedOrigin = ref(AllOrgin);
+const selectedOrigin = ref(AllOrigin);
 const traitTypeSelection = ref<VscodeMultiSelect | null>(null);
 const contextMenu = ref<VscodeContextMenu | null>(null);
 
@@ -182,7 +182,7 @@ function searchTrait() {
 
   if (
     searchValue.value === "" &&
-    selectedOrigin.value === AllOrgin &&
+    selectedOrigin.value === AllOrigin &&
     selectedTraitType.length === traitTypes.length
   ) {
     viewData.value = rawTraits;
@@ -194,7 +194,7 @@ function searchTrait() {
     item.LocalizedName.toLowerCase().includes(search) || item.Name.toLowerCase().includes(search);
 
   const isTargetFileOrigin = (item: TraitDto) =>
-    selectedOrigin.value === AllOrgin || item.FileOrigin.toString() === selectedOrigin.value;
+    selectedOrigin.value === AllOrigin || item.FileOrigin.toString() === selectedOrigin.value;
 
   let traitTypeFlags = selectedTraitType.map<TraitType>((item) => TraitType[item]);
 
