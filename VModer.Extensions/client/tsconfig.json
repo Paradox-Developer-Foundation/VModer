@@ -1,9 +1,10 @@
 {
     "extends": "@tomjs/tsconfig/vue.json",
     "compilerOptions": {
-        "lib": ["DOM", "ESNext"]
+        "lib": ["DOM", "ESNext"],
+        "allowSyntheticDefaultImports": true
     },
-    "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts","src/**/*.vue"],
+    "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts","src/**/*.vue", "shared"],
     "exclude": ["node_modules", ".vscode-test"],
     "references": [{ "path": "./tsconfig.node.json" }]
 }
