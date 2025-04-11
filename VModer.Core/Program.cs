@@ -94,9 +94,12 @@ builder.Services.AddSingleton<LeaderTraitsService>();
 builder.Services.AddSingleton<DefinesService>();
 builder.Services.AddSingleton<SpriteService>();
 builder.Services.AddSingleton<UnitService>();
+builder.Services.AddSingleton<OreService>();
+builder.Services.AddSingleton<ModifiersMessageService>();
 
 builder.Services.AddHostedService<LanguageServerHostedService>();
 
+// 添加 NLog 日志
 builder.Logging.ClearProviders();
 builder.Logging.AddNLog(builder.Configuration);
 LogManager.Configuration = new NLogLoggingConfiguration(builder.Configuration.GetSection("NLog"));

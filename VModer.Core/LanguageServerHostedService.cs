@@ -51,6 +51,28 @@ public sealed class LanguageServerHostedService : IHostedService
         _server.AddRequestHandler("getRuntimeInfo", GetRuntimeInfoAsync);
         _server.AddNotificationHandler("clearImageCache", ClearLocalImageCacheAsync);
         _server.AddRequestHandler("getAllTrait", GetAllTraitAsync);
+        _server.AddRequestHandler("getAllModifier", GetAllModifierAsync);
+    }
+
+    private Task<JsonDocument?> GetAllModifierAsync(RequestMessage message, CancellationToken token)
+    {
+        return Task.Run(
+            () =>
+            {
+                try
+                {
+                    var modifiersService = _serviceProvider.GetRequiredService<ModifiersMessageService>();
+                    return modifiersService.GetModifierJson();
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e, "Failed to get all modifiers");
+                    _logger.Log("Failed to get all modifiers");
+                    return null;
+                }
+            },
+            token
+        );
     }
 
     private Task<JsonDocument?> GetAllTraitAsync(RequestMessage message, CancellationToken token)
@@ -59,10 +81,7 @@ public sealed class LanguageServerHostedService : IHostedService
             () =>
             {
                 var traits = _serviceProvider.GetRequiredService<GeneralTraitsService>().GetAllTraitDto();
-                var value = JsonSerializer.SerializeToDocument(
-                    traits,
-                    TraitContext.Default.ListTraitDto
-                );
+                var value = JsonSerializer.SerializeToDocument(traits, TraitContext.Default.ListTraitDto);
                 return value;
             },
             token

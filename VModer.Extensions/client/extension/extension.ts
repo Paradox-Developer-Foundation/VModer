@@ -22,6 +22,7 @@ import {
 import * as path from "path";
 import { TraitView } from "./views/TraitsView";
 import TelemetryReporter from "@vscode/extension-telemetry";
+import { ModifierQuerierView } from './views/ModifierQuerierView';
 
 let client: LanguageClient;
 let analyzeAllFilesEnd = false;
@@ -145,7 +146,7 @@ export async function activate(context: ExtensionContext) {
     client.sendNotification("clearImageCache");
   });
 
-  const openTraitsView = commands.registerCommand("vmoder.openTraitsView", async () => {
+  const openTraitsView = commands.registerCommand("vmoder.openTraitsView", () => {
     if (!client.isRunning()) {
       return;
     }
@@ -154,10 +155,20 @@ export async function activate(context: ExtensionContext) {
     reporter.sendTelemetryEvent("openTraitsView");
   });
 
+  const openModifierQuerierView = commands.registerCommand("vmoder.openModifierQuerierView", () => {
+    if (!client.isRunning()) {
+      return;
+    }
+
+    ModifierQuerierView.render(context, client);
+    reporter.sendTelemetryEvent("openModifierQuerierView");
+  });
+
   context.subscriptions.push(
     client.onDidChangeState(() => updateStatusBarItem(statusBarItem, client)),
     clearImageCache,
-    openTraitsView
+    openTraitsView,
+    openModifierQuerierView
   );
 }
 

@@ -10,12 +10,13 @@ namespace VModer.Core.Services.GameResource;
 public sealed class BuildingsService
     : CommonResourcesService<BuildingsService, FrozenDictionary<string, BuildingInfo>>
 {
-    private ICollection<FrozenDictionary<string, BuildingInfo>> Buildings =>
-        Resources.Values;
+    public IEnumerable<BuildingInfo> All => Buildings.SelectMany(item => item.Values);
+
+    private ICollection<FrozenDictionary<string, BuildingInfo>> Buildings => Resources.Values;
     private const string BuildingsKeyword = "buildings";
 
     public BuildingsService()
-        : base(Path.Combine([Keywords.Common, BuildingsKeyword]), WatcherFilter.Text) { }
+        : base(Path.Combine(Keywords.Common, BuildingsKeyword), WatcherFilter.Text) { }
 
     public bool Contains(string buildingName)
     {
@@ -66,10 +67,7 @@ public sealed class BuildingsService
         return buildings.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
     }
 
-    private void ParseBuildingNodeToDictionary(
-        Node buildingNode,
-        Dictionary<string, BuildingInfo> buildings
-    )
+    private void ParseBuildingNodeToDictionary(Node buildingNode, Dictionary<string, BuildingInfo> buildings)
     {
         int? maxLevel = null;
         var levelCapNode = buildingNode.Nodes.FirstOrDefault(node =>

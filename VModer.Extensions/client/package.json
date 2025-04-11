@@ -97,6 +97,12 @@
 				"icon": "$(file-symlink-file)"
 			},
 			{
+				"command": "vmoder.openModifierQuerierView",
+				"title": "%vmoder.openTraitsViewTitle%",
+				"category": "VModer",
+				"icon": "$(file-symlink-file)"
+			},
+			{
 				"command": "vmoder.clearImageCache",
 				"title": "%vmoder.clearImageCacheTitle%",
 				"category": "VModer"
@@ -106,6 +112,10 @@
 			"editor/title": [
 				{
 					"command": "vmoder.openTraitsView",
+					"group": "navigation"
+				},
+				{
+					"command": "vmoder.openModifierQuerierView",
 					"group": "navigation"
 				}
 			]
@@ -134,9 +144,10 @@
 	},
 	"dependencies": {
 		"@tomjs/vscode-webview": "^2.0.2",
-		"@vscode-elements/elements": "^1.13.1",
+		"@vscode-elements/elements": "^1.15.0",
 		"@vscode/extension-telemetry": "^0.9.8",
 		"lodash-es": "^4.17.21",
+		"marked": "^15.0.8",
 		"vscode-languageclient": "^9.0.1",
 		"vue": "^3.5.13"
 	}
