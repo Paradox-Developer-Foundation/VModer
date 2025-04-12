@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VModer.Languages", "VModer.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VModer.DocumentParser", "VModer.DocumentParser\VModer.DocumentParser.csproj", "{DD8F048B-D443-41EC-982E-A7A995A54730}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VModer.UnitTests", "VModer.UnitTests\VModer.UnitTests.csproj", "{C5B1EFE3-E31B-4CA8-B318-BDB5BB49FE7E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,5 +35,9 @@ Global
 		{DD8F048B-D443-41EC-982E-A7A995A54730}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD8F048B-D443-41EC-982E-A7A995A54730}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD8F048B-D443-41EC-982E-A7A995A54730}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5B1EFE3-E31B-4CA8-B318-BDB5BB49FE7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5B1EFE3-E31B-4CA8-B318-BDB5BB49FE7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5B1EFE3-E31B-4CA8-B318-BDB5BB49FE7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5B1EFE3-E31B-4CA8-B318-BDB5BB49FE7E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
