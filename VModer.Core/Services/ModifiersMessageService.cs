@@ -15,13 +15,16 @@ public sealed class ModifiersMessageService
 {
     private readonly ModifierMessage[] _modifiers;
     private readonly Lazy<ModifierDto[]> _lazyModifierDto;
+    private static readonly char[] TrimChars = [':', '：'];
 
     [Time]
     public ModifiersMessageService(
         BuildingsService buildingsService,
         OreService oreService,
         ModifierService modifierService,
-        LocalizationFormatService localizationFormatService
+        LocalizationFormatService localizationFormatService,
+        IdeologiesService ideologiesService,
+        UnitService unitService
     )
     {
         string filePtah = Path.Combine(App.AssetsFolder, "Modifiers.csv");
@@ -39,7 +42,8 @@ public sealed class ModifiersMessageService
             list.Add(modifierMessage);
         }
 
-        ReadDynamicModifiers(list, buildingsService, oreService);
+        ReadDynamicModifiers(list, buildingsService, oreService, ideologiesService, unitService);
+
         _modifiers = list.ToArray();
         _lazyModifierDto = new Lazy<ModifierDto[]>(() =>
         {
@@ -49,11 +53,12 @@ public sealed class ModifiersMessageService
                     Name = message.Name,
                     Categories = message.Categories,
                     LocalizedName = string.Join(
-                        string.Empty,
-                        localizationFormatService.GetFormatTextInfo(
-                            modifierService.GetLocalizationName(message.Name)
-                        ).Select(info => info.DisplayText)
-                    )
+                            string.Empty,
+                            localizationFormatService
+                                .GetFormatTextInfo(modifierService.GetLocalizationName(message.Name))
+                                .Select(info => info.DisplayText)
+                        )
+                        .TrimEnd(TrimChars)
                 })
                 .ToArray();
         });
@@ -62,7 +67,9 @@ public sealed class ModifiersMessageService
     private static void ReadDynamicModifiers(
         List<ModifierMessage> modifiers,
         BuildingsService buildingsService,
-        OreService oreService
+        OreService oreService,
+        IdeologiesService ideologiesService,
+        UnitService unitService
     )
     {
         string filePtah = Path.Combine(App.AssetsFolder, "DynamicModifiers.csv");
@@ -87,6 +94,20 @@ public sealed class ModifiersMessageService
                 foreach (string oreName in oreService.All)
                 {
                     modifiers.Add(new ModifierMessage(name.Replace("<Resource>", oreName), categories));
+                }
+            }
+            else if (name.Contains("<Ideology>"))
+            {
+                foreach (string ideologyName in ideologiesService.All)
+                {
+                    modifiers.Add(new ModifierMessage(name.Replace("<Ideology>", ideologyName), categories));
+                }
+            }
+            else if (name.Contains("<Unit>"))
+            {
+                foreach (string unitName in unitService.All)
+                {
+                    modifiers.Add(new ModifierMessage(name.Replace("<Unit>", unitName), categories));
                 }
             }
             else

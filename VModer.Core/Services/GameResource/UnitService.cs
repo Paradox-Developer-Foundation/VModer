@@ -10,6 +10,7 @@ public sealed class UnitService()
         WatcherFilter.Text
     )
 {
+    public IEnumerable<string> All => Units.SelectMany(unitSet => unitSet);
     private ICollection<FrozenSet<string>> Units => Resources.Values;
 
     /// <summary>
