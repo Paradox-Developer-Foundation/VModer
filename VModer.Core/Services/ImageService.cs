@@ -10,7 +10,7 @@ using VModer.Core.Services.GameResource;
 
 namespace VModer.Core.Services;
 
-public sealed class ImageService
+public sealed class ImageService : IImageService
 {
     private readonly SpriteService _spriteService;
     private readonly string _cachePath;

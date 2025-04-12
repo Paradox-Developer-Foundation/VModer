@@ -1,7 +1,6 @@
 ﻿using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
 using VModer.Core.Services.GameResource.Base;
-using VModer.Core.Services.GameResource.Localization;
 
 namespace VModer.Core.Services.GameResource;
 
@@ -18,7 +17,7 @@ public sealed class OreService : CommonResourcesService<OreService, string[]>
     private const string ResourcesKeyword = "resources";
     private ICollection<string[]> Ores => Resources.Values;
 
-    public OreService(LocalizationService localizationService)
+    public OreService()
         : base(Path.Combine(Keywords.Common, ResourcesKeyword), WatcherFilter.Text) { }
 
     public bool Contains(string resource)

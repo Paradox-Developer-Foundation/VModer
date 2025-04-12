@@ -60,7 +60,7 @@ builder.Services.AddSingleton<GameResourcesPathService>();
 builder.Services.AddSingleton<GameModDescriptorService>();
 builder.Services.AddSingleton<GameFilesService>();
 builder.Services.AddSingleton<GameResourcesWatcherService>();
-builder.Services.AddSingleton<ImageService>();
+builder.Services.AddSingleton<IImageService, ImageService>();
 
 // 语言服务
 builder.Services.AddSingleton<AnalyzeService>();
@@ -79,14 +79,14 @@ builder.Services.AddSingleton<IHoverStrategy, CountriesDefineHoverStrategy>();
 builder.Services.AddSingleton<IHoverStrategy, TechnologyHoverStrategy>();
 
 // 游戏资源服务
-builder.Services.AddSingleton<LocalizationService>();
+builder.Services.AddSingleton<ILocalizationService, LocalizationService>();
 builder.Services.AddSingleton<BuildingsService>();
 builder.Services.AddSingleton<LocalizationKeyMappingService>();
 builder.Services.AddSingleton<LocalizationFormatService>();
 builder.Services.AddSingleton<TerrainService>();
 builder.Services.AddSingleton<ModifierDisplayService>();
 builder.Services.AddSingleton<ModifierService>();
-builder.Services.AddSingleton<LocalizationTextColorsService>();
+builder.Services.AddSingleton<ILocalizationTextColorsService, LocalizationTextColorsService>();
 builder.Services.AddSingleton<CharacterSkillService>();
 builder.Services.AddSingleton<ModiferLocalizationFormatService>();
 builder.Services.AddSingleton<GeneralTraitsService>();

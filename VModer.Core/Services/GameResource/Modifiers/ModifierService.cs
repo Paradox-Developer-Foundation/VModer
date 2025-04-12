@@ -8,11 +8,11 @@ namespace VModer.Core.Services.GameResource.Modifiers;
 
 public sealed class ModifierService
 {
-    private readonly LocalizationService _localizationService;
+    private readonly ILocalizationService _localizationService;
     private readonly ModiferLocalizationFormatService _modifierLocalizationFormatService;
 
     public ModifierService(
-        LocalizationService localizationService,
+        ILocalizationService localizationService,
         ModiferLocalizationFormatService modifierLocalizationFormatService
     )
     {

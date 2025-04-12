@@ -23,7 +23,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
     private readonly LocalizationFormatService _localizationFormatService;
     private readonly GeneralTraitsService _generalTraitsService;
     private readonly CharacterSkillService _characterSkillService;
-    private readonly ImageService _imageService;
+    private readonly IImageService _imageService;
 
     private const int CharacterTypeLevel = 3;
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
@@ -34,7 +34,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         GeneralTraitsService generalTraitsService,
         LocalizationFormatService localizationFormatService,
         CharacterSkillService characterSkillService,
-        ImageService imageService
+        IImageService imageService
     )
     {
         _modifierDisplayService = modifierDisplayService;

@@ -10,7 +10,8 @@ using VModer.Core.Services.GameResource.Base;
 namespace VModer.Core.Services.GameResource.Localization;
 
 public sealed class LocalizationTextColorsService
-    : CommonResourcesService<LocalizationTextColorsService, FrozenDictionary<char, LocalizationTextColor>>
+    : CommonResourcesService<LocalizationTextColorsService, FrozenDictionary<char, LocalizationTextColor>>,
+        ILocalizationTextColorsService
 {
     [Time("加载本地化文本颜色")]
     public LocalizationTextColorsService()

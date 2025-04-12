@@ -11,7 +11,7 @@ public sealed class ModifierDisplayService
     public const string NodeModifierChildrenPrefix = "  ";
 
     private readonly LocalizationFormatService _localisationFormatService;
-    private readonly LocalizationService _localizationService;
+    private readonly ILocalizationService _localizationService;
     private readonly ModifierService _modifierService;
     private readonly TerrainService _terrainService;
     private readonly LocalizationKeyMappingService _localisationKeyMappingService;
@@ -20,7 +20,7 @@ public sealed class ModifierDisplayService
 
     public ModifierDisplayService(
         LocalizationFormatService localisationFormatService,
-        LocalizationService localizationService,
+        ILocalizationService localizationService,
         ModifierService modifierService,
         LocalizationKeyMappingService localisationKeyMappingService,
         TerrainService terrainService

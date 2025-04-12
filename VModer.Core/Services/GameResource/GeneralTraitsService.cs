@@ -22,7 +22,7 @@ public sealed class GeneralTraitsService
     private readonly ModifierDisplayService _modifierDisplayService;
     private readonly GameResourcesPathService _gameResourcesPathService;
     private readonly ModifierService _modifierService;
-    private readonly ImageService _imageService;
+    private readonly IImageService _imageService;
     private ICollection<FrozenDictionary<string, GeneralTrait>> Traits => Resources.Values;
 
     /// <summary>
@@ -64,7 +64,7 @@ public sealed class GeneralTraitsService
         ModifierDisplayService modifierDisplayService,
         GameResourcesPathService gameResourcesPathService,
         ModifierService modifierService,
-        ImageService imageService
+        IImageService imageService
     )
         : base(Path.Combine(Keywords.Common, "unit_leader"), WatcherFilter.Text)
     {

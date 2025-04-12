@@ -6,9 +6,9 @@ using VModer.Core.Models;
 namespace VModer.Core.Services.GameResource.Localization;
 
 public sealed class LocalizationFormatService(
-    LocalizationTextColorsService localizationTextColorsService,
-    LocalizationService localizationService,
-    ImageService imageService
+    ILocalizationTextColorsService localizationTextColorsService,
+    ILocalizationService localizationService,
+    IImageService imageService
 )
 {
     /// <summary>
@@ -95,7 +95,7 @@ public sealed class LocalizationFormatService(
             }
             else
             {
-                result.Add(GetColorText(format));
+                result.AddRange(GetColorText(format));
             }
         }
     }
@@ -137,21 +137,40 @@ public sealed class LocalizationFormatService(
     /// </summary>
     /// <param name="format">文本格式信息</param>
     /// <returns></returns>
-    private TextFormatInfo GetColorText(LocalizationFormatInfo format)
+    private IEnumerable<TextFormatInfo> GetColorText(LocalizationFormatInfo format)
     {
+        var color = Color.Black;
+        string text = format.Text;
         if (format.Type == LocalizationFormatType.TextWithColor)
         {
             if (string.IsNullOrEmpty(format.Text))
             {
-                return new TextFormatInfo(string.Empty, Color.Black);
+                return [new TextFormatInfo(string.Empty, Color.Black)];
             }
 
             if (localizationTextColorsService.TryGetColor(format.Text[0], out var colorInfo))
             {
-                return new TextFormatInfo(format.Text[1..], colorInfo.Color);
+                color = colorInfo.Color;
+                text = format.Text[1..];
+            }
+
+            // 处理嵌套在着色语法中的其他语法使用
+            if (
+                LocalizationFormatParser.TryParse(text, out var formatInfos)
+                && formatInfos.Any(info => info.Type == LocalizationFormatType.Placeholder)
+            )
+            {
+                var list = new List<TextFormatInfo>();
+                ParseFormatToList(formatInfos, list);
+                for (int i = 0; i < list.Count; i++)
+                {
+                    list[i] = new TextFormatInfo(list[i].DisplayText, color);
+                }
+
+                return list;
             }
         }
 
-        return new TextFormatInfo(format.Text, Color.Black);
+        return [new TextFormatInfo(text, color)];
     }
 }

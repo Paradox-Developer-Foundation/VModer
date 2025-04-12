@@ -10,10 +10,10 @@ using VModer.Core.Services.GameResource.Base;
 namespace VModer.Core.Services.GameResource.Localization;
 
 public sealed class LocalizationService
-    : ResourcesService<LocalizationService, FrozenDictionary<string, string>, YAMLLocalisationParser.LocFile>
+    : ResourcesService<LocalizationService, FrozenDictionary<string, string>, YAMLLocalisationParser.LocFile>,
+        ILocalizationService
 {
-    private ICollection<FrozenDictionary<string, string>> Localisations =>
-        Resources.Values;
+    private ICollection<FrozenDictionary<string, string>> Localisations => Resources.Values;
     private readonly LocalizationKeyMappingService _localizationKeyMapping;
 
     [Time("加载本地化文件")]
