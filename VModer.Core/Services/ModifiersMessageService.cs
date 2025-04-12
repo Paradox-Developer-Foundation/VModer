@@ -13,8 +13,7 @@ namespace VModer.Core.Services;
 
 public sealed class ModifiersMessageService
 {
-    private readonly ModifierMessage[] _modifiers;
-    private readonly Lazy<ModifierDto[]> _lazyModifierDto;
+    private readonly ModifierDto[] _modifierDto;
     private static readonly char[] TrimChars = [':', '：'];
 
     [Time]
@@ -31,7 +30,7 @@ public sealed class ModifiersMessageService
 
         using var csv = new CsvReader(File.OpenText(filePtah), CultureInfo.InvariantCulture);
 
-        var list = new List<ModifierMessage>();
+        var modifiers = new List<ModifierMessage>();
         csv.Read();
         csv.ReadHeader();
         while (csv.Read())
@@ -39,29 +38,25 @@ public sealed class ModifiersMessageService
             string name = csv.GetField<string>("Name") ?? string.Empty;
             string[] categories = csv.GetField<string>("Categories")?.Split(';') ?? [];
             var modifierMessage = new ModifierMessage(name, categories);
-            list.Add(modifierMessage);
+            modifiers.Add(modifierMessage);
         }
 
-        ReadDynamicModifiers(list, buildingsService, oreService, ideologiesService, unitService);
+        ReadDynamicModifiers(modifiers, buildingsService, oreService, ideologiesService, unitService);
 
-        _modifiers = list.ToArray();
-        _lazyModifierDto = new Lazy<ModifierDto[]>(() =>
-        {
-            return _modifiers
-                .Select(message => new ModifierDto
-                {
-                    Name = message.Name,
-                    Categories = message.Categories,
-                    LocalizedName = string.Join(
-                            string.Empty,
-                            localizationFormatService
-                                .GetFormatTextInfo(modifierService.GetLocalizationName(message.Name))
-                                .Select(info => info.DisplayText)
-                        )
-                        .TrimEnd(TrimChars)
-                })
-                .ToArray();
-        });
+        _modifierDto = modifiers
+            .Select(message => new ModifierDto
+            {
+                Name = message.Name,
+                Categories = message.Categories,
+                LocalizedName = string.Join(
+                        string.Empty,
+                        localizationFormatService
+                            .GetFormatTextInfo(modifierService.GetLocalizationName(message.Name))
+                            .Select(info => info.DisplayText)
+                    )
+                    .TrimEnd(TrimChars)
+            })
+            .ToArray();
     }
 
     private static void ReadDynamicModifiers(
@@ -122,10 +117,7 @@ public sealed class ModifiersMessageService
     public JsonDocument GetModifierJson()
     {
         return JsonDocument.Parse(
-            JsonSerializer.Serialize(
-                _lazyModifierDto.Value,
-                ModifierSerializerContext.Default.ModifierDtoArray
-            )
+            JsonSerializer.Serialize(_modifierDto, ModifierSerializerContext.Default.ModifierDtoArray)
         );
     }
 }
