@@ -117,7 +117,7 @@ public sealed class LanguageServerHostedService : IHostedService
                 Log.Info("开始清理本地图片缓存.");
                 try
                 {
-                    _serviceProvider.GetRequiredService<ImageService>().ClearCache();
+                    _serviceProvider.GetRequiredService<IImageService>().ClearCache();
                     _server.Client.ShowMessage(
                         new ShowMessageParams
                         {
