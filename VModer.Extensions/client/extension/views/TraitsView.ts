@@ -46,7 +46,7 @@ export class TraitView {
 
       const i18n: TraitViewI18n = {
         search: l10n.t("TraitsView.Search"),
-        searchButton: l10n.t("TraitsView.SearchButton"),
+        searchButton: l10n.t("SearchButton"),
         origin: l10n.t("TraitsView.Origin"),
         all: l10n.t("TraitsView.All"),
         gameOnly: l10n.t("TraitsView.GameOnly"),

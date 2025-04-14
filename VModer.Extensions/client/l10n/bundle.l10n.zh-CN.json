@@ -2,8 +2,8 @@
   "SelectGameRootPath": "请选择游戏根目录.",
   "SelectFolder": "选择文件夹",
   "MustRestart": "您必须重新启动才能使更改生效.",
+  "SearchButton": "搜索",
   "TraitsView.Search": "ID | 本地化名称",
-  "TraitsView.SearchButton": "搜索",
   "TraitsView.Origin": "来源:",
   "TraitsView.All": "全部",
   "TraitsView.GameOnly": "仅游戏",
@@ -13,5 +13,10 @@
   "TraitsView.CopyTraitId": "复制特质ID",
   "TraitsView.OpenInFile": "在文件中打开",
   "TraitsView.Refresh": "刷新",
-  "TraitsView.Loading": "加载中..."
+  "TraitsView.Loading": "加载中...",
+  "ModifierQuerierView.Title": "修饰符查询器",
+  "ModifierQuerierView.SearchPlaceholder": "本地化名称 | 名称",
+  "ModifierQuerierView.Categories": "类别",
+  "ModifierQuerierView.Name": "名称",
+  "ModifierQuerierView.LocalizedName": "本地化名称"
 }

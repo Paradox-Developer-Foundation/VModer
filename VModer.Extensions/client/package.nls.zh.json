@@ -6,5 +6,6 @@
 	"VModer.GameLocalizedLanguage": "游戏文本的语言. 决定扩展从哪个语言文件夹读取文本.",
 	"vmoder.openLogsTitle": "打开 VModer 日志文件夹",
 	"vmoder.clearImageCacheTitle": "清除本地图片缓存",
-	"vmoder.openTraitsViewTitle": "人物特质查询"
+	"vmoder.openTraitsViewTitle": "人物特质查询",
+	"vmoder.openModifierQuerierView": "修饰符查询器"
 }

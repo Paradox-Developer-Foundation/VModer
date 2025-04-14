@@ -1,13 +1,8 @@
-import {
-  ExtensionContext,
-  l10n,
-  ViewColumn,
-  WebviewPanel,
-  window,
-} from "vscode";
+import { ExtensionContext, l10n, ViewColumn, WebviewPanel, window } from "vscode";
 import { Disposable } from "vscode-languageclient";
 import { WebviewHelpers } from "./WebviewHelpers";
-import { LanguageClient } from 'vscode-languageclient/node';
+import { LanguageClient } from "vscode-languageclient/node";
+import type { ModifierQuerierViewI18n } from "../../src/types/ModifierQuerierViewI18";
 
 export class ModifierQuerierView {
   public static currentPanel: ModifierQuerierView | undefined;
@@ -31,7 +26,7 @@ export class ModifierQuerierView {
     } else {
       const panel = window.createWebviewPanel(
         "traitsView",
-        l10n.t("TraitsView.Title"),
+        l10n.t("ModifierQuerierView.Title"),
         ViewColumn.One,
         {
           enableScripts: true,
@@ -39,11 +34,27 @@ export class ModifierQuerierView {
         }
       );
 
+      const i18n: ModifierQuerierViewI18n = {
+        searchPlaceholder: l10n.t("ModifierQuerierView.SearchPlaceholder"),
+        searchButton: l10n.t("SearchButton"),
+        categories: l10n.t("ModifierQuerierView.Categories"),
+        name: l10n.t("ModifierQuerierView.Name"),
+        localizedName: l10n.t("ModifierQuerierView.LocalizedName"),
+      };
+
       ModifierQuerierView.currentPanel = new ModifierQuerierView(panel, context);
 
       panel.webview.onDidReceiveMessage(async (message: string) => {
         if (message == "init_complete") {
-			panel.webview.postMessage({type: "modifierList", data: await client.sendRequest("getAllModifier")});
+          panel.webview.postMessage({
+            type: "modifierList",
+            data: await client.sendRequest("getAllModifier"),
+          });
+
+          panel.webview.postMessage({
+            type: "i18n",
+            data: i18n,
+          });
         }
       });
     }

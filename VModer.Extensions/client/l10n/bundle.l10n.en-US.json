@@ -2,8 +2,8 @@
   "SelectGameRootPath": "Please Select the root path of HOI4 game folder.",
   "SelectFolder": "Select Folder",
   "MustRestart": "You must restart to make the changes take effect.",
+  "SearchButton": "Search",
   "TraitsView.Search": "ID | Localized Name",
-  "TraitsView.SearchButton": "Search",
   "TraitsView.Origin": "Origin:",
   "TraitsView.All": "All",
   "TraitsView.GameOnly": "Game Only",
@@ -13,5 +13,10 @@
   "TraitsView.CopyTraitId": "Copy Trait ID",
   "TraitsView.OpenInFile": "Open in File",
   "TraitsView.Refresh": "Refresh",
-  "TraitsView.Loading": "Loading..."
+  "TraitsView.Loading": "Loading...",
+  "ModifierQuerierView.Title": "Modifier Query",
+  "ModifierQuerierView.SearchPlaceholder": "Localized Name | Name",
+  "ModifierQuerierView.Categories": "Categories",
+  "ModifierQuerierView.Name": "Name",
+  "ModifierQuerierView.LocalizedName": "Localized Name"
 }

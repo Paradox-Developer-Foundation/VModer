@@ -4,9 +4,19 @@
       <vscode-textfield
         @keyup.enter="filterList"
         v-model.trim="searchText"
-        placeholder="本地化名称 | 名称"
+        :placeholder="i18n.searchPlaceholder"
       ></vscode-textfield>
-      <vscode-button style="margin-left: 4px" @click="filterList">搜索</vscode-button>
+      <vscode-button style="margin-left: 4px" @click="filterList">{{
+        i18n.searchButton
+      }}</vscode-button>
+      <label style="margin: 0 4px; font-size: medium" for="typeSelect"
+        >{{ i18n.categories }}:</label
+      >
+      <vscode-multi-select ref="categoriesSelection" id="typeSelect" @change="filterList">
+        <vscode-option v-for="category in modiiferCategories" :key="category" :value="category">
+          {{ category }}
+        </vscode-option>
+      </vscode-multi-select>
     </div>
     <vscode-table
       style="flex-grow: 1; margin-top: 4px; min-height: 0"
@@ -15,9 +25,9 @@
       resizable
     >
       <vscode-table-header slot="header">
-        <vscode-table-header-cell>本地化名称</vscode-table-header-cell>
-        <vscode-table-header-cell>名称</vscode-table-header-cell>
-        <vscode-table-header-cell>类别</vscode-table-header-cell>
+        <vscode-table-header-cell>{{ i18n.localizedName }}</vscode-table-header-cell>
+        <vscode-table-header-cell>{{ i18n.name }}</vscode-table-header-cell>
+        <vscode-table-header-cell>{{ i18n.categories }}</vscode-table-header-cell>
       </vscode-table-header>
       <vscode-table-body slot="body">
         <vscode-table-row v-for="(item, index) in modifierList" :key="index">
@@ -35,6 +45,12 @@ import { WebviewApi } from "@tomjs/vscode-webview";
 import { onMounted, onUnmounted, ref } from "vue";
 import type { ModifierDto } from "../dto/ModifierDto";
 import { marked } from "marked";
+import { uniq } from "lodash-es";
+import type { VscodeMultiSelect } from "@vscode-elements/elements";
+import type { ModifierQuerierViewI18n } from "../types/ModifierQuerierViewI18";
+
+const modifierListKey = "modifierList";
+const i18nKey = "i18n";
 
 marked.use({
   extensions: [
@@ -52,30 +68,49 @@ marked.use({
 const modifierList = ref<ModifierDto[]>([]);
 let rawModifierList: ModifierDto[] = [];
 const searchText = ref<string>("");
+const modiiferCategories = ref<string[]>([]);
 const vscode = new WebviewApi();
+const categoriesSelection = ref<VscodeMultiSelect | null>(null);
+const i18n = ref<ModifierQuerierViewI18n>({
+  searchPlaceholder: "本地化名称 | 名称",
+  searchButton: "搜索",
+  categories: "类别:",
+  name: "名称",
+  localizedName: "本地化名称",
+});
 
 onMounted(() => {
   vscode.postMessage("init_complete");
 });
 
-vscode.on<ModifierDto[]>("modifierList", (data) => {
+vscode.on<ModifierDto[]>(modifierListKey, (data) => {
   rawModifierList = data;
   modifierList.value = data;
+  modiiferCategories.value = uniq(data.map((item) => item.Categories).flat());
+});
+
+vscode.on<ModifierQuerierViewI18n>(i18nKey, (data) => {
+  i18n.value = data;
 });
 
 onUnmounted(() => {
-  vscode.off("modifierList");
+  vscode.off(modifierListKey);
+  vscode.off(i18nKey);
 });
 
 function filterList() {
-  if (searchText.value === "") {
+  const selectedCategories = new Set(categoriesSelection.value?.value || []);
+  if (searchText.value === "" && selectedCategories.size === 0) {
     modifierList.value = rawModifierList;
     return;
   }
   const search = searchText.value.toLowerCase();
   modifierList.value = rawModifierList.filter((item) => {
     return (
-      item.LocalizedName.toLowerCase().includes(search) || item.Name.toLowerCase().includes(search)
+      (item.LocalizedName.toLowerCase().includes(search) ||
+        item.Name.toLowerCase().includes(search)) &&
+      (selectedCategories.size === 0 ||
+        item.Categories.some((category) => selectedCategories.has(category)))
     );
   });
 }

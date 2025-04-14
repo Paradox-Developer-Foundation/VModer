@@ -6,5 +6,6 @@
 	"VModer.GameLocalizedLanguage": "The language of the game text.",
 	"vmoder.openLogsTitle": "Open VModer log folder",
 	"vmoder.clearImageCacheTitle": "Clear local image cache",
-	"vmoder.openTraitsViewTitle": "Character Traits Query"
+	"vmoder.openTraitsViewTitle": "Character Traits Query",
+	"vmoder.openModifierQuerierView": "Modifier Query"
 }
