@@ -73,6 +73,11 @@ Language: 简体中文 | [English](https://github.com/textGamex/VModer/blob/main
 - 可复制特质 ID
 - 在文件中打开此特质
 
+### 修饰符查询器
+
+显示游戏内可用的修饰符, 并可以按名称, 类别筛选
+
+
 ### 国家定义文件
 
 显示`set_technology`内科技的本地化值
@@ -102,6 +107,10 @@ Language: 简体中文 | [English](https://github.com/textGamex/VModer/blob/main
 > Character 总览
 >
 >![image](https://www.helloimg.com/i/2025/01/18/678a83910610a.png)
+
+### 修饰符查询器
+
+![Modifier](https://free4.yunpng.top/2025/04/14/67fd22b807f94.png)
 
 ### 特质预览器
 
