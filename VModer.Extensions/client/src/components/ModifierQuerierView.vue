@@ -17,6 +17,7 @@
           {{ category }}
         </vscode-option>
       </vscode-multi-select>
+      <label style="font-size: medium; margin-left: 4px; text-align: center;">Count: {{ modifierList.length }}</label>
     </div>
     <vscode-table
       style="flex-grow: 1; margin-top: 4px; min-height: 0"
