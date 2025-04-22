@@ -222,7 +222,7 @@ public sealed class ImageService : IImageService
             int frameWidth = image.Width / totalFrames;
             if (frameWidth * totalFrames != image.Width)
             {
-                throw new ArgumentException("图像宽度必须能被总帧数整除，当前宽度: " + $"{image.Width}, 总帧数: {totalFrames}");
+                throw new ArgumentException($"图像宽度必须能被总帧数整除，当前宽度: {image.Width}, 总帧数: {totalFrames}");
             }
 
             // 遍历每一帧
