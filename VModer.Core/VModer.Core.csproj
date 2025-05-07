@@ -49,7 +49,7 @@
       <PackageReference Include="ParadoxPower.CSharpExtensions" Version="0.5.1-beta" />
       <PackageReference Include="Pfim" Version="0.11.3" />
       <PackageReference Include="Pidgin" Version="3.4.0" />
-      <PackageReference Include="SixLabors.ImageSharp" Version="3.1.7" />
+      <PackageReference Include="SixLabors.ImageSharp" Version="3.1.8" />
     </ItemGroup>
 
     <ItemGroup>
