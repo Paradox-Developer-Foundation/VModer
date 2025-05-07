@@ -96,6 +96,7 @@ builder.Services.AddSingleton<SpriteService>();
 builder.Services.AddSingleton<UnitService>();
 builder.Services.AddSingleton<OreService>();
 builder.Services.AddSingleton<IdeologiesService>();
+builder.Services.AddSingleton<OperationsService>();
 builder.Services.AddSingleton<ModifiersMessageService>();
 
 builder.Services.AddHostedService<LanguageServerHostedService>();

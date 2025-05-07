@@ -23,7 +23,8 @@ public sealed class ModifiersMessageService
         ModifierService modifierService,
         LocalizationFormatService localizationFormatService,
         IdeologiesService ideologiesService,
-        UnitService unitService
+        UnitService unitService,
+        OperationsService operationsService
     )
     {
         string filePtah = Path.Combine(App.AssetsFolder, "Modifiers.csv");
@@ -41,7 +42,14 @@ public sealed class ModifiersMessageService
             modifiers.Add(modifierMessage);
         }
 
-        ReadDynamicModifiers(modifiers, buildingsService, oreService, ideologiesService, unitService);
+        ReadDynamicModifiers(
+            modifiers,
+            buildingsService,
+            oreService,
+            ideologiesService,
+            unitService,
+            operationsService
+        );
 
         _modifierDto = modifiers
             .Select(message => new ModifierDto
@@ -64,7 +72,8 @@ public sealed class ModifiersMessageService
         BuildingsService buildingsService,
         OreService oreService,
         IdeologiesService ideologiesService,
-        UnitService unitService
+        UnitService unitService,
+        OperationsService operationsService
     )
     {
         string filePtah = Path.Combine(App.AssetsFolder, "DynamicModifiers.csv");
@@ -103,6 +112,15 @@ public sealed class ModifiersMessageService
                 foreach (string unitName in unitService.All)
                 {
                     modifiers.Add(new ModifierMessage(name.Replace("<Unit>", unitName), categories));
+                }
+            }
+            else if (name.Contains("<Operation>"))
+            {
+                foreach (string operationName in operationsService.OperationNames)
+                {
+                    modifiers.Add(
+                        new ModifierMessage(name.Replace("<Operation>", operationName), categories)
+                    );
                 }
             }
             else

@@ -173,7 +173,10 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
                     skillSet[leaf.Key] = value;
                 }
             }
-            else if (child.TryGetNode(out var childNode) && childNode.Key.Equals("traits", StringComparison.OrdinalIgnoreCase))
+            else if (
+                child.TryGetNode(out var childNode)
+                && childNode.Key.Equals("traits", StringComparison.OrdinalIgnoreCase)
+            )
             {
                 AddTraitsDescription(childNode, builder, LookUpTraitType.General);
             }
@@ -257,7 +260,12 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         foreach (string traitKey in traits)
         {
             string traitName = _localizationFormatService.GetFormatText(traitKey);
-            if (_imageService.TryGetLocalImagePathBySpriteName(_generalTraitsService.GetSpriteName(traitKey), out string? imageUri))
+            if (
+                _imageService.TryGetLocalImagePathBySpriteName(
+                    _generalTraitsService.GetSpriteName(traitKey),
+                    out string? imageUri
+                )
+            )
             {
                 traitName = $"![icon]({imageUri}){traitName}";
             }
