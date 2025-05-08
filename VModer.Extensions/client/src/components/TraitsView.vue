@@ -40,6 +40,7 @@
     </div>
 
     <ListBox v-if="!isLoading" ref="listBox" :items="viewData">
+      <!-- TODO: 无法显示Icon, 换成 Markdown -->
       <template #tooltip="{ item }">
         <div>
           <span>id: {{ item.Name }}</span>
