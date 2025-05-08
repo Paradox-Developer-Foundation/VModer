@@ -50,7 +50,8 @@ public sealed class LanguageServerHostedService : IHostedService
 
         _server.AddRequestHandler("getRuntimeInfo", GetRuntimeInfoAsync);
         _server.AddNotificationHandler("clearImageCache", ClearLocalImageCacheAsync);
-        _server.AddRequestHandler("getAllTrait", GetAllTraitAsync);
+        _server.AddRequestHandler("getGeneralTraits", GetGeneralTraitsAsync);
+        _server.AddRequestHandler("getLeaderTraits", GetLeaderTraitsAsync);
         _server.AddRequestHandler("getAllModifier", GetAllModifierAsync);
     }
 
@@ -75,12 +76,26 @@ public sealed class LanguageServerHostedService : IHostedService
         );
     }
 
-    private Task<JsonDocument?> GetAllTraitAsync(RequestMessage message, CancellationToken token)
+    private Task<JsonDocument?> GetGeneralTraitsAsync(RequestMessage message, CancellationToken token)
     {
         return Task.Run<JsonDocument?>(
             () =>
             {
+                // TODO: 本地化中的 \n 未转义
                 var traits = _serviceProvider.GetRequiredService<GeneralTraitsService>().GetAllTraitDto();
+                var value = JsonSerializer.SerializeToDocument(traits, TraitContext.Default.ListTraitDto);
+                return value;
+            },
+            token
+        );
+    }
+
+    private Task<JsonDocument?> GetLeaderTraitsAsync(RequestMessage message, CancellationToken token)
+    {
+        return Task.Run<JsonDocument?>(
+            () =>
+            {
+                var traits = _serviceProvider.GetRequiredService<LeaderTraitsService>().GetAllTraitDto();
                 var value = JsonSerializer.SerializeToDocument(traits, TraitContext.Default.ListTraitDto);
                 return value;
             },

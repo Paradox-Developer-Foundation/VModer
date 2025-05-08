@@ -2,20 +2,34 @@
 using System.Diagnostics.CodeAnalysis;
 using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
+using VModer.Core.Dto;
+using VModer.Core.Extensions;
 using VModer.Core.Models;
+using VModer.Core.Models.Character;
 using VModer.Core.Models.Modifiers;
 using VModer.Core.Services.GameResource.Base;
+using VModer.Core.Services.GameResource.Localization;
+using VModer.Core.Services.GameResource.Modifiers;
 
 namespace VModer.Core.Services.GameResource;
 
-public sealed class LeaderTraitsService()
+public sealed class LeaderTraitsService(
+    GameResourcesPathService gameResourcesPathService,
+    ModifierDisplayService modifierDisplayService,
+    LocalizationFormatService localizationFormatService
+)
     : CommonResourcesService<LeaderTraitsService, FrozenDictionary<string, LeaderTrait>>(
         Path.Combine([Keywords.Common, "country_leader"]),
         WatcherFilter.Text
     )
 {
-    private ICollection<FrozenDictionary<string, LeaderTrait>> Traits =>
-        Resources.Values;
+    private ICollection<FrozenDictionary<string, LeaderTrait>> Traits => Resources.Values;
+
+    private static readonly string[] TraitFeatureLeafKeywords = ["sprite", "random", "command_cap"];
+
+    // 仅处理数组中存在的节点修饰符
+    // https://hoi4.paradoxwikis.com/Character_modding#Country_leader_traits
+    private static readonly string[] TraitModifierNodeKeywords = ["targeted_modifier", "equipment_bonus"];
 
     public bool TryGetValue(string traitName, [NotNullWhen(true)] out LeaderTrait? trait)
     {
@@ -29,6 +43,33 @@ public sealed class LeaderTraitsService()
 
         trait = null;
         return false;
+    }
+
+    public List<TraitDto> GetAllTraitDto()
+    {
+        var traits = new List<TraitDto>(Resources.Sum(dic => dic.Value.Count));
+
+        foreach (var resource in Resources)
+        {
+            var fileOrigin = gameResourcesPathService.GetFileOrigin(resource.Key);
+            foreach (var trait in resource.Value.Select(item => item.Value))
+            {
+                traits.Add(
+                    new TraitDto
+                    {
+                        FileOrigin = fileOrigin,
+                        Name = trait.Name,
+                        LocalizedName = localizationFormatService.GetFormatText(trait.Name),
+                        Modifiers = string.Join('\n', modifierDisplayService.GetDescription(trait.Modifiers)),
+                        GeneralType = TraitType.All,
+                        FilePath = resource.Key,
+                        Position = trait.Position.ToDocumentRange()
+                    }
+                );
+            }
+        }
+
+        return traits;
     }
 
     protected override FrozenDictionary<string, LeaderTrait> ParseFileToContent(Node rootNode)
@@ -48,12 +89,6 @@ public sealed class LeaderTraitsService()
 
         return leaderTraits.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
     }
-
-    private static readonly string[] TraitFeatureLeafKeywords = ["sprite", "random", "command_cap"];
-
-    // 仅处理数组中存在的节点修饰符
-    // https://hoi4.paradoxwikis.com/Character_modding#Country_leader_traits
-    private static readonly string[] TraitModifierNodeKeywords = ["targeted_modifier", "equipment_bonus"];
 
     private static LeaderTrait ParseTraitToLeaderTrait(Node traitNode)
     {
@@ -90,6 +125,6 @@ public sealed class LeaderTraitsService()
             }
         }
 
-        return new LeaderTrait(traitNode.Key, modifiers);
+        return new LeaderTrait(traitNode.Key, modifiers, traitNode.Position);
     }
 }

@@ -1,15 +1,11 @@
-﻿using VModer.Core.Models.Modifiers;
+﻿using ParadoxPower.Utilities;
+using VModer.Core.Models.Modifiers;
 
 namespace VModer.Core.Models;
 
-public sealed class LeaderTrait
+public sealed class LeaderTrait(string name, IEnumerable<IModifier> modifiers, Position.Range position)
 {
-    public LeaderTrait(string name, IEnumerable<IModifier> modifiers)
-    {
-        Name = name;
-        Modifiers = modifiers.ToArray();
-    }
-
-    public string Name { get; }
-    public IEnumerable<IModifier> Modifiers { get; }
+    public string Name { get; } = name;
+    public IEnumerable<IModifier> Modifiers { get; } = modifiers.ToArray();
+    public Position.Range Position { get; } = position;
 }

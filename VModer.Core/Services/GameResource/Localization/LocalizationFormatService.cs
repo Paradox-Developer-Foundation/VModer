@@ -35,12 +35,7 @@ public sealed class LocalizationFormatService(
     /// <returns>格式化后的文本, 如果未找到值, 则返回<c>key</c></returns>
     public string GetFormatText(string key)
     {
-        if (TryGetFormatText(key, out string? value))
-        {
-            return value;
-        }
-
-        return key;
+        return TryGetFormatText(key, out string? value) ? value : key;
     }
 
     /// <summary>

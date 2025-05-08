@@ -14,9 +14,15 @@
   "TraitsView.OpenInFile": "在文件中打开",
   "TraitsView.Refresh": "刷新",
   "TraitsView.Loading": "加载中...",
+  "TraitsView.General": "将领",
+  "TraitsView.Leader": "领导人, 内阁",
+  "TraitsView.GeneralTraitType": "将领特质类型",
   "ModifierQuerierView.Title": "修饰符查询器",
   "ModifierQuerierView.SearchPlaceholder": "本地化名称 | 名称",
   "ModifierQuerierView.Categories": "类别",
   "ModifierQuerierView.Name": "名称",
-  "ModifierQuerierView.LocalizedName": "本地化名称"
+  "ModifierQuerierView.LocalizedName": "本地化名称",
+  "CopyToClipboardFailed": "复制到剪切板失败",
+  "CopyContentToClipboard": "已复制内容到剪贴板",
+  "OpenFileFailed": "打开文件失败"
 }

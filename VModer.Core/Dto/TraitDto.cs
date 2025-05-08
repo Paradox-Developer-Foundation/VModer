@@ -11,7 +11,7 @@ public sealed class TraitDto
     public required string LocalizedName { get; init; }
     public required string Modifiers { get; init; }
     public required FileOrigin FileOrigin { get; init; }
-    public required TraitType Type { get; init; }
+    public required TraitType GeneralType { get; init; }
 
     /// <summary>
     /// 特质描述信息

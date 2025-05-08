@@ -10,4 +10,7 @@ export interface TraitViewI18n {
 	openInFile: string;
 	refresh: string;
 	loading: string;
+	general: string;
+	leader: string;
+	generalTraitType: string;
 }

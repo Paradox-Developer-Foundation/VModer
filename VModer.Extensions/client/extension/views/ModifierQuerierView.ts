@@ -1,4 +1,4 @@
-import { ExtensionContext, l10n, ViewColumn, WebviewPanel, window } from "vscode";
+import { type ExtensionContext, l10n, ViewColumn, type WebviewPanel, window } from "vscode";
 import { Disposable } from "vscode-languageclient";
 import { WebviewHelpers } from "./WebviewHelpers";
 import { LanguageClient } from "vscode-languageclient/node";

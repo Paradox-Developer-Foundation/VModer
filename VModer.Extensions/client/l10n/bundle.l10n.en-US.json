@@ -14,9 +14,15 @@
   "TraitsView.OpenInFile": "Open in File",
   "TraitsView.Refresh": "Refresh",
   "TraitsView.Loading": "Loading...",
+  "TraitsView.General": "General",
+  "TraitsView.Leader": "Leader, Cabinet",
+  "TraitsView.GeneralTraitType": "General Trait Type",
   "ModifierQuerierView.Title": "Modifier Query",
   "ModifierQuerierView.SearchPlaceholder": "Localized Name | Name",
   "ModifierQuerierView.Categories": "Categories",
   "ModifierQuerierView.Name": "Name",
-  "ModifierQuerierView.LocalizedName": "Localized Name"
+  "ModifierQuerierView.LocalizedName": "Localized Name",
+  "CopyToClipboardFailed": "Copy to clipboard failed",
+  "CopyContentToClipboard": "Copy content to clipboard successfully",
+  "OpenFileFailed": "Open file failed"
 }

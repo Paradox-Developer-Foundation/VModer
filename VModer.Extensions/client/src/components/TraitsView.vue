@@ -1,5 +1,5 @@
 <template>
-  <div style="margin: 16px">
+  <div style="margin: 12px">
     <div style="display: flex; column-gap: 8px; margin-bottom: 8px">
       <vscode-textfield
         :placeholder="i18n.search"
@@ -15,12 +15,25 @@
         <option value="2">{{ i18n.modOnly }}</option>
       </select>
 
-      <label for="traitTypeSelection">{{ i18n.traitType }}</label>
-      <vscode-multi-select id="traitTypeSelection" ref="traitTypeSelection" @change="searchTrait">
-        <vscode-option v-for="type in traitTypes" :value="type" selected="true">{{
-          TraitType[type]
-        }}</vscode-option>
-      </vscode-multi-select>
+      <label for="traitTypeSelect">{{ i18n.traitType }}</label>
+      <select id="traitTypeSelect" @change="searchTrait" v-model="selectedTraitType">
+        <option :value="TraitKind.None">{{ i18n.all }}</option>
+        <option :value="TraitKind.General">{{ i18n.general }}</option>
+        <option :value="TraitKind.Leader">{{ i18n.leader }}</option>
+      </select>
+
+      <div v-show="selectedTraitType !== TraitKind.Leader">
+        <label for="generalTraitTypeSelection">{{ i18n.generalTraitType }}</label>
+        <vscode-multi-select
+          id="generalTraitTypeSelection"
+          ref="generalTraitTypeSelection"
+          @change="searchTrait"
+        >
+          <vscode-option v-for="type in generalTraitTypes" :value="type" selected="true">{{
+            TraitType[type]
+          }}</vscode-option>
+        </vscode-multi-select>
+      </div>
 
       <vscode-button @click="refreshTraits">{{ i18n.refresh }}</vscode-button>
       <label>Count: {{ viewData.length }} </label>
@@ -58,7 +71,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, useTemplateRef } from "vue";
-import { FileOrigin, TraitType, type TraitDto, getTraitTypeValues, hasFlag } from "../dto/TraitDto";
+import {
+  FileOrigin,
+  TraitType,
+  type TraitDto,
+  getTraitTypeValues,
+  hasFlag,
+  TraitKind,
+} from "../dto/TraitDto";
 import { WebviewApi } from "@tomjs/vscode-webview";
 import ListBox from "./ListBox.vue";
 import type { TraitViewI18n } from "../types/TraitViewI18n";
@@ -66,7 +86,7 @@ import type { VscodeContextMenu, VscodeMultiSelect } from "@vscode-elements/elem
 import type { OpenInFileMessage } from "../types/OpenInFileMessage";
 
 const AllOrigin = "0";
-const traitTypes: TraitType[] = getTraitTypeValues();
+const generalTraitTypes: TraitType[] = getTraitTypeValues();
 const vscode = new WebviewApi();
 const i18n = ref<TraitViewI18n>({
   search: "Search",
@@ -80,12 +100,16 @@ const i18n = ref<TraitViewI18n>({
   openInFile: "Open in File",
   refresh: "Refresh",
   loading: "Loading...",
+  general: "General",
+  leader: "Leader",
+  generalTraitType: "General Trait Type:",
 });
 
 const searchValue = ref("");
 const selectedOrigin = ref(AllOrigin);
-const traitTypeSelection = ref<VscodeMultiSelect | null>(null);
+const generalTraitTypeSelection = ref<VscodeMultiSelect | null>(null);
 const contextMenu = ref<VscodeContextMenu | null>(null);
+const selectedTraitType = ref<TraitKind>(TraitKind.None);
 
 const listBox = useTemplateRef("listBox");
 
@@ -178,31 +202,44 @@ vscode.on<TraitViewI18n>("i18n", (i18nData) => {
 });
 
 function searchTrait() {
-  const selectedTraitType = traitTypeSelection.value?.value ?? [];
+  const selectedGeneralTraitType = generalTraitTypeSelection.value?.value ?? [];
+
+  console.log(selectedTraitType.value);
 
   if (
     searchValue.value === "" &&
     selectedOrigin.value === AllOrigin &&
-    selectedTraitType.length === traitTypes.length
+    selectedGeneralTraitType.length === generalTraitTypes.length &&
+    selectedTraitType.value === TraitKind.None
   ) {
     viewData.value = rawTraits;
     return;
   }
 
+  console.log(selectedTraitType.value === TraitKind.None);
+  console.log(selectedTraitType.value === TraitKind.General);
+  console.log(selectedTraitType.value === TraitKind.Leader);
+
   const search = searchValue.value.toLowerCase();
   const includesSearchValue = (item: TraitDto) =>
-    item.LocalizedName.toLowerCase().includes(search) || item.Name.toLowerCase().includes(search);
+    search === "" ||
+    item.LocalizedName.toLowerCase().includes(search) ||
+    item.Name.toLowerCase().includes(search);
 
   const isTargetFileOrigin = (item: TraitDto) =>
     selectedOrigin.value === AllOrigin || item.FileOrigin.toString() === selectedOrigin.value;
 
-  let traitTypeFlags = selectedTraitType.map<TraitType>((item) => TraitType[item]);
+  const isTargetTraitType = (item: TraitDto) =>
+    selectedTraitType.value === TraitKind.None || selectedTraitType.value === item.Type;
+
+  let traitTypeFlags = selectedGeneralTraitType.map<TraitType>((item) => TraitType[item]);
 
   viewData.value = rawTraits.filter(
     (item) =>
       isTargetFileOrigin(item) &&
       includesSearchValue(item) &&
-      traitTypeFlags.some((traitFlag) => hasFlag(item.Type, traitFlag))
+      traitTypeFlags.some((traitFlag) => hasFlag(item.GeneralType, traitFlag)) &&
+      isTargetTraitType(item)
   );
 }
 
@@ -228,6 +265,10 @@ select {
 }
 
 label {
-  font-size: medium;
+  font-size: small;
+}
+
+vscode-button {
+  align-content: center;
 }
 </style>

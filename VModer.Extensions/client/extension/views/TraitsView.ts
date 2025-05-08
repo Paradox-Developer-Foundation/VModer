@@ -1,11 +1,11 @@
 import {
   env,
-  ExtensionContext,
+  type ExtensionContext,
   l10n,
   Selection,
   Uri,
   ViewColumn,
-  WebviewPanel,
+  type WebviewPanel,
   window,
   workspace,
 } from "vscode";
@@ -15,6 +15,7 @@ import { LanguageClient } from "vscode-languageclient/node";
 import type { TraitViewI18n } from "../../src/types/TraitViewI18n";
 import type { OpenInFileMessage } from "../../src/types/OpenInFileMessage";
 import type { DocumentRange } from "../../src/types/DocumentRange";
+import { TraitKind, type TraitDto } from "../../src/dto/TraitDto";
 
 export class TraitView {
   public static currentPanel: TraitView | undefined;
@@ -56,6 +57,9 @@ export class TraitView {
         openInFile: l10n.t("TraitsView.OpenInFile"),
         refresh: l10n.t("TraitsView.Refresh"),
         loading: l10n.t("TraitsView.Loading"),
+        general: l10n.t("TraitsView.General"),
+        leader: l10n.t("TraitsView.Leader"),
+        generalTraitType: l10n.t("TraitsView.GeneralTraitType"),
       };
 
       panel.webview.onDidReceiveMessage(
@@ -63,20 +67,22 @@ export class TraitView {
           if (message == "init_complete") {
             panel.webview.postMessage({ type: "i18n", data: i18n });
           } else if (message == "refreshTraits") {
-            const traits = await client.sendRequest<{ IconPath: string }[]>("getAllTrait");
+            const generalTraits = await client.sendRequest<TraitDto[]>("getGeneralTraits");
+            const leaderTraits = await client.sendRequest<TraitDto[]>("getLeaderTraits");
 
-            traits.forEach((trait) => {
+            generalTraits.forEach((trait) => {
               if (trait.IconPath) {
-                if (trait.IconPath) {
-                  const iconPath = panel.webview.asWebviewUri(Uri.parse(trait.IconPath));
-                  trait.IconPath = iconPath.toString();
-                }
+                const iconPath = panel.webview.asWebviewUri(Uri.parse(trait.IconPath));
+                trait.IconPath = iconPath.toString();
               }
+              trait.Type = TraitKind.General;
             });
+
+            leaderTraits.forEach((trait) => (trait.Type = TraitKind.Leader));
 
             await panel.webview.postMessage({
               type: "traits",
-              data: traits,
+              data: generalTraits.concat(leaderTraits),
             });
           }
         },
@@ -89,10 +95,10 @@ export class TraitView {
           if (message.type === "copyToClipboard") {
             try {
               await env.clipboard.writeText(message.data);
-              window.showInformationMessage("已复制内容到剪贴板");
+              window.showInformationMessage(l10n.t("CopyContentToClipboard"));
             } catch (err) {
               console.error("无法复制文本:", err);
-              window.showErrorMessage("复制失败");
+              window.showErrorMessage(l10n.t("CopyToClipboardFailed"));
             }
           }
         },
@@ -115,7 +121,7 @@ export class TraitView {
               await window.showTextDocument(document, { selection });
             } catch (error) {
               console.error("无法打开文件:", error);
-              window.showErrorMessage("无法打开文件");
+              window.showErrorMessage(l10n.t("OpenFileFailed"));
             }
           }
         },

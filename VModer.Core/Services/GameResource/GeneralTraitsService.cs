@@ -91,7 +91,7 @@ public sealed class GeneralTraitsService
                     LocalizedName = GetLocalizationName(trait),
                     Modifiers = string.Join('\n', GetModifiersDescription(trait)),
                     FileOrigin = fileOrigin,
-                    Type = trait.Type,
+                    GeneralType = trait.Type,
                     Position = trait.Position.ToDocumentRange(),
                     FilePath = fileResource.Key
                 };

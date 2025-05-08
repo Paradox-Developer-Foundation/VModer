@@ -1,4 +1,4 @@
-import { ExtensionContext, Webview } from "vscode";
+import type { ExtensionContext, Webview } from "vscode";
 
 export class WebviewHelpers {
     static getHtml(webview: Webview, context: ExtensionContext, input: string) {
