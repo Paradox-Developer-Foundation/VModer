@@ -45,6 +45,7 @@
           <span>id: {{ item.Name }}</span>
           <br />
           <span>origin: {{ FileOrigin[item.FileOrigin] }}</span>
+          <p v-if="item.Modifiers !== ''"/>
           <pre style="margin: 0; font-family: inherit">{{ item.Modifiers }}</pre>
 
           <br v-if="item.Description" />
