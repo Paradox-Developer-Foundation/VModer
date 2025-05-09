@@ -1,5 +1,6 @@
 import {
   commands,
+  env,
   type ExtensionContext,
   ExtensionMode,
   l10n,
@@ -22,7 +23,7 @@ import {
 import * as path from "path";
 import { TraitView } from "./views/TraitsView";
 import TelemetryReporter from "@vscode/extension-telemetry";
-import { ModifierQuerierView } from './views/ModifierQuerierView';
+import { ModifierQuerierView } from "./views/ModifierQuerierView";
 
 let client: LanguageClient;
 let analyzeAllFilesEnd = false;
@@ -34,7 +35,9 @@ export async function activate(context: ExtensionContext) {
   context.subscriptions.push(reporter);
 
   try {
-    reporter.sendTelemetryEvent("activate");
+    reporter.sendTelemetryEvent("activate", {
+      language: env.language,
+    });
   } catch (error) {
     console.log(error);
   }
