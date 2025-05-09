@@ -4,6 +4,7 @@ using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
 using VModer.Core.Dto;
 using VModer.Core.Extensions;
+using VModer.Core.Helpers;
 using VModer.Core.Models;
 using VModer.Core.Models.Character;
 using VModer.Core.Models.Modifiers;
@@ -60,7 +61,9 @@ public sealed class LeaderTraitsService(
                         FileOrigin = fileOrigin,
                         Name = trait.Name,
                         LocalizedName = localizationFormatService.GetFormatText(trait.Name),
-                        Modifiers = string.Join('\n', modifierDisplayService.GetDescription(trait.Modifiers)),
+                        Modifiers = CharacterHelper.ToMarkdown(
+                            modifierDisplayService.GetDescription(trait.Modifiers)
+                        ),
                         GeneralType = TraitType.All,
                         FilePath = resource.Key,
                         Position = trait.Position.ToDocumentRange()

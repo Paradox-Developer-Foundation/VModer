@@ -40,21 +40,18 @@
     </div>
 
     <ListBox v-if="!isLoading" ref="listBox" :items="viewData">
-      <!-- TODO: 无法显示Icon, 换成 Markdown -->
       <template #tooltip="{ item }">
-        <div>
-          <span>id: {{ item.Name }}</span>
-          <br />
-          <span>origin: {{ FileOrigin[item.FileOrigin] }}</span>
-          <br />
-          <span>type: {{ item.Type === TraitKind.General ? i18n.general : i18n.leader }}</span>
+        <span>id: {{ item.Name }}</span>
+        <br />
+        <span>origin: {{ FileOrigin[item.FileOrigin] }}</span>
+        <br />
+        <span>type: {{ item.Type === TraitKind.General ? i18n.general : i18n.leader }}</span>
 
-          <p v-if="item.Modifiers" />
-          <pre style="margin: 0; font-family: inherit">{{ item.Modifiers }}</pre>
+        <p v-if="item.Modifiers" />
+        <span class="markdown-body" v-html="marked(item.Modifiers)"></span>
 
-          <br v-if="item.Description" />
-          <span v-if="item.Description">{{ item.Description }}</span>
-        </div>
+        <br v-if="item.Description" />
+        <span v-if="item.Description">{{ item.Description }}</span>
       </template>
 
       <template #item="{ item, index }">
@@ -89,6 +86,10 @@ import ListBox from "./ListBox.vue";
 import type { TraitViewI18n } from "../types/TraitViewI18n";
 import type { VscodeContextMenu, VscodeMultiSelect } from "@vscode-elements/elements";
 import type { OpenInFileMessage } from "../types/OpenInFileMessage";
+import { marked } from "marked";
+import { initMarked } from "../helpers/markdownHelper";
+
+initMarked();
 
 const AllOrigin = "0";
 const generalTraitTypes: TraitType[] = getTraitTypeValues();
@@ -270,5 +271,17 @@ label {
 
 vscode-button {
   align-content: center;
+}
+
+.markdown-body p {
+  margin-top: 2px;
+  margin-bottom: 2px;
+  line-height: 1.2;
+}
+
+.markdown-body ul {
+  margin-top: 2px;
+  margin-bottom: 2px;
+  padding-left: 28px;
 }
 </style>

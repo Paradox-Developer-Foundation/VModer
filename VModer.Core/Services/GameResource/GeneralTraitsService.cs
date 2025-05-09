@@ -7,6 +7,7 @@ using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
 using VModer.Core.Dto;
 using VModer.Core.Extensions;
+using VModer.Core.Helpers;
 using VModer.Core.Models.Character;
 using VModer.Core.Models.Modifiers;
 using VModer.Core.Services.GameResource.Base;
@@ -89,14 +90,16 @@ public sealed class GeneralTraitsService
                 {
                     Name = trait.Name,
                     LocalizedName = GetLocalizationName(trait),
-                    Modifiers = string.Join('\n', GetModifiersDescription(trait)),
+                    Modifiers = CharacterHelper.ToMarkdown(GetModifiersDescription(trait)),
                     FileOrigin = fileOrigin,
                     GeneralType = trait.Type,
                     Position = trait.Position.ToDocumentRange(),
                     FilePath = fileResource.Key
                 };
 
-                if (_imageService.TryGetLocalImagePathBySpriteName(GetSpriteName(trait.Name), out string? uri))
+                if (
+                    _imageService.TryGetLocalImagePathBySpriteName(GetSpriteName(trait.Name), out string? uri)
+                )
                 {
                     dto.IconPath = uri;
                 }

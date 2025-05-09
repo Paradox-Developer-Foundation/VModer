@@ -49,22 +49,12 @@ import { marked } from "marked";
 import { uniq } from "lodash-es";
 import type { VscodeMultiSelect } from "@vscode-elements/elements";
 import type { ModifierQuerierViewI18n } from "../types/ModifierQuerierViewI18";
+import { initMarked } from "../helpers/markdownHelper";
+
+initMarked();
 
 const modifierListKey = "modifierList";
 const i18nKey = "i18n";
-
-marked.use({
-  extensions: [
-    {
-      name: "image",
-      renderer(token) {
-        const url = new URL(token.href);
-        // TODO: 跨平台兼容性?
-        return `<img src="https://file+.vscode-resource.vscode-cdn.net${url.pathname}" alt="${token.text}"/>`;
-      },
-    },
-  ],
-});
 
 const modifierList = ref<ModifierDto[]>([]);
 let rawModifierList: ModifierDto[] = [];
