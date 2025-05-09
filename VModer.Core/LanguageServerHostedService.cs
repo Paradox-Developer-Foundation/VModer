@@ -81,7 +81,6 @@ public sealed class LanguageServerHostedService : IHostedService
         return Task.Run<JsonDocument?>(
             () =>
             {
-                // TODO: 本地化中的 \n 未转义
                 var traits = _serviceProvider.GetRequiredService<GeneralTraitsService>().GetAllTraitDto();
                 var value = JsonSerializer.SerializeToDocument(traits, TraitContext.Default.ListTraitDto);
                 return value;
