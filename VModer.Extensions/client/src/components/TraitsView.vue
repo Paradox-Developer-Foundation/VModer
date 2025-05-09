@@ -209,7 +209,6 @@ vscode.on<TraitViewI18n>("i18n", (i18nData) => {
 function searchTrait() {
   const selectedGeneralTraitType = generalTraitTypeSelection.value?.value ?? [];
 
-  console.log(selectedTraitType.value);
 
   if (
     searchValue.value === "" &&
@@ -220,10 +219,6 @@ function searchTrait() {
     viewData.value = rawTraits;
     return;
   }
-
-  console.log(selectedTraitType.value === TraitKind.None);
-  console.log(selectedTraitType.value === TraitKind.General);
-  console.log(selectedTraitType.value === TraitKind.Leader);
 
   const search = searchValue.value.toLowerCase();
   const includesSearchValue = (item: TraitDto) =>
