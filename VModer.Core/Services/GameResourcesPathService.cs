@@ -3,7 +3,7 @@ using VModer.Core.Extensions;
 
 namespace VModer.Core.Services;
 
-public sealed partial class GameResourcesPathService(
+public sealed class GameResourcesPathService(
     SettingsService settingService,
     GameModDescriptorService descriptor
 )
