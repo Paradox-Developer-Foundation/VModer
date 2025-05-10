@@ -74,9 +74,10 @@ builder.Services.AddSingleton<ServerLoggerService>();
 builder.Services.AddSingleton<HoverService>();
 builder.Services.AddSingleton<HoverStrategyManager>();
 builder.Services.AddSingleton<IHoverStrategy, CharacterHoverStrategy>();
-builder.Services.AddSingleton<IHoverStrategy, ModifierHoverStrategy>();
+builder.Services.AddKeyedSingleton<IHoverStrategy, ModifierHoverStrategy>(nameof(ModifierHoverStrategy));
 builder.Services.AddSingleton<IHoverStrategy, CountriesDefineHoverStrategy>();
 builder.Services.AddSingleton<IHoverStrategy, TechnologyHoverStrategy>();
+builder.Services.AddSingleton<IHoverStrategy, DefaultHoverStrategy>();
 
 // 游戏资源服务
 builder.Services.AddSingleton<ILocalizationService, LocalizationService>();

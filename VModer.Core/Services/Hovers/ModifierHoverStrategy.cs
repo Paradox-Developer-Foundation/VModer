@@ -4,24 +4,18 @@ using NLog;
 using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
 using VModer.Core.Extensions;
+using VModer.Core.Helpers;
 using VModer.Core.Models;
 using VModer.Core.Models.Modifiers;
 using VModer.Core.Services.GameResource.Modifiers;
 
 namespace VModer.Core.Services.Hovers;
 
-public sealed class ModifierHoverStrategy : IHoverStrategy
+public sealed class ModifierHoverStrategy(ModifierDisplayService modifierDisplayService) : IHoverStrategy
 {
-    public GameFileType FileType => GameFileType.Unknown;
-
-    private readonly ModifierDisplayService _modifierDisplayService;
+    public GameFileType FileType => GameFileType.Modifiers;
 
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-
-    public ModifierHoverStrategy(ModifierDisplayService modifierDisplayService)
-    {
-        _modifierDisplayService = modifierDisplayService;
-    }
 
     public string GetHoverText(Node rootNode, HoverParams request)
     {
@@ -34,7 +28,7 @@ public sealed class ModifierHoverStrategy : IHoverStrategy
         var node = rootNode.FindAdjacentNodeByPosition(localPosition);
         Log.Debug("光标所在 Node, Key:{Key}, Pos: {Pos}", node.Key, localPosition);
 
-        if (!IsModifierNode(node, request))
+        if (!ModifierHelper.IsModifierNode(node, request))
         {
             return string.Empty;
         }
@@ -44,7 +38,7 @@ public sealed class ModifierHoverStrategy : IHoverStrategy
         if (child.TryGetNode(out var childNode))
         {
             foreach (
-                string description in _modifierDisplayService.GetDescription(GetModifiersForNode(childNode))
+                string description in modifierDisplayService.GetDescription(GetModifiersForNode(childNode))
             )
             {
                 builder.AppendParagraph(description);
@@ -53,19 +47,10 @@ public sealed class ModifierHoverStrategy : IHoverStrategy
         else if (child.TryGetLeaf(out var leaf))
         {
             var leafModifier = LeafModifier.FromLeaf(leaf);
-            builder.AppendParagraph(_modifierDisplayService.GetDescription(leafModifier));
+            builder.AppendParagraph(modifierDisplayService.GetDescription(leafModifier));
         }
 
         return builder.ToString();
-    }
-
-    private static bool IsModifierNode(Node node, HoverParams request)
-    {
-        var fileType = GameFileType.FromFilePath(request.TextDocument.Uri.Uri.ToSystemPath());
-        return fileType == GameFileType.Modifiers
-            || node.Key.Equals("modifier", StringComparison.OrdinalIgnoreCase)
-            || node.Key.Equals("modifiers", StringComparison.OrdinalIgnoreCase)
-            || node.Key.Equals(Keywords.HiddenModifier, StringComparison.OrdinalIgnoreCase);
     }
 
     private static List<IModifier> GetModifiersForNode(Node node)
