@@ -15,7 +15,7 @@ public sealed class CharacterSkillService()
         WatcherFilter.Text
     )
 {
-    public IEnumerable<SkillInfo> Skills => Resources.Values.SelectMany(s => s);
+    private IEnumerable<SkillInfo> Skills => Resources.Values.SelectMany(s => s);
 
     private const ushort DefaultSkillMaxValue = 1;
 
@@ -31,6 +31,20 @@ public sealed class CharacterSkillService()
         }
 
         return DefaultSkillMaxValue;
+    }
+
+    public SkillModifier? GetModifier(SkillType skillType, SkillCharacterType characterType, ushort level)
+    {
+        foreach (var skillInfo in Skills.Where(skill => skill.SkillType == skillType))
+        {
+            var skillModifier = skillInfo.GetModifierDescription(characterType, level);
+            if (skillModifier is not null)
+            {
+                return skillModifier;
+            }
+        }
+
+        return null;
     }
 
     protected override SkillInfo[]? ParseFileToContent(Node rootNode)

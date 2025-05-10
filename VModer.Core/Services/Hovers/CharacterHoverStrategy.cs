@@ -201,10 +201,7 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
         ushort level
     )
     {
-        var skillModifier = _characterSkillService
-            .Skills.FirstOrDefault(skill => skill.SkillType == skillType)
-            ?.GetModifierDescription(skillCharacterType, level);
-
+        var skillModifier = _characterSkillService.GetModifier(skillType, skillCharacterType, level);
         if (skillModifier is null || skillModifier.Modifiers.Count == 0)
         {
             return [];
