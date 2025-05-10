@@ -21,8 +21,16 @@ public sealed class CharacterSkillService()
 
     public ushort GetMaxSkillValue(SkillType skillType, SkillCharacterType skillCharacterType)
     {
-        return Skills.FirstOrDefault(skill => skill.SkillType == skillType)?.GetMaxValue(skillCharacterType)
-            ?? DefaultSkillMaxValue;
+        foreach (var skillInfo in Skills.Where(skill => skill.SkillType == skillType))
+        {
+            ushort? value = skillInfo.GetMaxValue(skillCharacterType);
+            if (value.HasValue)
+            {
+                return value.Value;
+            }
+        }
+
+        return DefaultSkillMaxValue;
     }
 
     protected override SkillInfo[]? ParseFileToContent(Node rootNode)
