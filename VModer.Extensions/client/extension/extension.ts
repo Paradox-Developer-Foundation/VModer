@@ -9,6 +9,7 @@ import {
   Uri,
   window,
   workspace,
+  type WorkspaceConfiguration,
 } from "vscode";
 import * as net from "net";
 import * as fs from "fs";
@@ -96,17 +97,7 @@ export async function activate(context: ExtensionContext) {
     config.get<string>("VModer.GameRootPath") || config.get<string>("cwtools.cache.hoi4");
 
   if (gameRootFolderPath === undefined || gameRootFolderPath === "") {
-    await window.showWarningMessage(l10n.t("SelectGameRootPath"), l10n.t("SelectFolder"));
-    const uri = await window.showOpenDialog({
-      canSelectFiles: false,
-      canSelectFolders: true,
-      canSelectMany: false,
-      openLabel: l10n.t("SelectFolder"),
-    });
-    if (uri && uri[0]) {
-      config.update("VModer.GameRootPath", uri[0].fsPath, true);
-    }
-    await window.showInformationMessage(l10n.t("MustRestart"));
+    await pickGameRootFolderPath(config);
   }
 
   // 控制语言客户端的选项
@@ -173,6 +164,20 @@ export async function activate(context: ExtensionContext) {
     openTraitsView,
     openModifierQuerierView
   );
+}
+
+async function pickGameRootFolderPath(config: WorkspaceConfiguration) {
+  await window.showWarningMessage(l10n.t("SelectGameRootPath"), l10n.t("SelectFolder"));
+  const uri = await window.showOpenDialog({
+    canSelectFiles: false,
+    canSelectFolders: true,
+    canSelectMany: false,
+    openLabel: l10n.t("SelectFolder"),
+  });
+  if (uri && uri[0]) {
+    await config.update("VModer.GameRootPath", uri[0].fsPath, true);
+  }
+  await window.showInformationMessage(l10n.t("MustRestart"));
 }
 
 function updateStatusBarItem(statusBarItem: StatusBarItem, client: LanguageClient) {
