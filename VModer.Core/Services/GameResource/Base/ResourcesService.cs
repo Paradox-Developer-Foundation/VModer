@@ -26,11 +26,13 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
     /// <param name="folderOrFileRelativePath">文件夹或文件的相对路径</param>
     /// <param name="filter">过滤条件</param>
     /// <param name="pathType"><c>folderOrFileRelativePath</c>的类型</param>
+    /// <param name="searchOption">指定文件夹的搜索模式, 当路径是文件时此配置无效</param>
     /// <param name="isAsyncLoading">是否多线程加载资源, 子类需要确保重写的方法是线程安全的</param>
     protected ResourcesService(
         string folderOrFileRelativePath,
         WatcherFilter filter,
         PathType pathType,
+        SearchOption searchOption = SearchOption.TopDirectoryOnly,
         bool isAsyncLoading = false
     )
     {
@@ -44,7 +46,11 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
         bool isFolderPath = pathType == PathType.Folder;
         string[] filePaths = isFolderPath
             ? gameResourcesPathService
-                .GetAllFilePriorModByRelativePathForFolder(_folderOrFileRelativePath, filter.Name)
+                .GetAllFilePriorModByRelativePathForFolder(
+                    _folderOrFileRelativePath,
+                    filter.Name,
+                    searchOption
+                )
                 .ToArray()
             : [gameResourcesPathService.GetFilePathPriorModByRelativePath(folderOrFileRelativePath)];
 

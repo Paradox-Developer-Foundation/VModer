@@ -25,6 +25,7 @@ public sealed class LocalizationService
             ),
             WatcherFilter.LocalizationFiles,
             PathType.Folder,
+            SearchOption.AllDirectories,
             true
         )
     {

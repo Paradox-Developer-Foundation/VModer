@@ -15,10 +15,9 @@ public sealed class SpriteService
 {
     [Time("加载界面图片")]
     public SpriteService()
-        : base("interface", WatcherFilter.GfxFiles, PathType.Folder, true) { }
+        : base("interface", WatcherFilter.GfxFiles, PathType.Folder, SearchOption.TopDirectoryOnly, true) { }
 
-    private ICollection<FrozenDictionary<string, SpriteInfo>> Sprites =>
-        Resources.Values;
+    private ICollection<FrozenDictionary<string, SpriteInfo>> Sprites => Resources.Values;
 
     public bool TryGetSpriteInfo(string spriteTypeName, [NotNullWhen(true)] out SpriteInfo? info)
     {
