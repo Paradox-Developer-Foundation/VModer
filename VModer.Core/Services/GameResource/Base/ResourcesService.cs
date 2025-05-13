@@ -74,13 +74,17 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
             ParseFileAndAddToResourcesSync(filePaths);
         }
 
+        bool includeSubFolders = searchOption == SearchOption.AllDirectories && isFolderPath;
+
         watcherService.Watch(
             isFolderPath
                 ? _folderOrFileRelativePath
                 : Path.GetDirectoryName(folderOrFileRelativePath) ?? folderOrFileRelativePath,
             this,
-            filter.Name
+            filter.Name,
+            includeSubFolders
         );
+
         Log.Info("初始化资源成功: {FolderRelativePath}, 共 {Count} 个文件", _folderOrFileRelativePath, filePaths.Length);
         LogItemsSum();
     }
