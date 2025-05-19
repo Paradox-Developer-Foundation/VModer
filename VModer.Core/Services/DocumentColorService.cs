@@ -23,17 +23,6 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
 
     public ColorPresentationResponse GetColorPresentation(ColorPresentationParams request)
     {
-        string filePath = request.TextDocument.Uri.Uri.ToSystemPath();
-
-        var fileType = GameFileType.FromFilePath(filePath);
-
-        // TODO: 实现字体颜色代码颜色选择器
-        // 节点键不为 color 而是颜色代码, 无法直接替换, 需要获取当前颜色代码
-        if (fileType == GameFileType.CoreGfx)
-        {
-            return new ColorPresentationResponse([]);
-        }
-
         double red = request.Color.Red * 255;
         double green = request.Color.Green * 255;
         double blue = request.Color.Blue * 255;
@@ -41,8 +30,8 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
 
         List<ColorPresentation> presentations =
         [
-            GetRgbColorPresentation(red, green, blue, request.Range!.Value),
-            GetHsvColorPresentation(h, s, v, request.Range!.Value)
+            GetRgbColorPresentation(red, green, blue, request),
+            GetHsvColorPresentation(h, s, v, request)
         ];
 
         return new ColorPresentationResponse(presentations);
@@ -102,21 +91,31 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
         double red,
         double green,
         double blue,
-        DocumentRange documentRange
+        ColorPresentationParams param
     )
     {
         double max = Math.Max(red, Math.Max(green, blue));
         double saturationModifier = definesService.Get<double>(CountryColorSaturationModifier);
         double brightnessModifier = definesService.Get<double>(CountryColorBrightnessModifier);
 
+        if (!gameFilesService.TryGetFileText(param.TextDocument.Uri.Uri, out string? text))
+        {
+            text = File.ReadAllText(param.TextDocument.Uri.Uri.ToSystemPath());
+        }
+
+        string textInPosition = GetTextByPosition(text, param.Range!.Value);
+        bool isHasColorType =
+            textInPosition.Contains("rgb", StringComparison.OrdinalIgnoreCase)
+            || textInPosition.Contains("HSV", StringComparison.OrdinalIgnoreCase);
+        string colorType = isHasColorType ? "rgb " : string.Empty;
         return new ColorPresentation
         {
             Label = $"rgb({red:F0}, {green:F0}, {blue:F0})",
             TextEdit = new TextEdit
             {
                 NewText =
-                    $"color = rgb {{ {GetDisplayColor(red):F0} {GetDisplayColor(green):F0} {GetDisplayColor(blue):F0} }}",
-                Range = documentRange
+                    $"{colorType}{{ {GetDisplayColor(red):F0} {GetDisplayColor(green):F0} {GetDisplayColor(blue):F0} }}",
+                Range = param.Range!.Value
             }
         };
 
@@ -130,7 +129,7 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
         double h,
         double s,
         double v,
-        DocumentRange documentRange
+        ColorPresentationParams param
     )
     {
         double saturationModifier = definesService.Get<double>(CountryColorSaturationModifier);
@@ -145,8 +144,8 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
             Label = $"hsv({h:F0}, {s:P}, {v:P})",
             TextEdit = new TextEdit
             {
-                NewText = $"color = HSV {{ {h / 360.0:F2} {usedSaturation:F2} {usedBrightness:F2} }}",
-                Range = documentRange
+                NewText = $"HSV {{ {h / 360.0:F2} {usedSaturation:F2} {usedBrightness:F2} }}",
+                Range = param.Range!.Value
             }
         };
     }
@@ -228,12 +227,12 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
         }
 
         var colors = new List<ColorInformation>();
-        AddTextColors(rootNode, colors);
+        AddTextColors(rootNode, colors, fileText);
 
         return new DocumentColorResponse(colors);
     }
 
-    private void AddTextColors(Node node, List<ColorInformation> colorsInfo)
+    private void AddTextColors(Node node, List<ColorInformation> colorsInfo, string fileText)
     {
         foreach (var childNode in node.Nodes)
         {
@@ -241,13 +240,13 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
             {
                 foreach (var colorNode in childNode.Nodes)
                 {
-                    AddColorInfoToList(colorNode, colorsInfo);
+                    AddColorInfoToList(colorNode, colorsInfo, fileText);
                 }
             }
             // 确保不是 LeafValues 节点以避免无效的递归调用
             else if (!childNode.LeafValues.Any())
             {
-                AddTextColors(childNode, colorsInfo);
+                AddTextColors(childNode, colorsInfo, fileText);
             }
         }
     }
@@ -274,7 +273,7 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
                     )
                 )
                 {
-                    AddColorInfoToList(colorNode, colorsInfo);
+                    AddColorInfoToList(colorNode, colorsInfo, fileText);
                 }
             }
         }
@@ -293,13 +292,13 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
         var colorsInfo =
             fileName.Equals("colors.txt", StringComparison.OrdinalIgnoreCase)
             || fileName.Equals("cosmetic.txt", StringComparison.OrdinalIgnoreCase)
-                ? GetColorInNodeColorFile(rootNode)
-                : GetColorInLeafColorFile(rootNode);
+                ? GetColorInNodeColorFile(rootNode, fileText)
+                : GetColorInLeafColorFile(rootNode, fileText);
 
         return new DocumentColorResponse(colorsInfo);
     }
 
-    private List<ColorInformation> GetColorInNodeColorFile(Node rootNode)
+    private List<ColorInformation> GetColorInNodeColorFile(Node rootNode, string fileText)
     {
         var colorsInfo = new List<ColorInformation>();
 
@@ -312,14 +311,14 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
                 )
             )
             {
-                AddColorInfoToList(colorNode, colorsInfo);
+                AddColorInfoToList(colorNode, colorsInfo, fileText);
             }
         }
 
         return colorsInfo;
     }
 
-    private List<ColorInformation> GetColorInLeafColorFile(Node rootNode)
+    private List<ColorInformation> GetColorInLeafColorFile(Node rootNode, string fileText)
     {
         var colorsInfo = new List<ColorInformation>();
 
@@ -329,13 +328,13 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
             )
         )
         {
-            AddColorInfoToList(colorNode, colorsInfo);
+            AddColorInfoToList(colorNode, colorsInfo, fileText);
         }
 
         return colorsInfo;
     }
 
-    private void AddColorInfoToList(Node colorNode, List<ColorInformation> colorsInfo)
+    private void AddColorInfoToList(Node colorNode, List<ColorInformation> colorsInfo, string fileText)
     {
         Span<double> colors = stackalloc double[3];
         var colorLeafValues = colorNode.LeafValues.ToArray();
@@ -345,8 +344,27 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
         }
 
         int index = 0;
+        int startColumn = int.MaxValue;
+        int startLine = 1;
+        int endLine = colorNode.Position.EndLine;
+        int endColumn = colorNode.Position.EndColumn;
+
+        if (colorNode.Leaves.Count == 1)
+        {
+            var colorType = colorNode.Leaves.First();
+            startColumn = colorType.Position.StartColumn;
+            startLine = colorType.Position.StartLine;
+        }
+        else
+        {
+            string text = GetTextByPosition(fileText, colorNode.Position.ToDocumentRange());
+            startColumn = text.IndexOf('{') + colorNode.Position.StartColumn;
+            startLine = fileText.AsSpan()[..startColumn].Count('\n') + colorNode.Position.StartLine;
+        }
         foreach (var leafValue in colorLeafValues)
         {
+            startColumn = Math.Min(startColumn, leafValue.Position.Start.Column);
+            startLine = Math.Min(startLine, leafValue.Position.Start.Line);
             if (double.TryParse(leafValue.ValueText, out double color))
             {
                 colors[index++] = color;
@@ -356,7 +374,10 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
         colorsInfo.Add(
             new ColorInformation
             {
-                Range = colorNode.Position.ToDocumentRange(),
+                Range = new DocumentRange(
+                    new Position(startLine - 1, startColumn),
+                    new Position(endLine - 1, endColumn)
+                ),
                 Color = GetColor(colors, colorNode)
             }
         );
