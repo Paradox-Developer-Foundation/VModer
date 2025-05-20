@@ -18,6 +18,10 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
         "NDefines.NGraphics.COUNTRY_COLOR_SATURATION_MODIFIER";
     private const string CountryColorBrightnessModifier =
         "NDefines.NGraphics.COUNTRY_COLOR_BRIGHTNESS_MODIFIER";
+    private const string CountryUiColorSaturationModifier =
+        "NDefines.NGraphics.COUNTRY_UI_COLOR_SATURATION_MODIFIER";
+    private const string CountryUiColorBrightnessModifier =
+        "NDefines.NGraphics.COUNTRY_UI_COLOR_BRIGHTNESS_MODIFIER";
 
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
@@ -28,6 +32,7 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
         double blue = request.Color.Blue * 255;
         var (h, s, v) = RgbToHsv(red, green, blue);
 
+        // BUG: 所有情况下都会使用修饰符, 但这不是正确的
         List<ColorPresentation> presentations =
         [
             GetRgbColorPresentation(red, green, blue, request),
@@ -35,56 +40,6 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
         ];
 
         return new ColorPresentationResponse(presentations);
-    }
-
-    /// <summary>
-    /// 获取这段位置上的文字
-    /// </summary>
-    /// <param name="text"></param>
-    /// <param name="position"></param>
-    /// <returns></returns>
-    private string GetTextByPosition(string text, DocumentRange position)
-    {
-        var start = position.Start;
-        var end = position.End;
-        int lineCount = Math.Max(1, end.Line - start.Line);
-
-        int currentLine = 0;
-        var sb = new StringBuilder();
-        foreach (var line in text.AsSpan().EnumerateLines())
-        {
-            if (currentLine < start.Line)
-            {
-                currentLine++;
-                continue;
-            }
-
-            int endCharacter = Math.Min(line.Length, end.Character);
-            if (currentLine == start.Line && start.Line == end.Line)
-            {
-                sb.Append(line[start.Character..endCharacter]);
-            }
-            else if (currentLine == start.Line)
-            {
-                sb.Append(line[start.Character..]);
-            }
-            else if (currentLine == end.Line)
-            {
-                sb.Append(line[..endCharacter]);
-            }
-            else
-            {
-                sb.Append(line);
-            }
-            if (--lineCount <= 0)
-            {
-                break;
-            }
-
-            currentLine++;
-        }
-
-        return sb.ToString();
     }
 
     private ColorPresentation GetRgbColorPresentation(
@@ -227,12 +182,12 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
         }
 
         var colors = new List<ColorInformation>();
-        AddTextColors(rootNode, colors, fileText);
+        AddTextColors(rootNode, colors, filePath, fileText);
 
         return new DocumentColorResponse(colors);
     }
 
-    private void AddTextColors(Node node, List<ColorInformation> colorsInfo, string fileText)
+    private void AddTextColors(Node node, List<ColorInformation> colorsInfo, string filePath, string fileText)
     {
         foreach (var childNode in node.Nodes)
         {
@@ -240,13 +195,13 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
             {
                 foreach (var colorNode in childNode.Nodes)
                 {
-                    AddColorInfoToList(colorNode, colorsInfo, fileText);
+                    AddColorInfoToList(colorNode, colorsInfo, filePath, fileText);
                 }
             }
             // 确保不是 LeafValues 节点以避免无效的递归调用
             else if (!childNode.LeafValues.Any())
             {
-                AddTextColors(childNode, colorsInfo, fileText);
+                AddTextColors(childNode, colorsInfo, filePath, fileText);
             }
         }
     }
@@ -273,7 +228,7 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
                     )
                 )
                 {
-                    AddColorInfoToList(colorNode, colorsInfo, fileText);
+                    AddColorInfoToList(colorNode, colorsInfo, filePath, fileText);
                 }
             }
         }
@@ -292,13 +247,13 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
         var colorsInfo =
             fileName.Equals("colors.txt", StringComparison.OrdinalIgnoreCase)
             || fileName.Equals("cosmetic.txt", StringComparison.OrdinalIgnoreCase)
-                ? GetColorInNodeColorFile(rootNode, fileText)
-                : GetColorInLeafColorFile(rootNode, fileText);
+                ? GetColorInNodeColorFile(rootNode, filePath, fileText)
+                : GetColorInLeafColorFile(rootNode, filePath, fileText);
 
         return new DocumentColorResponse(colorsInfo);
     }
 
-    private List<ColorInformation> GetColorInNodeColorFile(Node rootNode, string fileText)
+    private List<ColorInformation> GetColorInNodeColorFile(Node rootNode, string filePath, string fileText)
     {
         var colorsInfo = new List<ColorInformation>();
 
@@ -311,14 +266,14 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
                 )
             )
             {
-                AddColorInfoToList(colorNode, colorsInfo, fileText);
+                AddColorInfoToList(colorNode, colorsInfo, filePath, fileText);
             }
         }
 
         return colorsInfo;
     }
 
-    private List<ColorInformation> GetColorInLeafColorFile(Node rootNode, string fileText)
+    private List<ColorInformation> GetColorInLeafColorFile(Node rootNode, string filePath, string fileText)
     {
         var colorsInfo = new List<ColorInformation>();
 
@@ -328,13 +283,18 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
             )
         )
         {
-            AddColorInfoToList(colorNode, colorsInfo, fileText);
+            AddColorInfoToList(colorNode, colorsInfo, filePath, fileText);
         }
 
         return colorsInfo;
     }
 
-    private void AddColorInfoToList(Node colorNode, List<ColorInformation> colorsInfo, string fileText)
+    private void AddColorInfoToList(
+        Node colorNode,
+        List<ColorInformation> colorsInfo,
+        string filePath,
+        string fileText
+    )
     {
         Span<double> colors = stackalloc double[3];
         var colorLeafValues = colorNode.LeafValues.ToArray();
@@ -344,11 +304,12 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
         }
 
         int index = 0;
-        int startColumn = int.MaxValue;
-        int startLine = 1;
+        int startColumn;
+        int startLine;
         int endLine = colorNode.Position.EndLine;
         int endColumn = colorNode.Position.EndColumn;
 
+        // 如果有颜色类型, 则包含颜色类型, 如果没有就只包含颜色值节点
         if (colorNode.Leaves.Count == 1)
         {
             var colorType = colorNode.Leaves.First();
@@ -363,14 +324,13 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
         }
         foreach (var leafValue in colorLeafValues)
         {
-            startColumn = Math.Min(startColumn, leafValue.Position.Start.Column);
-            startLine = Math.Min(startLine, leafValue.Position.Start.Line);
             if (double.TryParse(leafValue.ValueText, out double color))
             {
                 colors[index++] = color;
             }
         }
 
+        var fileType = GameFileType.FromFilePath(filePath);
         colorsInfo.Add(
             new ColorInformation
             {
@@ -378,30 +338,52 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
                     new Position(startLine - 1, startColumn),
                     new Position(endLine - 1, endColumn)
                 ),
-                Color = GetColor(colors, colorNode)
+                Color = GetColor(colors, colorNode, fileType)
             }
         );
     }
 
-    private DocumentColor GetColor(ReadOnlySpan<double> colors, Node colorNode)
+    private DocumentColor GetColor(ReadOnlySpan<double> colors, Node colorNode, GameFileType fileType)
     {
+        double saturationModifier = 1;
+        double brightnessModifier = 1;
+        if (fileType == GameFileType.Countries)
+        {
+            if (colorNode.Key.EqualsIgnoreCase("color"))
+            {
+                saturationModifier = definesService.Get<double>(CountryColorSaturationModifier);
+                brightnessModifier = definesService.Get<double>(CountryColorBrightnessModifier);
+            }
+            else if (colorNode.Key.EqualsIgnoreCase("color_ui"))
+            {
+                saturationModifier = definesService.Get<double>(CountryUiColorSaturationModifier);
+                brightnessModifier = definesService.Get<double>(CountryUiColorBrightnessModifier);
+            }
+        }
+
         if (
             colorNode.Leaves.Count == 0
             || colorNode.Leaves.Any(leaf => leaf.Key.Equals("rgb", StringComparison.OrdinalIgnoreCase))
         )
         {
-            return GetColorFromRgb(colors);
+            return GetColorFromRgb(colors, saturationModifier, brightnessModifier);
         }
 
-        return GetColorFromHsv(colors);
+        return GetColorFromHsv(colors, saturationModifier, brightnessModifier);
     }
 
-    private DocumentColor GetColorFromRgb(ReadOnlySpan<double> rgb)
+    private static DocumentColor GetColorFromRgb(
+        ReadOnlySpan<double> rgb,
+        double saturationModifier,
+        double brightnessModifier
+    )
     {
-        double max = Math.Max(Math.Max(rgb[0], rgb[1]), rgb[2]);
-        double saturationModifier = definesService.Get<double>(CountryColorSaturationModifier);
-        double brightnessModifier = definesService.Get<double>(CountryColorBrightnessModifier);
+        if (Math.Abs(saturationModifier - 1.0) < 0.00001 && Math.Abs(brightnessModifier - 1) < 0.00001)
+        {
+            return new DocumentColor(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255, 1);
+        }
 
+        double max = Math.Max(Math.Max(rgb[0], rgb[1]), rgb[2]);
         return new DocumentColor(
             GetActualColor(rgb[0]) / 255,
             GetActualColor(rgb[1]) / 255,
@@ -415,12 +397,13 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
         }
     }
 
-    private DocumentColor GetColorFromHsv(ReadOnlySpan<double> hsv)
+    private static DocumentColor GetColorFromHsv(
+        ReadOnlySpan<double> hsv,
+        double saturationModifier,
+        double brightnessModifier
+    )
     {
-        double saturationModifier = definesService.Get<double>(CountryColorSaturationModifier);
-        double brightnessModifier = definesService.Get<double>(CountryColorBrightnessModifier);
         var (r, g, b) = HsvToRgb(hsv[0], hsv[1] * saturationModifier, hsv[2] * brightnessModifier);
-
         return new DocumentColor(r, g, b, 1);
     }
 
@@ -475,5 +458,55 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
         g += m;
         b += m;
         return (r, g, b);
+    }
+
+    /// <summary>
+    /// 获取这段位置上的文字
+    /// </summary>
+    /// <param name="text"></param>
+    /// <param name="position"></param>
+    /// <returns></returns>
+    private string GetTextByPosition(string text, DocumentRange position)
+    {
+        var start = position.Start;
+        var end = position.End;
+        int lineCount = Math.Max(1, end.Line - start.Line);
+
+        int currentLine = 0;
+        var sb = new StringBuilder();
+        foreach (var line in text.AsSpan().EnumerateLines())
+        {
+            if (currentLine < start.Line)
+            {
+                currentLine++;
+                continue;
+            }
+
+            int endCharacter = Math.Min(line.Length, end.Character);
+            if (currentLine == start.Line && start.Line == end.Line)
+            {
+                sb.Append(line[start.Character..endCharacter]);
+            }
+            else if (currentLine == start.Line)
+            {
+                sb.Append(line[start.Character..]);
+            }
+            else if (currentLine == end.Line)
+            {
+                sb.Append(line[..endCharacter]);
+            }
+            else
+            {
+                sb.Append(line);
+            }
+            if (--lineCount <= 0)
+            {
+                break;
+            }
+
+            currentLine++;
+        }
+
+        return sb.ToString();
     }
 }

@@ -49,6 +49,7 @@ public sealed class DefinesService : ResourcesService<DefinesService, byte, byte
 
     public T? Get<T>(string defineName)
     {
+        // TODO: 缓存一下
         // ReSharper disable once CoVariantArrayConversion
         object? value = GlobalEnv.GetValue(defineName.Split('.'));
         if (value is not null)

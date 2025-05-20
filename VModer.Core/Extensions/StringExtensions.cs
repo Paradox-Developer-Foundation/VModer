@@ -26,8 +26,8 @@ public static class StringExtensions
         return builder.ToString();
     }
 
-    public static bool EqualsIgnoreCase(this string left, string right)
+    public static bool EqualsIgnoreCase(this string left, string value)
     {
-        return left.Equals(right, StringComparison.OrdinalIgnoreCase);
+        return left.Equals(value, StringComparison.OrdinalIgnoreCase);
     }
 }
