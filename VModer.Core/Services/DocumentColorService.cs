@@ -197,12 +197,12 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
         }
 
         var colors = new List<ColorInformation>();
-        AddTextColors(rootNode, colors, filePath, fileText);
+        AddTextColors(rootNode, colors, filePath);
 
         return new DocumentColorResponse(colors);
     }
 
-    private void AddTextColors(Node node, List<ColorInformation> colorsInfo, string filePath, string fileText)
+    private void AddTextColors(Node node, List<ColorInformation> colorsInfo, string filePath)
     {
         foreach (var childNode in node.Nodes)
         {
@@ -210,13 +210,13 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
             {
                 foreach (var colorNode in childNode.Nodes)
                 {
-                    AddColorInfoToList(colorNode, colorsInfo, filePath, fileText);
+                    AddColorInfoToList(colorNode, colorsInfo, filePath);
                 }
             }
             // 确保不是 LeafValues 节点以避免无效的递归调用
             else if (!childNode.LeafValues.Any())
             {
-                AddTextColors(childNode, colorsInfo, filePath, fileText);
+                AddTextColors(childNode, colorsInfo, filePath);
             }
         }
     }
@@ -243,7 +243,7 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
                     )
                 )
                 {
-                    AddColorInfoToList(colorNode, colorsInfo, filePath, fileText);
+                    AddColorInfoToList(colorNode, colorsInfo, filePath);
                 }
             }
         }
@@ -262,13 +262,13 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
         var colorsInfo =
             fileName.Equals("colors.txt", StringComparison.OrdinalIgnoreCase)
             || fileName.Equals("cosmetic.txt", StringComparison.OrdinalIgnoreCase)
-                ? GetColorInNodeColorFile(rootNode, filePath, fileText)
-                : GetColorInLeafColorFile(rootNode, filePath, fileText);
+                ? GetColorInNodeColorFile(rootNode, filePath)
+                : GetColorInLeafColorFile(rootNode, filePath);
 
         return new DocumentColorResponse(colorsInfo);
     }
 
-    private List<ColorInformation> GetColorInNodeColorFile(Node rootNode, string filePath, string fileText)
+    private List<ColorInformation> GetColorInNodeColorFile(Node rootNode, string filePath)
     {
         var colorsInfo = new List<ColorInformation>();
 
@@ -281,14 +281,14 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
                 )
             )
             {
-                AddColorInfoToList(colorNode, colorsInfo, filePath, fileText);
+                AddColorInfoToList(colorNode, colorsInfo, filePath);
             }
         }
 
         return colorsInfo;
     }
 
-    private List<ColorInformation> GetColorInLeafColorFile(Node rootNode, string filePath, string fileText)
+    private List<ColorInformation> GetColorInLeafColorFile(Node rootNode, string filePath)
     {
         var colorsInfo = new List<ColorInformation>();
 
@@ -298,18 +298,13 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
             )
         )
         {
-            AddColorInfoToList(colorNode, colorsInfo, filePath, fileText);
+            AddColorInfoToList(colorNode, colorsInfo, filePath);
         }
 
         return colorsInfo;
     }
 
-    private void AddColorInfoToList(
-        Node colorNode,
-        List<ColorInformation> colorsInfo,
-        string filePath,
-        string fileText
-    )
+    private void AddColorInfoToList(Node colorNode, List<ColorInformation> colorsInfo, string filePath)
     {
         Span<double> colors = stackalloc double[3];
         var colorLeafValues = colorNode.LeafValues.ToArray();
