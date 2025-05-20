@@ -32,7 +32,6 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
         double blue = request.Color.Blue * 255;
         var (h, s, v) = RgbToHsv(red, green, blue);
 
-        // BUG: 所有情况下都会使用修饰符, 但这不是正确的
         List<ColorPresentation> presentations =
         [
             GetRgbColorPresentation(red, green, blue, request),
@@ -50,15 +49,21 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
     )
     {
         double max = Math.Max(red, Math.Max(green, blue));
-        double saturationModifier = definesService.Get<double>(CountryColorSaturationModifier);
-        double brightnessModifier = definesService.Get<double>(CountryColorBrightnessModifier);
 
-        if (!gameFilesService.TryGetFileText(param.TextDocument.Uri.Uri, out string? text))
+        var filePathUri = param.TextDocument.Uri.Uri;
+        string filePath = filePathUri.ToSystemPath();
+        if (!gameFilesService.TryGetFileText(filePathUri, out string? text))
         {
-            text = File.ReadAllText(param.TextDocument.Uri.Uri.ToSystemPath());
+            text = File.ReadAllText(filePath);
         }
 
         string textInPosition = GetTextByPosition(text, param.Range!.Value);
+        string nodeKey = textInPosition.Split('=', StringSplitOptions.TrimEntries)[0];
+        (double saturationModifier, double brightnessModifier) = GetColorModifier(
+            nodeKey,
+            GameFileType.FromFilePath(filePath)
+        );
+
         bool isHasColorType =
             textInPosition.Contains("rgb", StringComparison.OrdinalIgnoreCase)
             || textInPosition.Contains("HSV", StringComparison.OrdinalIgnoreCase);
@@ -69,7 +74,7 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
             TextEdit = new TextEdit
             {
                 NewText =
-                    $"{colorType}{{ {GetDisplayColor(red):F0} {GetDisplayColor(green):F0} {GetDisplayColor(blue):F0} }}",
+                    $"{nodeKey} = {colorType}{{ {GetDisplayColor(red):F0} {GetDisplayColor(green):F0} {GetDisplayColor(blue):F0} }}",
                 Range = param.Range!.Value
             }
         };
@@ -87,8 +92,18 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
         ColorPresentationParams param
     )
     {
-        double saturationModifier = definesService.Get<double>(CountryColorSaturationModifier);
-        double brightnessModifier = definesService.Get<double>(CountryColorBrightnessModifier);
+        var filePathUri = param.TextDocument.Uri.Uri;
+        string filePath = filePathUri.ToSystemPath();
+        if (!gameFilesService.TryGetFileText(filePathUri, out string? text))
+        {
+            text = File.ReadAllText(filePath);
+        }
+        string textInPosition = GetTextByPosition(text, param.Range!.Value);
+        string nodeKey = textInPosition.Split('=', StringSplitOptions.TrimEntries)[0];
+        (double saturationModifier, double brightnessModifier) = GetColorModifier(
+            nodeKey,
+            GameFileType.FromFilePath(filePath)
+        );
 
         // 使用修饰符算出应填入的数字
         double usedSaturation = s / saturationModifier;
@@ -99,7 +114,7 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
             Label = $"hsv({h:F0}, {s:P}, {v:P})",
             TextEdit = new TextEdit
             {
-                NewText = $"HSV {{ {h / 360.0:F2} {usedSaturation:F2} {usedBrightness:F2} }}",
+                NewText = $"{nodeKey} = HSV {{ {h / 360.0:F2} {usedSaturation:F2} {usedBrightness:F2} }}",
                 Range = param.Range!.Value
             }
         };
@@ -304,24 +319,6 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
         }
 
         int index = 0;
-        int startColumn;
-        int startLine;
-        int endLine = colorNode.Position.EndLine;
-        int endColumn = colorNode.Position.EndColumn;
-
-        // 如果有颜色类型, 则包含颜色类型, 如果没有就只包含颜色值节点
-        if (colorNode.Leaves.Count == 1)
-        {
-            var colorType = colorNode.Leaves.First();
-            startColumn = colorType.Position.StartColumn;
-            startLine = colorType.Position.StartLine;
-        }
-        else
-        {
-            string text = GetTextByPosition(fileText, colorNode.Position.ToDocumentRange());
-            startColumn = text.IndexOf('{') + colorNode.Position.StartColumn;
-            startLine = fileText.AsSpan()[..startColumn].Count('\n') + colorNode.Position.StartLine;
-        }
         foreach (var leafValue in colorLeafValues)
         {
             if (double.TryParse(leafValue.ValueText, out double color))
@@ -334,10 +331,7 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
         colorsInfo.Add(
             new ColorInformation
             {
-                Range = new DocumentRange(
-                    new Position(startLine - 1, startColumn),
-                    new Position(endLine - 1, endColumn)
-                ),
+                Range = colorNode.Position.ToDocumentRange(),
                 Color = GetColor(colors, colorNode, fileType)
             }
         );
@@ -345,21 +339,7 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
 
     private DocumentColor GetColor(ReadOnlySpan<double> colors, Node colorNode, GameFileType fileType)
     {
-        double saturationModifier = 1;
-        double brightnessModifier = 1;
-        if (fileType == GameFileType.Countries)
-        {
-            if (colorNode.Key.EqualsIgnoreCase("color"))
-            {
-                saturationModifier = definesService.Get<double>(CountryColorSaturationModifier);
-                brightnessModifier = definesService.Get<double>(CountryColorBrightnessModifier);
-            }
-            else if (colorNode.Key.EqualsIgnoreCase("color_ui"))
-            {
-                saturationModifier = definesService.Get<double>(CountryUiColorSaturationModifier);
-                brightnessModifier = definesService.Get<double>(CountryUiColorBrightnessModifier);
-            }
-        }
+        var (saturationModifier, brightnessModifier) = GetColorModifier(colorNode.Key, fileType);
 
         if (
             colorNode.Leaves.Count == 0
@@ -458,6 +438,31 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
         g += m;
         b += m;
         return (r, g, b);
+    }
+
+    private (double saturationModifier, double brightnessModifier) GetColorModifier(
+        string nodeKey,
+        GameFileType fileType
+    )
+    {
+        double saturationModifier = 1;
+        double brightnessModifier = 1;
+
+        if (fileType == GameFileType.Countries)
+        {
+            if (nodeKey.EqualsIgnoreCase("color"))
+            {
+                saturationModifier = definesService.Get<double>(CountryColorSaturationModifier);
+                brightnessModifier = definesService.Get<double>(CountryColorBrightnessModifier);
+            }
+            else if (nodeKey.EqualsIgnoreCase("color_ui"))
+            {
+                saturationModifier = definesService.Get<double>(CountryUiColorSaturationModifier);
+                brightnessModifier = definesService.Get<double>(CountryUiColorBrightnessModifier);
+            }
+        }
+
+        return (saturationModifier, brightnessModifier);
     }
 
     /// <summary>
