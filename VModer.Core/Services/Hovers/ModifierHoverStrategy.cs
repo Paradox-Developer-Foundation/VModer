@@ -28,7 +28,10 @@ public sealed class ModifierHoverStrategy(ModifierDisplayService modifierDisplay
         var node = rootNode.FindAdjacentNodeByPosition(localPosition);
         Log.Debug("光标所在 Node, Key:{Key}, Pos: {Pos}", node.Key, localPosition);
 
-        if (!ModifierHelper.IsModifierNode(node, request))
+        if (
+            !ModifierHelper.IsModifierNode(node, request)
+            || node.Parent?.Key.EqualsIgnoreCase("ai_will_do") == true
+        )
         {
             return string.Empty;
         }
