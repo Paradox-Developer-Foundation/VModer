@@ -1,6 +1,6 @@
-﻿using ParadoxPower.Process;
+﻿using ParadoxPower.CSharpExtensions;
+using ParadoxPower.Process;
 using VModer.Core.Extensions;
-using VModer.Core.Infrastructure.Parser;
 
 namespace VModer.Core.Services.GameResource.Base;
 

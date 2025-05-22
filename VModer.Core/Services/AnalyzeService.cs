@@ -2,10 +2,10 @@
 using EmmyLua.LanguageServer.Framework.Protocol.Message.Client.PublishDiagnostics;
 using EmmyLua.LanguageServer.Framework.Protocol.Model.Diagnostic;
 using NLog;
+using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
 using VModer.Core.Analyzers;
 using VModer.Core.Extensions;
-using VModer.Core.Infrastructure.Parser;
 using VModer.Core.Models;
 
 namespace VModer.Core.Services;

@@ -1,6 +1,5 @@
 ﻿using EmmyLua.LanguageServer.Framework.Protocol.Message.Hover;
 using Microsoft.Extensions.DependencyInjection;
-using NLog;
 using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
 using VModer.Core.Extensions;

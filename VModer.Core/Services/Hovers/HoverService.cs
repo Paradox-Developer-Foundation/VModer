@@ -1,8 +1,8 @@
 ﻿using EmmyLua.LanguageServer.Framework.Protocol.Message.Hover;
 using EmmyLua.LanguageServer.Framework.Protocol.Model.Markup;
 using MethodTimer;
+using ParadoxPower.CSharpExtensions;
 using VModer.Core.Extensions;
-using VModer.Core.Infrastructure.Parser;
 using VModer.Core.Models;
 
 namespace VModer.Core.Services.Hovers;

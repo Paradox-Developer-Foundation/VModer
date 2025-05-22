@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using EmmyLua.LanguageServer.Framework.Protocol.Model.Diagnostic;
-using MethodTimer;
 using NLog;
 using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;

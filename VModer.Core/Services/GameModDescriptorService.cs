@@ -1,7 +1,7 @@
 ﻿using System.Collections.Frozen;
 using NLog;
+using ParadoxPower.CSharpExtensions;
 using VModer.Core.Extensions;
-using VModer.Core.Infrastructure.Parser;
 
 namespace VModer.Core.Services;
 
