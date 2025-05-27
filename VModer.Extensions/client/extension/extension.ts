@@ -130,9 +130,9 @@ export async function activate(context: ExtensionContext) {
       updateStatusBarServerInfo(statusBarItem, client);
     }, config.get<number>("VModer.RamQueryIntervalTime") || 1500);
 
-    client.info("VModer 服务端启动中...");
+    client.info(l10n.t("ServerStarting"));
   } else {
-    client.info("未打开工作区, 无法启动 VModer 服务端");
+    client.info(l10n.t("UnableStart"));
   }
   statusBarItem.show();
   updateStatusBarItem(statusBarItem, client);

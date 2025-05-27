@@ -24,5 +24,7 @@
   "ModifierQuerierView.LocalizedName": "Localized Name",
   "CopyToClipboardFailed": "Copy to clipboard failed",
   "CopyContentToClipboard": "Copy content to clipboard successfully",
-  "OpenFileFailed": "Open file failed"
+  "OpenFileFailed": "Open file failed",
+  "ServerStarting": "VModer Server is starting...",
+  "UnableStart": "The workspace has not been opened, Unable to start VModer server"
 }

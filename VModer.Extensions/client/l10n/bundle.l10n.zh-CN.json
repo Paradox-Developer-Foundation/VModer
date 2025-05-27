@@ -24,5 +24,7 @@
   "ModifierQuerierView.LocalizedName": "本地化名称",
   "CopyToClipboardFailed": "复制到剪切板失败",
   "CopyContentToClipboard": "已复制内容到剪贴板",
-  "OpenFileFailed": "打开文件失败"
+  "OpenFileFailed": "打开文件失败",
+  "VModer.ServerStarting": "VModer 服务端启动中...",
+  "UnableStart": "未打开工作区, 无法启动 VModer 服务端"
 }
