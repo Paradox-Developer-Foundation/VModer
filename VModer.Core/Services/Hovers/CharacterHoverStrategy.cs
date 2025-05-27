@@ -11,6 +11,7 @@ using VModer.Core.Services.GameResource;
 using VModer.Core.Services.GameResource.Localization;
 using VModer.Core.Services.GameResource.Modifiers;
 using VModer.Languages;
+using ZLinq;
 
 namespace VModer.Core.Services.Hovers;
 
@@ -184,9 +185,11 @@ public sealed class CharacterHoverStrategy : IHoverStrategy
 
         var skillType = SkillCharacterType.FromCharacterType(generalNode.Key);
         foreach (
-            string skillInfo in skillSet.SelectMany(kvp =>
-                GetSkillModifierDescription(SkillType.FromValue(kvp.Key), skillType, kvp.Value)
-            )
+            string skillInfo in skillSet
+                .AsValueEnumerable()
+                .SelectMany(kvp =>
+                    GetSkillModifierDescription(SkillType.FromValue(kvp.Key), skillType, kvp.Value)
+                )
         )
         {
             builder.AppendParagraph(skillInfo);

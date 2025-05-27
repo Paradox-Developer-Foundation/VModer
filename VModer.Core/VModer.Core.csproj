@@ -50,6 +50,7 @@
       <PackageReference Include="Pfim" Version="0.11.3" />
       <PackageReference Include="Pidgin" Version="3.4.0" />
       <PackageReference Include="SixLabors.ImageSharp" Version="3.1.8" />
+      <PackageReference Include="ZLinq" Version="1.4.9" />
     </ItemGroup>
 
     <ItemGroup>

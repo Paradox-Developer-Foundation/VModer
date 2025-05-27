@@ -11,8 +11,6 @@ public sealed class NodeModifier : IModifier
     public IReadOnlyList<IModifier> Modifiers { get; }
     public IEnumerable<LeafModifier> Leaves =>
         Modifiers.Where(x => x.Type == ModifierType.Leaf).Select(modifier => (LeafModifier)modifier);
-    public IEnumerable<NodeModifier> Nodes =>
-        Modifiers.Where(x => x.Type == ModifierType.Node).Select(modifier => (NodeModifier)modifier);
     public ModifierType Type => ModifierType.Node;
 
     public NodeModifier(string key, IEnumerable<IModifier> modifiers)

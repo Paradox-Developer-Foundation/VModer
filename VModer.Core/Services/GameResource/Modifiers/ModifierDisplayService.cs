@@ -3,6 +3,7 @@ using VModer.Core.Models;
 using VModer.Core.Models.Modifiers;
 using VModer.Core.Services.GameResource.Localization;
 using VModer.Languages;
+using ZLinq;
 
 namespace VModer.Core.Services.GameResource.Modifiers;
 
@@ -106,12 +107,12 @@ public sealed class ModifierDisplayService
         string modifierKey = _localisationKeyMappingService.TryGetValue(modifier.Key, out string? mappingKey)
             ? mappingKey
             : modifier.Key;
-        string modifierName = string.Join(
-            string.Empty,
-            _localisationFormatService
-                .GetFormatTextInfo(_modifierService.GetLocalizationName(modifierKey))
-                .Select(x => x.DisplayText)
-        );
+        string modifierName = _localisationFormatService
+            .GetFormatTextInfo(_modifierService.GetLocalizationName(modifierKey))
+            .AsValueEnumerable()
+            .Select(x => x.DisplayText)
+            .JoinToString(string.Empty);
+
         string colon =
             modifierName.EndsWith(':')
             || modifierName.EndsWith('：')
@@ -133,7 +134,7 @@ public sealed class ModifierDisplayService
         return $"{modifierName}{colon}{number}";
     }
 
-    private List<string> GetModifierDescriptionForNode(NodeModifier nodeModifier)
+    private IEnumerable<string> GetModifierDescriptionForNode(NodeModifier nodeModifier)
     {
         if (_terrainService.Contains(nodeModifier.Key))
         {
@@ -153,7 +154,7 @@ public sealed class ModifierDisplayService
         if (nodeModifier.Key.Equals(Keywords.HiddenModifier, StringComparison.OrdinalIgnoreCase))
         {
             // 直接展开 hidden_modifier 节点下的修饰符
-            return nodeModifier.Leaves.Select(GetDescriptionForLeaf).ToList();
+            return nodeModifier.Leaves.Select(GetDescriptionForLeaf);
         }
 
         return GetDescriptionForUnknownNode(nodeModifier);
@@ -162,7 +163,9 @@ public sealed class ModifierDisplayService
     private List<string> GetEquipmentModifierDescription(NodeModifier nodeModifier)
     {
         var descriptions = new List<string>();
-        foreach (var equipmentModifierNode in nodeModifier.Nodes)
+        foreach (
+            var equipmentModifierNode in nodeModifier.Modifiers.AsValueEnumerable().OfType<NodeModifier>()
+        )
         {
             descriptions.Add($"{_localisationFormatService.GetFormatText(equipmentModifierNode.Key)}:");
             foreach (var modifier in equipmentModifierNode.Leaves)
@@ -177,10 +180,12 @@ public sealed class ModifierDisplayService
     {
         var descriptions = new List<string>();
         var countryTagLeaf = (LeafModifier?)
-            nodeModifier.Modifiers.FirstOrDefault(modifier =>
-                modifier.Type == ModifierType.Leaf
-                && modifier.Key.Equals("tag", StringComparison.OrdinalIgnoreCase)
-            );
+            nodeModifier
+                .Modifiers.AsValueEnumerable()
+                .FirstOrDefault(modifier =>
+                    modifier.Type == ModifierType.Leaf
+                    && modifier.Key.Equals("tag", StringComparison.OrdinalIgnoreCase)
+                );
 
         string? countryTag = countryTagLeaf?.Value;
         descriptions.Add(
@@ -190,7 +195,8 @@ public sealed class ModifierDisplayService
         );
         foreach (
             var modifier in nodeModifier
-                .Modifiers.Where(modifier =>
+                .Modifiers.AsValueEnumerable()
+                .Where(modifier =>
                     !modifier.Key.Equals("tag", StringComparison.OrdinalIgnoreCase)
                     && modifier.Type == ModifierType.Leaf
                 )
@@ -234,9 +240,7 @@ public sealed class ModifierDisplayService
                 string modifierName = _localisationFormatService.GetFormatText(
                     $"STAT_ADJUSTER_{modifier.Key}"
                 );
-                string modifierFormat = _localizationService.GetValue(
-                    $"STAT_ADJUSTER_{modifier.Key}_DIFF"
-                );
+                string modifierFormat = _localizationService.GetValue($"STAT_ADJUSTER_{modifier.Key}_DIFF");
                 return $"{NodeModifierChildrenPrefix}{modifierName}{_modifierService.GetDisplayValue((LeafModifier)modifier, modifierFormat)}";
             }
         );

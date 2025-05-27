@@ -2,6 +2,7 @@
 using System.Drawing;
 using VModer.Core.Infrastructure.Parser;
 using VModer.Core.Models;
+using ZLinq;
 
 namespace VModer.Core.Services.GameResource.Localization;
 
@@ -45,7 +46,10 @@ public sealed class LocalizationFormatService(
     /// <returns>一个格式化后被拼接的文本</returns>
     private string GetFormatTextByText(string text)
     {
-        return string.Join(string.Empty, GetFormatTextInfo(text).Select(info => info.DisplayText));
+        return GetFormatTextInfo(text)
+            .AsValueEnumerable()
+            .Select(info => info.DisplayText)
+            .JoinToString(string.Empty);
     }
 
     /// <summary>
@@ -152,7 +156,9 @@ public sealed class LocalizationFormatService(
             // 处理嵌套在着色语法中的其他语法使用
             if (
                 LocalizationFormatParser.TryParse(text, out var formatInfos)
-                && formatInfos.Any(info => info.Type == LocalizationFormatType.Placeholder)
+                && formatInfos
+                    .AsValueEnumerable()
+                    .Any(info => info.Type == LocalizationFormatType.Placeholder)
             )
             {
                 var list = new List<TextFormatInfo>();

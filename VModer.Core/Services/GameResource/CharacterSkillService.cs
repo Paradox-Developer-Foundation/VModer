@@ -2,6 +2,8 @@ using MethodTimer;
 using ParadoxPower.Process;
 using VModer.Core.Models.Character;
 using VModer.Core.Services.GameResource.Base;
+using ZLinq;
+using ZLinq.Linq;
 
 namespace VModer.Core.Services.GameResource;
 
@@ -15,7 +17,10 @@ public sealed class CharacterSkillService()
         WatcherFilter.Text
     )
 {
-    private IEnumerable<SkillInfo> Skills => Resources.Values.SelectMany(s => s);
+    private ValueEnumerable<
+        SelectMany<FromEnumerable<SkillInfo[]>, SkillInfo[], SkillInfo>,
+        SkillInfo
+    > Skills => Resources.Values.AsValueEnumerable().SelectMany(s => s);
 
     private const ushort DefaultSkillMaxValue = 1;
 
