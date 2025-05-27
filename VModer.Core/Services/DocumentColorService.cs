@@ -14,14 +14,14 @@ namespace VModer.Core.Services;
 
 public sealed class DocumentColorService(GameFilesService gameFilesService, DefinesService definesService)
 {
-    private const string CountryColorSaturationModifier =
-        "NDefines.NGraphics.COUNTRY_COLOR_SATURATION_MODIFIER";
-    private const string CountryColorBrightnessModifier =
-        "NDefines.NGraphics.COUNTRY_COLOR_BRIGHTNESS_MODIFIER";
-    private const string CountryUiColorSaturationModifier =
-        "NDefines.NGraphics.COUNTRY_UI_COLOR_SATURATION_MODIFIER";
-    private const string CountryUiColorBrightnessModifier =
-        "NDefines.NGraphics.COUNTRY_UI_COLOR_BRIGHTNESS_MODIFIER";
+    private static readonly string[] CountryColorSaturationModifier =
+        "NDefines.NGraphics.COUNTRY_COLOR_SATURATION_MODIFIER".Split('.');
+    private static readonly string[] CountryColorBrightnessModifier =
+        "NDefines.NGraphics.COUNTRY_COLOR_BRIGHTNESS_MODIFIER".Split('.');
+    private static readonly string[] CountryUiColorSaturationModifier =
+        "NDefines.NGraphics.COUNTRY_UI_COLOR_SATURATION_MODIFIER".Split('.');
+    private static readonly string[] CountryUiColorBrightnessModifier =
+        "NDefines.NGraphics.COUNTRY_UI_COLOR_BRIGHTNESS_MODIFIER".Split('.');
 
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 

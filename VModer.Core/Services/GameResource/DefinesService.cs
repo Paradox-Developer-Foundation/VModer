@@ -47,11 +47,12 @@ public sealed class DefinesService : ResourcesService<DefinesService, byte, byte
         return 2;
     }
 
-    public T? Get<T>(string defineName)
+    public T? Get<T>(string[] defineName)
     {
         // TODO: 缓存一下
+
         // ReSharper disable once CoVariantArrayConversion
-        object? value = GlobalEnv.GetValue(defineName.Split('.'));
+        object? value = GlobalEnv.GetValue(defineName);
         if (value is not null)
         {
             return (T)value;
