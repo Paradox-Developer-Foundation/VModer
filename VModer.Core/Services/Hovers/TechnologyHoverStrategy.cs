@@ -10,6 +10,7 @@ using VModer.Core.Services.GameResource;
 using VModer.Core.Services.GameResource.Localization;
 using VModer.Core.Services.GameResource.Modifiers;
 using VModer.Languages;
+using ZLinq;
 
 namespace VModer.Core.Services.Hovers;
 
@@ -32,7 +33,9 @@ public sealed class TechnologyHoverStrategy(
         "doctrine_name",
         "is_special_project_tech",
         "desc",
-        "show_effect_as_desc"
+        "show_effect_as_desc",
+        "xp_unlock_cost",
+        "xp_research_type"
     ];
 
     private const string TechnologiesKeyword = "technologies";
@@ -145,7 +148,7 @@ public sealed class TechnologyHoverStrategy(
         builder.Insert(1, new MarkdownHorizontalRule());
 
         // 在我们需要反转一下, 以确保显示顺序和实际顺序一致
-        foreach (var leafValue in leafValues.Reverse())
+        foreach (var leafValue in leafValues.AsValueEnumerable().Reverse())
         {
             builder.Insert(
                 1,
