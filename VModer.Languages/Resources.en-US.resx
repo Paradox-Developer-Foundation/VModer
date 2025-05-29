@@ -47,4 +47,7 @@
     <data name="Categories" xml:space="preserve">
         <value>Categories:</value>
     </data>
+    <data name="EnableEquipmentModules" xml:space="preserve">
+        <value>Enable equipment modules:</value>
+    </data>
 </root>

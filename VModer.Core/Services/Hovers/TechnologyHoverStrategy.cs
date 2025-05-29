@@ -40,6 +40,7 @@ public sealed class TechnologyHoverStrategy(
 
     private const string TechnologiesKeyword = "technologies";
     private const string CategoriesKeyword = "categories";
+    private const string EnableEquipmentModulesKeyword = "enable_equipment_modules";
 
     public string GetHoverText(Node rootNode, HoverParams request)
     {
@@ -51,9 +52,13 @@ public sealed class TechnologyHoverStrategy(
         {
             hoverText = GetTechnologyNodeText(rootNode, adjacentNode);
         }
-        else if (adjacentNode.Key.Equals(CategoriesKeyword, StringComparison.OrdinalIgnoreCase))
+        else if (adjacentNode.Key.EqualsIgnoreCase(CategoriesKeyword))
         {
             hoverText = GetCategoriesDescriptionText(adjacentNode, localPosition);
+        }
+        else if (adjacentNode.Key.EqualsIgnoreCase(EnableEquipmentModulesKeyword))
+        {
+            hoverText = GetEnableModulesHoverText(adjacentNode, localPosition);
         }
         // 当为具体的修饰符时
         else
@@ -66,6 +71,35 @@ public sealed class TechnologyHoverStrategy(
         }
 
         return hoverText;
+    }
+
+    private string GetEnableModulesHoverText(Node adjacentNode, LocalPosition localPosition)
+    {
+        var builder = new MarkdownDocument();
+        var pointedChild = adjacentNode.FindPointedChildByPosition(localPosition);
+        if (pointedChild.TryGetLeafValue(out var leafValue))
+        {
+            // 直接显示叶子值
+            builder.AppendParagraph(localizationFormatService.GetFormatText(leafValue.ValueText));
+        }
+        else if (pointedChild.TryGetNode(out var node))
+        {
+            AddEnableModulesDescription(node, builder);
+        }
+
+        return builder.ToString();
+    }
+
+    private void AddEnableModulesDescription(Node node, MarkdownDocument builder)
+    {
+        builder.AppendHeader(Resources.EnableEquipmentModules, 3);
+        foreach (var enableModules in node.LeafValues)
+        {
+            builder.AppendListItem(
+                localizationFormatService.GetFormatText(enableModules.ValueText),
+                0
+            );
+        }
     }
 
     private string GetTechnologyNodeText(Node rootNode, Node node)
@@ -127,6 +161,10 @@ public sealed class TechnologyHoverStrategy(
             else if (node.Key.Equals(CategoriesKeyword, StringComparison.OrdinalIgnoreCase))
             {
                 AddCategoriesDescription(node.LeafValues, builder);
+            }
+            else if (node.Key.EqualsIgnoreCase(EnableEquipmentModulesKeyword))
+            {
+                AddEnableModulesDescription(node, builder);
             }
         }
 

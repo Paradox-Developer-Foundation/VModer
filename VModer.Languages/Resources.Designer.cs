@@ -132,6 +132,15 @@ namespace VModer.Languages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 启用装备模块:.
+        /// </summary>
+        public static string EnableEquipmentModules {
+            get {
+                return ResourceManager.GetString("EnableEquipmentModules", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 意识形态.
         /// </summary>
         public static string Ideology {

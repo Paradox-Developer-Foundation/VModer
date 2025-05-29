@@ -54,4 +54,7 @@
     <data name="Categories" xml:space="preserve">
         <value>类别:</value>
     </data>
+    <data name="EnableEquipmentModules" xml:space="preserve">
+        <value>启用装备模块:</value>
+    </data>
 </root>

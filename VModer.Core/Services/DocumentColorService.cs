@@ -336,9 +336,10 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
     {
         var (saturationModifier, brightnessModifier) = GetColorModifier(colorNode.Key, fileType);
 
+        var leaves = colorNode.Leaves.ToArray();
         if (
-            colorNode.Leaves.Count == 0
-            || colorNode.Leaves.Any(leaf => leaf.Key.Equals("rgb", StringComparison.OrdinalIgnoreCase))
+            leaves.Length == 0
+            || leaves.Any(leaf => leaf.Key.Equals("rgb", StringComparison.OrdinalIgnoreCase))
         )
         {
             return GetColorFromRgb(colors, saturationModifier, brightnessModifier);
