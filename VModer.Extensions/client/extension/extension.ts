@@ -209,7 +209,7 @@ function formatBytes(bytes: number): string {
   const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   const size = (bytes / Math.pow(k, i)).toFixed(2);
-  return size + " " + sizes[i];
+  return `${size} ${sizes[i]}`;
 }
 
 export function deactivate(): Thenable<void> | undefined {
