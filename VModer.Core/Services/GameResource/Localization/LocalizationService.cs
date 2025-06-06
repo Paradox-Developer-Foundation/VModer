@@ -91,36 +91,25 @@ public sealed class LocalizationService
         YAMLLocalisationParser.LocFile result
     )
     {
-        var localisations = new Dictionary<string, string>(result.entries.Length);
-        foreach (var item in result.entries)
+        var localisations = new Dictionary<string, string>(result.Entries.Count);
+        foreach (var item in result.Entries)
         {
-            localisations[item.key] = GetCleanDesc(item.desc);
+            localisations[item.Key] = item.Desc;
         }
 
         return localisations.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
     }
 
-    /// 去除开头和结尾的 "
-    private static string GetCleanDesc(string rawDesc)
-    {
-        return rawDesc.Length switch
-        {
-            > 2 => rawDesc[1..^1],
-            2 => string.Empty,
-            _ => rawDesc
-        };
-    }
-
     protected override YAMLLocalisationParser.LocFile? GetParseResult(string filePath)
     {
-        var localisation = YAMLLocalisationParser.parseLocFile(filePath);
+        var localisation = YAMLLocalisationParser.ParseLocFile(filePath);
         if (localisation.IsFailure)
         {
-            Log.LogParseError(localisation.GetError());
+            Log.LogParseError(localisation.GetError()!);
             return null;
         }
 
-        var result = localisation.GetResult();
+        var result = localisation.GetResult()!;
         return result;
     }
 }
