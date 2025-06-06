@@ -9,6 +9,7 @@ using ParadoxPower.Process;
 using VModer.Core.Extensions;
 using VModer.Core.Models;
 using VModer.Core.Services.GameResource;
+using ZLinq;
 
 namespace VModer.Core.Services;
 
@@ -293,9 +294,9 @@ public sealed class DocumentColorService(GameFilesService gameFilesService, Defi
         var colorsInfo = new List<ColorInformation>();
 
         foreach (
-            var colorNode in rootNode.Nodes.Where(node =>
-                node.Key.Equals("color", StringComparison.OrdinalIgnoreCase)
-            )
+            var colorNode in rootNode
+                .Nodes.AsValueEnumerable()
+                .Where(node => node.Key.EqualsIgnoreCase("color"))
         )
         {
             AddColorInfoToList(colorNode, colorsInfo, filePath);
