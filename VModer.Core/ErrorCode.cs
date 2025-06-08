@@ -22,4 +22,8 @@ public static class ErrorCode
     /// 人物技能等级超过上限
     /// </summary>
     public const string VM1004 = nameof(VM1004);
+    /// <summary>
+    /// 未使用的语句
+    /// </summary>
+    public const string VM1005 = nameof(VM1005);
 }

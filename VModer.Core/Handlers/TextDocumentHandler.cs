@@ -31,8 +31,8 @@ public sealed class TextDocumentHandler : TextDocumentHandlerBase, IHandler
                 await _analyzeService.AnalyzeFileFromOpenedFileAsync(request.TextDocument.Uri.Uri).ConfigureAwait(false),
             token
         );
-    }
-
+    }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+   
     protected override Task Handle(DidCloseTextDocumentParams request, CancellationToken token)
     {
         Log.Debug($"Closed file: {request.TextDocument.Uri.Uri}");

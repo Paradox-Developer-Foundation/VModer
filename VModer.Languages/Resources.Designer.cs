@@ -60,6 +60,15 @@ namespace VModer.Languages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 未使用的语句.
+        /// </summary>
+        public static string Analyzer_UnusedStatement {
+            get {
+                return ResourceManager.GetString("Analyzer.UnusedStatement", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 类别:.
         /// </summary>
         public static string Categories {
@@ -155,6 +164,15 @@ namespace VModer.Languages {
         public static string MissingTargetCountry {
             get {
                 return ResourceManager.GetString("MissingTargetCountry", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 移除未使用的语句.
+        /// </summary>
+        public static string QuickFix_RemoveUnusedStatement {
+            get {
+                return ResourceManager.GetString("QuickFix.RemoveUnusedStatement", resourceCulture);
             }
         }
         

@@ -50,4 +50,10 @@
     <data name="EnableEquipmentModules" xml:space="preserve">
         <value>Enable equipment modules:</value>
     </data>
+    <data name="QuickFix.RemoveUnusedStatement" xml:space="preserve">
+        <value>Remove unused statement</value>
+    </data>
+    <data name="Analyzer.UnusedStatement" xml:space="preserve">
+        <value>Unused statement</value>
+    </data>
 </root>

@@ -69,6 +69,7 @@ builder.Services.AddSingleton<CharacterAnalyzerService>();
 builder.Services.AddSingleton<EditorDiagnosisService>();
 builder.Services.AddSingleton<DocumentColorService>();
 builder.Services.AddSingleton<ServerLoggerService>();
+builder.Services.AddSingleton<CodeActionService>();
 
 // Hover服务
 builder.Services.AddSingleton<HoverService>();

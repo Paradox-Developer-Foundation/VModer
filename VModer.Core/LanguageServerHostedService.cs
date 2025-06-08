@@ -157,7 +157,13 @@ public sealed class LanguageServerHostedService : IHostedService
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        List<IHandler> handlers = [new TextDocumentHandler(), new HoverHandler(), new DocumentColorHandler()];
+        List<IHandler> handlers =
+        [
+            new TextDocumentHandler(),
+            new HoverHandler(),
+            new DocumentColorHandler(),
+            new CodeActionHandler()
+        ];
         foreach (var handler in handlers)
         {
             _server.AddHandler(handler);

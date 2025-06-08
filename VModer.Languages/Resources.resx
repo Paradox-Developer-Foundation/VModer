@@ -57,4 +57,10 @@
     <data name="EnableEquipmentModules" xml:space="preserve">
         <value>启用装备模块:</value>
     </data>
+    <data name="QuickFix.RemoveUnusedStatement" xml:space="preserve">
+        <value>移除未使用的语句</value>
+    </data>
+    <data name="Analyzer.UnusedStatement" xml:space="preserve">
+        <value>未使用的语句</value>
+    </data>
 </root>

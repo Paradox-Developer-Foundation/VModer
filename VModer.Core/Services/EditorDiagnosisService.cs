@@ -53,7 +53,8 @@ public sealed class EditorDiagnosisService
         }
         var start = new Position(startLine, startChar);
         var end = new Position(startLine, endChar);
-        return DocumentRange.From(start, end);
+
+        return new DocumentRange(start, end);
     }
 
     public Task AddDiagnoseAsync(PublishDiagnosticsParams diagnoseParams)
