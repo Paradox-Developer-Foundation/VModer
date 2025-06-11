@@ -1,6 +1,7 @@
 ﻿using EmmyLua.LanguageServer.Framework.Protocol.Capabilities.Client.ClientCapabilities;
 using EmmyLua.LanguageServer.Framework.Protocol.Capabilities.Server;
 using EmmyLua.LanguageServer.Framework.Protocol.Capabilities.Server.Options;
+using EmmyLua.LanguageServer.Framework.Protocol.Message.Client.PublishDiagnostics;
 using EmmyLua.LanguageServer.Framework.Protocol.Message.TextDocument;
 using EmmyLua.LanguageServer.Framework.Protocol.Model.TextEdit;
 using EmmyLua.LanguageServer.Framework.Server.Handler;
@@ -14,6 +15,8 @@ public sealed class TextDocumentHandler : TextDocumentHandlerBase, IHandler
 {
     private readonly GameFilesService _filesService;
     private AnalyzeService _analyzeService = null!;
+    private EditorDiagnosisService _editorDiagnosisService = null!;
+
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
     public TextDocumentHandler()
@@ -28,11 +31,18 @@ public sealed class TextDocumentHandler : TextDocumentHandlerBase, IHandler
 
         return Task.Run(
             async () =>
-                await _analyzeService.AnalyzeFileFromOpenedFileAsync(request.TextDocument.Uri.Uri).ConfigureAwait(false),
+            {
+                var list = _analyzeService.AnalyzeFileFromOpenedFile(request.TextDocument.Uri.Uri);
+                await _editorDiagnosisService
+                    .AddDiagnoseAsync(
+                        new PublishDiagnosticsParams { Diagnostics = list, Uri = request.TextDocument.Uri }
+                    )
+                    .ConfigureAwait(false);
+            },
             token
         );
-    }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
-   
+    }
+
     protected override Task Handle(DidCloseTextDocumentParams request, CancellationToken token)
     {
         Log.Debug($"Closed file: {request.TextDocument.Uri.Uri}");
@@ -47,14 +57,21 @@ public sealed class TextDocumentHandler : TextDocumentHandlerBase, IHandler
 
         return Task.Run(
             async () =>
-                await _analyzeService.AnalyzeFileFromOpenedFileAsync(request.TextDocument.Uri.Uri).ConfigureAwait(false),
+            {
+                var list = _analyzeService.AnalyzeFileFromOpenedFile(request.TextDocument.Uri.Uri);
+                await _editorDiagnosisService
+                    .AddDiagnoseAsync(
+                        new PublishDiagnosticsParams { Diagnostics = list, Uri = request.TextDocument.Uri }
+                    )
+                    .ConfigureAwait(false);
+            },
             token
         );
     }
 
     protected override Task Handle(WillSaveTextDocumentParams request, CancellationToken token)
     {
-        throw new NotSupportedException();
+        return Task.CompletedTask;
     }
 
     protected override Task<List<TextEdit>?> HandleRequest(
@@ -62,7 +79,7 @@ public sealed class TextDocumentHandler : TextDocumentHandlerBase, IHandler
         CancellationToken token
     )
     {
-        throw new NotSupportedException();
+        return Task.FromResult<List<TextEdit>?>(null);
     }
 
     public override void RegisterCapability(
@@ -80,5 +97,6 @@ public sealed class TextDocumentHandler : TextDocumentHandlerBase, IHandler
     public void Initialize()
     {
         _analyzeService = App.Services.GetRequiredService<AnalyzeService>();
+        _editorDiagnosisService = App.Services.GetRequiredService<EditorDiagnosisService>();
     }
 }

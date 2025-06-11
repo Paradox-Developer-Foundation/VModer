@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using EmmyLua.LanguageServer.Framework.Protocol.JsonRpc;
+using EmmyLua.LanguageServer.Framework.Protocol.Message.Client.PublishDiagnostics;
 using EmmyLua.LanguageServer.Framework.Protocol.Message.Client.ShowMessage;
 using EmmyLua.LanguageServer.Framework.Protocol.Message.Initialize;
 using EmmyLua.LanguageServer.Framework.Server;
@@ -31,6 +32,7 @@ public sealed class LanguageServerHostedService : IHostedService
     private readonly ServerLoggerService _logger;
     private readonly IServiceProvider _serviceProvider;
     private readonly Process _currentProcess = Process.GetCurrentProcess();
+    private readonly EditorDiagnosisService _diagnosisService;
 
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
@@ -39,7 +41,8 @@ public sealed class LanguageServerHostedService : IHostedService
         SettingsService settings,
         LanguageServer server,
         ServerLoggerService logger,
-        IServiceProvider serviceProvider
+        IServiceProvider serviceProvider,
+        EditorDiagnosisService diagnosisService
     )
     {
         _lifetime = lifetime;
@@ -47,6 +50,7 @@ public sealed class LanguageServerHostedService : IHostedService
         _server = server;
         _logger = logger;
         _serviceProvider = serviceProvider;
+        _diagnosisService = diagnosisService;
 
         _server.AddRequestHandler("getRuntimeInfo", GetRuntimeInfoAsync);
         _server.AddNotificationHandler("clearImageCache", ClearLocalImageCacheAsync);
@@ -193,11 +197,29 @@ public sealed class LanguageServerHostedService : IHostedService
             var analyzersService = App.Services.GetRequiredService<AnalyzeService>();
 
             _server.SendNotification(new NotificationMessage("analyzeAllFilesStart", null));
-            analyzersService
-                .AnalyzeAllFilesAsync(cancellationToken)
+
+            long start = Stopwatch.GetTimestamp();
+            Task.WhenAll(analyzersService.AnalyzeAllFilesAsync(cancellationToken))
                 .ContinueWith(
-                    _ =>
+                    tasks =>
                     {
+                        if (!tasks.IsFaulted)
+                        {
+                            foreach (var result in tasks.Result)
+                            {
+                                _diagnosisService.AddDiagnoseAsync(
+                                    new PublishDiagnosticsParams
+                                    {
+                                        Diagnostics = result.Diagnostics,
+                                        Uri = result.FilePath
+                                    }
+                                );
+                            }
+                        }
+                        Log.Info(
+                            "分析全部文件耗时: {Milliseconds} ms",
+                            Stopwatch.GetElapsedTime(start).TotalMilliseconds
+                        );
                         _server.SendNotification(new NotificationMessage("analyzeAllFilesEnd", null));
                         Log.Info("Language server initialized.");
                         _logger.Log("Language server initialized.");

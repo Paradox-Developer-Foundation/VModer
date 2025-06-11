@@ -17,7 +17,6 @@ public sealed class CodeActionHandler : CodeActionHandlerBase, IHandler
 
     protected override Task<CodeActionResponse> Handle(CodeActionParams request, CancellationToken token)
     {
-        Log.Info("CodeActionParams {@A}", request);
         return Task.Run(() => _codeActionService.GetCodeActions(request), token);
     }
 

@@ -1,7 +1,8 @@
 ﻿using System.Diagnostics;
-using EmmyLua.LanguageServer.Framework.Protocol.Message.Client.PublishDiagnostics;
+using EmmyLua.LanguageServer.Framework.Protocol.Model;
 using EmmyLua.LanguageServer.Framework.Protocol.Model.Diagnostic;
 using NLog;
+using ParadoxPower.CSharp;
 using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
 using VModer.Core.Analyzers;
@@ -13,7 +14,6 @@ namespace VModer.Core.Services;
 
 public sealed class AnalyzeService(
     GameFilesService gameFilesService,
-    EditorDiagnosisService editorDiagnosisService,
     StateAnalyzerService stateAnalyzerService,
     CharacterAnalyzerService characterAnalyzerService,
     SettingsService settingsService
@@ -21,10 +21,11 @@ public sealed class AnalyzeService(
 {
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-    public Task AnalyzeAllFilesAsync(CancellationToken cancellationToken)
+    public List<Task<(string FilePath, List<Diagnostic> Diagnostics)>> AnalyzeAllFilesAsync(
+        CancellationToken cancellationToken
+    )
     {
-        long start = Stopwatch.GetTimestamp();
-        var tasks = new List<Task>();
+        var tasks = new List<Task<(string FilePath, List<Diagnostic> Diagnostics)>>();
 
         foreach (
             string filePath in Directory.EnumerateFiles(
@@ -34,67 +35,63 @@ public sealed class AnalyzeService(
             )
         )
         {
-            tasks.Add(
-                Task.Run(
-                    async () => await AnalyzeFileFromFilePathAsync(filePath).ConfigureAwait(false),
-                    cancellationToken
-                )
-            );
+            tasks.Add(Task.Run(() => (filePath, AnalyzeFileFromFilePath(filePath)), cancellationToken));
         }
 
-        return Task.WhenAll(tasks)
-            .ContinueWith(
-                _ =>
-                {
-                    var end = Stopwatch.GetElapsedTime(start);
-                    Log.Info($"Analyze all files completed in {end.TotalSeconds} s.");
-                },
-                cancellationToken
-            );
+        return tasks;
     }
 
-    public Task AnalyzeFileFromOpenedFileAsync(Uri fileUri)
+    public List<Diagnostic> AnalyzeFileFromOpenedFile(Uri fileUri)
     {
         string filePath = fileUri.ToSystemPath();
         if (settingsService.AnalysisBlackList.Contains(Path.GetFileName(filePath)))
         {
-            return Task.CompletedTask;
+            return [];
         }
 
         if (!gameFilesService.TryGetFileText(fileUri, out string? fileText))
         {
-            return Task.CompletedTask;
+            return [];
         }
 
         int textSize = fileText.Length * 2;
         if (textSize > settingsService.ParseFileMaxBytesSize)
         {
-            return Task.CompletedTask;
+            return [];
         }
 
-        return AnalyzeFileAsync(filePath, fileText);
+        return AnalyzeFile(filePath, fileText);
     }
 
-    private Task AnalyzeFileFromFilePathAsync(string filePath)
+    private List<Diagnostic> AnalyzeFileFromFilePath(string filePath)
     {
         if (settingsService.AnalysisBlackList.Contains(Path.GetFileName(filePath)))
         {
-            return Task.CompletedTask;
+            return [];
         }
 
         if (new FileInfo(filePath).Length > settingsService.ParseFileMaxBytesSize)
         {
-            return Task.CompletedTask;
+            return [];
         }
 
-        return AnalyzeFileAsync(filePath, File.ReadAllText(filePath));
+        return AnalyzeFile(filePath, File.ReadAllText(filePath));
     }
 
-    private Task AnalyzeFileAsync(string filePath, string fileText)
+    private List<Diagnostic> AnalyzeFile(string filePath, string fileText)
     {
         if (!TextParser.TryParse(filePath, fileText, out var rootNode, out var error))
         {
-            return editorDiagnosisService.AddDiagnoseAsync(error, new Uri(filePath, UriKind.Absolute));
+            return
+            [
+                new Diagnostic
+                {
+                    Code = ErrorCode.VM1000,
+                    Range = GetRange(error, 0),
+                    Message = error.ErrorMessage,
+                    Severity = DiagnosticSeverity.Error
+                }
+            ];
         }
 
         var gameFileType = GameFileType.FromFilePath(filePath);
@@ -105,9 +102,28 @@ public sealed class AnalyzeService(
             AnalyzeEmptyNode(rootNode, diagnoses);
         }
 
-        return editorDiagnosisService.AddDiagnoseAsync(
-            new PublishDiagnosticsParams { Diagnostics = diagnoses, Uri = filePath }
-        );
+        return diagnoses;
+    }
+
+    private static DocumentRange GetRange(ParserError position, int length)
+    {
+        int startChar;
+        int endChar;
+        int startLine = Math.Max((int)position.Line - 1, 0);
+        if (length == 0)
+        {
+            startChar = 0;
+            endChar = (int)position.Column;
+        }
+        else
+        {
+            startChar = (int)position.Column;
+            endChar = (int)position.Column + length;
+        }
+        var start = new Position(startLine, startChar);
+        var end = new Position(startLine, endChar);
+
+        return new DocumentRange(start, end);
     }
 
     private List<Diagnostic> AnalyzeFile(Node rootNode, string filePath, GameFileType gameFileType)
