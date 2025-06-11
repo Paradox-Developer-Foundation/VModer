@@ -8,6 +8,7 @@ using VModer.Core.Helpers;
 using VModer.Core.Models;
 using VModer.Core.Models.Modifiers;
 using VModer.Core.Services.GameResource.Modifiers;
+using ZLinq;
 
 namespace VModer.Core.Services.Hovers;
 
@@ -16,6 +17,7 @@ public sealed class ModifierHoverStrategy(ModifierDisplayService modifierDisplay
     public GameFileType FileType => GameFileType.Modifiers;
 
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+    private static readonly string[] Keywords = ["new_commander_weight", "ai_will_do"];
 
     public string GetHoverText(Node rootNode, HoverParams request)
     {
@@ -30,7 +32,7 @@ public sealed class ModifierHoverStrategy(ModifierDisplayService modifierDisplay
 
         if (
             !ModifierHelper.IsModifierNode(node, request)
-            || node.Parent?.Key.EqualsIgnoreCase("ai_will_do") == true
+            || Keywords.AsValueEnumerable().Any(keyword => node.Parent?.Key.EqualsIgnoreCase(keyword) == true)
         )
         {
             return string.Empty;
