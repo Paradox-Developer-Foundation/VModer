@@ -34,9 +34,9 @@ public sealed class FileSystemSafeWatcher : IDisposable
     private readonly FileSystemWatcher _fileSystemWatcher;
 
     /// <summary>
-    /// Lock order is _enterThread, _events.SyncRoot
+    /// Lock order is _lock, _events.SyncRoot
     /// </summary>
-    private readonly object _enterThread = new(); // Only one timer event is processed at any given moment
+    private readonly Lock _lock = new(); // Only one timer event is processed at any given moment
     private ArrayList _events;
 
     private Timer _serverTimer;
@@ -308,7 +308,7 @@ public sealed class FileSystemSafeWatcher : IDisposable
         // We don't fire the events inside the lock. We will queue them here until
         // the code exits the locks.
         Queue<DelayedEvent>? eventsToBeFired = null;
-        if (System.Threading.Monitor.TryEnter(_enterThread))
+        if (_lock.TryEnter())
         {
             // Only one thread at a time is processing the events
             try
@@ -382,7 +382,7 @@ public sealed class FileSystemSafeWatcher : IDisposable
             }
             finally
             {
-                System.Threading.Monitor.Exit(_enterThread);
+                _lock.Exit();
             }
         }
         // else - this timer event was skipped, processing will happen during the next timer event
