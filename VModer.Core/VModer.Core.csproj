@@ -42,14 +42,14 @@
       </PackageReference>
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.6" />
       <PackageReference Include="NeoLua" Version="1.3.14" />
-      <PackageReference Include="NLog" Version="5.5.0" />
-      <PackageReference Include="NLog.Extensions.Logging" Version="5.5.0" />
+      <PackageReference Include="NLog" Version="6.0.1" />
+      <PackageReference Include="NLog.Extensions.Logging" Version="6.0.1" />
       <PackageReference Include="ParadoxPower" Version="0.12.0-beta" />
       <PackageReference Include="ParadoxPower.CSharpExtensions" Version="0.8.0-beta" />
       <PackageReference Include="Pfim" Version="0.11.3" />
-      <PackageReference Include="Pidgin" Version="3.4.0" />
-      <PackageReference Include="SixLabors.ImageSharp" Version="3.1.9" />
-      <PackageReference Include="ZLinq" Version="1.4.10" />
+      <PackageReference Include="Pidgin" Version="3.5.0" />
+      <PackageReference Include="SixLabors.ImageSharp" Version="3.1.10" />
+      <PackageReference Include="ZLinq" Version="1.4.12" />
     </ItemGroup>
 
     <ItemGroup>
