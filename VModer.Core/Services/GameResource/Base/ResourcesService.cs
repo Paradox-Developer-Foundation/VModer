@@ -37,7 +37,7 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
     )
     {
         _folderOrFileRelativePath = folderOrFileRelativePath;
-        Log = LogManager.GetLogger(typeof(TType).FullName);
+        Log = LogManager.GetLogger(typeof(TType).FullName ?? "None");
         _settingService = App.Services.GetRequiredService<SettingsService>();
 
         var gameResourcesPathService = App.Services.GetRequiredService<GameResourcesPathService>();
