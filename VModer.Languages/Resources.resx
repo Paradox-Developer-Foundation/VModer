@@ -63,4 +63,10 @@
     <data name="Analyzer.UnusedStatement" xml:space="preserve">
         <value>未使用的语句</value>
     </data>
+    <data name="ErrorMessage.SkillExceedsMaxValue" xml:space="preserve">
+        <value>{0} 的属性 {1} 超过最大值 {2}</value>
+    </data>
+    <data name="ErrorMessage.BuildingLevelExceedsMaxValue" xml:space="preserve">
+        <value>建筑 {0} 等级超过上限, 最大值为: {1}</value>
+    </data>
 </root>

@@ -4,6 +4,7 @@ using ParadoxPower.Process;
 using VModer.Core.Extensions;
 using VModer.Core.Models.Character;
 using VModer.Core.Services.GameResource;
+using VModer.Languages;
 
 namespace VModer.Core.Analyzers;
 
@@ -72,7 +73,12 @@ public sealed class CharacterAnalyzerService
                     new Diagnostic
                     {
                         Range = skillLeaf.Position.ToDocumentRange(),
-                        Message = $"{generalNode.Key} 的属性 {skillLeaf.Key} 超过最大值 {maxValue}",
+                        Message = string.Format(
+                            Resources.ErrorMessage_SkillExceedsMaxValue,
+                            generalNode.Key,
+                            skillLeaf.Key,
+                            maxValue
+                        ),
                         Severity = DiagnosticSeverity.Error,
                         Code = ErrorCode.VM1004
                     }

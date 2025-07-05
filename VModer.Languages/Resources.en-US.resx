@@ -56,4 +56,10 @@
     <data name="Analyzer.UnusedStatement" xml:space="preserve">
         <value>Unused statement</value>
     </data>
+    <data name="ErrorMessage.SkillExceedsMaxValue" xml:space="preserve">
+        <value>The property {1} of {0} exceeds the maximum value {2}.</value>
+    </data>
+    <data name="ErrorMessage.BuildingLevelExceedsMaxValue" xml:space="preserve">
+        <value>Building {0} level exceeds the limit, maximum value is: {1}.</value>
+    </data>
 </root>

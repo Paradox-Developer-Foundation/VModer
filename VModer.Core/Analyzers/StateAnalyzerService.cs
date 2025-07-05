@@ -5,6 +5,7 @@ using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
 using VModer.Core.Extensions;
 using VModer.Core.Services.GameResource;
+using VModer.Languages;
 
 namespace VModer.Core.Analyzers;
 
@@ -101,7 +102,11 @@ public sealed class StateAnalyzerService
                 {
                     Code = ErrorCode.VM1002,
                     Range = buildingLeaf.Position.ToDocumentRange(),
-                    Message = $"建筑 {buildingLeaf.Key} 等级超过上限, 最大值为: {buildingInfo.MaxLevel.Value}",
+                    Message = string.Format(
+                        Resources.ErrorMessage_BuildingLevelExceedsMaxValue,
+                        buildingLeaf.Key,
+                        buildingInfo.MaxLevel.Value
+                    ),
                     Severity = DiagnosticSeverity.Error,
                 }
             );
