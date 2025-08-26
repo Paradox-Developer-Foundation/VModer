@@ -150,6 +150,33 @@ namespace VModer.Languages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 建筑 {0} 等级超过上限, 最大值为: {1}.
+        /// </summary>
+        public static string ErrorMessage_BuildingLevelExceedsMaxValue {
+            get {
+                return ResourceManager.GetString("ErrorMessage.BuildingLevelExceedsMaxValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} 的属性 {1} 超过最大值 {2}.
+        /// </summary>
+        public static string ErrorMessage_SkillExceedsMaxValue {
+            get {
+                return ResourceManager.GetString("ErrorMessage.SkillExceedsMaxValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 修复所有: .
+        /// </summary>
+        public static string FixAll {
+            get {
+                return ResourceManager.GetString("FixAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 意识形态.
         /// </summary>
         public static string Ideology {

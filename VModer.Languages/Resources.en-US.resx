@@ -62,4 +62,7 @@
     <data name="ErrorMessage.BuildingLevelExceedsMaxValue" xml:space="preserve">
         <value>Building {0} level exceeds the limit, maximum value is: {1}.</value>
     </data>
+    <data name="FixAll" xml:space="preserve">
+        <value>Fix All: </value>
+    </data>
 </root>

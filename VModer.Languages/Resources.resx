@@ -69,4 +69,7 @@
     <data name="ErrorMessage.BuildingLevelExceedsMaxValue" xml:space="preserve">
         <value>建筑 {0} 等级超过上限, 最大值为: {1}</value>
     </data>
+    <data name="FixAll" xml:space="preserve">
+        <value>修复所有: </value>
+    </data>
 </root>

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using EmmyLua.LanguageServer.Framework.Protocol.Model;
+﻿using EmmyLua.LanguageServer.Framework.Protocol.Model;
 using EmmyLua.LanguageServer.Framework.Protocol.Model.Diagnostic;
 using NLog;
 using ParadoxPower.CSharp;
@@ -99,7 +98,7 @@ public sealed class AnalyzeService(
         var diagnoses = AnalyzeFile(rootNode, filePath, gameFileType);
         if (gameFileType != GameFileType.Ideologies && gameFileType != GameFileType.Modifiers)
         {
-            AnalyzeEmptyNode(rootNode, diagnoses);
+            AnalyzeHelper.AnalyzeEmptyNode(rootNode, diagnoses);
         }
 
         return diagnoses;
@@ -134,29 +133,5 @@ public sealed class AnalyzeService(
             nameof(GameFileType.Character) => characterAnalyzerService.Analyze(rootNode),
             _ => []
         };
-    }
-
-    private static void AnalyzeEmptyNode(Node node, List<Diagnostic> list)
-    {
-        foreach (var childNode in node.Nodes)
-        {
-            if (childNode.AllArray.Length == 0)
-            {
-                list.Add(
-                    new Diagnostic
-                    {
-                        Range = childNode.Position.ToDocumentRange(),
-                        Code = ErrorCode.VM1005,
-                        Message = Resources.Analyzer_UnusedStatement,
-                        Severity = DiagnosticSeverity.Warning,
-                        Tags = [DiagnosticTag.Unnecessary]
-                    }
-                );
-            }
-            else
-            {
-                AnalyzeEmptyNode(childNode, list);
-            }
-        }
     }
 }
