@@ -1,3 +1,10 @@
+## 0.12.0
+
+- feat: 添加对未使用语句的快捷修复
+- fix: 在 new_commander_weight 下的 modifier 错误显示 Hover
+- i18: 补全错误信息的本地化文本
+- fix: 补充缺失的修饰符本地化
+
 ## 0.11.0
 
 ### Feature

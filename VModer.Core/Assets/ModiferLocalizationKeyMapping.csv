@@ -33,3 +33,5 @@ experience_gain_army_unit_factor,MODIFIER_XP_GAIN_ARMY_UNIT_FACTOR,陆军师经�
 experience_gain_army_unit,MODIFIER_XP_GAIN_ARMY_UNIT,陆军师经验增长
 extra_trade_to_overlord_factor,MODIFIER_TRADE_TO_OVERLORD_FACTOR,对宗主国额外贸易
 base_fuel_gain,MODIFIER_BASE_FUEL_GAIN_FACTOR,基础燃油增长
+ap_attack,STAT_COMMON_PIERCING,穿甲深度
+max_commander_army_size,MODIFIER_COMMAND_CAP,指挥上限
