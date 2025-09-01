@@ -23,7 +23,7 @@ import {
 } from "vscode-languageclient/node";
 import * as path from "path";
 import { TraitView } from "./views/TraitsView";
-import TelemetryReporter from "@vscode/extension-telemetry";
+import { TelemetryReporter } from "@vscode/extension-telemetry";
 import { ModifierQuerierView } from "./views/ModifierQuerierView";
 
 let client: LanguageClient;
