@@ -209,37 +209,43 @@ public sealed class ImageService : IImageService
 
     private string SaveAsPng(string spriteName, Image image, short totalFrames, short frame)
     {
-        string outputPath;
-        if (totalFrames == 1)
+        try
         {
-            outputPath = GetSingleFrameImagePath(spriteName);
-            image.SaveAsPng(outputPath);
-        }
-        else
-        {
-            outputPath = GetMultipleFrameImagePath(spriteName, frame);
-            // 计算每帧宽度
-            int frameWidth = image.Width / totalFrames;
-            if (frameWidth * totalFrames != image.Width)
+            string outputPath;
+            if (totalFrames == 1)
             {
-                throw new ArgumentException($"图像宽度必须能被总帧数整除，当前宽度: {image.Width}, 总帧数: {totalFrames}");
+                outputPath = GetSingleFrameImagePath(spriteName);
+                image.SaveAsPng(outputPath);
+            }
+            else
+            {
+                outputPath = GetMultipleFrameImagePath(spriteName, frame);
+                // 计算每帧宽度
+                int frameWidth = image.Width / totalFrames;
+                if (frameWidth * totalFrames != image.Width)
+                {
+                    throw new ArgumentException($"图像宽度必须能被总帧数整除，当前宽度: {image.Width}, 总帧数: {totalFrames}");
+                }
+
+                // 遍历每一帧
+                for (int i = 0; i < totalFrames; i++)
+                {
+                    // 计算裁剪区域
+                    int x = i * frameWidth;
+                    var cropRect = new Rectangle(x, 0, frameWidth, image.Height);
+
+                    // 裁剪并保存
+                    using var frameImage = image.Clone(ctx => ctx.Crop(cropRect));
+                    frameImage.SaveAsPng(GetMultipleFrameImagePath(spriteName, i + 1));
+                }
             }
 
-            // 遍历每一帧
-            for (int i = 0; i < totalFrames; i++)
-            {
-                // 计算裁剪区域
-                int x = i * frameWidth;
-                var cropRect = new Rectangle(x, 0, frameWidth, image.Height);
-
-                // 裁剪并保存
-                using var frameImage = image.Clone(ctx => ctx.Crop(cropRect));
-                frameImage.SaveAsPng(GetMultipleFrameImagePath(spriteName, i + 1));
-            }
+            return outputPath;
         }
-
-        image.Dispose();
-        return outputPath;
+        finally
+        {
+            image.Dispose();
+        }
     }
 
     private static Image GetImageByFormat(IImage image, byte[] newData)
