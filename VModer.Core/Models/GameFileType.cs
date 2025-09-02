@@ -19,6 +19,7 @@ public sealed class GameFileType(string name, string value) : SmartEnum<GameFile
     public static readonly GameFileType Technology = new(nameof(Technology), "**/common/technologies/*.txt");
 
     private static readonly ConcurrentDictionary<string, Glob> Globs = new();
+    private static GameFileType[]? _types;
 
     static GameFileType()
     {
@@ -27,7 +28,8 @@ public sealed class GameFileType(string name, string value) : SmartEnum<GameFile
 
     public static GameFileType FromFilePath(string filePath)
     {
-        foreach (var fileType in List.AsValueEnumerable().Where(type => type != Unknown))
+        _types ??= List.AsValueEnumerable().Where(type => type != Unknown).ToArray();
+        foreach (var fileType in _types)
         {
             if (IsGlobMatch(fileType, filePath))
             {
