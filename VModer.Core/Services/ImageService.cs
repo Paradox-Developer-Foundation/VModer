@@ -234,7 +234,7 @@ public sealed class ImageService : IImageService
 
                 // 裁剪并保存
                 using var frameImage = image.Clone(ctx => ctx.Crop(cropRect));
-                frameImage.SaveAsPng(GetMultipleFrameImagePath(spriteName, i));
+                frameImage.SaveAsPng(GetMultipleFrameImagePath(spriteName, i + 1));
             }
         }
 
