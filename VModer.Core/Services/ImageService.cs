@@ -209,7 +209,7 @@ public sealed class ImageService : IImageService
 
     private string SaveAsPng(string spriteName, Image image, short totalFrames, short frame)
     {
-        try
+        using (image)
         {
             string outputPath;
             if (totalFrames == 1)
@@ -241,10 +241,6 @@ public sealed class ImageService : IImageService
             }
 
             return outputPath;
-        }
-        finally
-        {
-            image.Dispose();
         }
     }
 
