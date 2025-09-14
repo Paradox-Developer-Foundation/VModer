@@ -116,7 +116,7 @@ export async function activate(context: ExtensionContext) {
   client = new LanguageClient("vmoder", "VModer Server", serverOptions, clientOptions);
 
   client.onNotification("analyzeAllFilesStart", () => {
-    statusBarItem.text = "$(extensions-sync-enabled) VModer Analyzing";
+    statusBarItem.text = "$(loading~spin) VModer Analyzing";
   });
 
   client.onNotification("analyzeAllFilesEnd", () => {
