@@ -3,7 +3,7 @@ import { Disposable } from "vscode-languageclient";
 import { WebviewHelpers } from "./WebviewHelpers";
 import type { LanguageClient } from "vscode-languageclient/node";
 
-export abstract class BaseView {
+export abstract class BaseView implements Disposable {
   protected static currentPanel: BaseView | undefined;
   private readonly _panel: WebviewPanel;
   private readonly _client: LanguageClient;
