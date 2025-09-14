@@ -47,7 +47,7 @@ export abstract class BaseView {
     }
   }
 
-  protected abstract getI18n(): unknown;
+  protected abstract getI18n(): object;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected async onInitialized(panel: WebviewPanel, client: LanguageClient): Promise<void> {}
