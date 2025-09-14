@@ -9,32 +9,26 @@ import {
   window,
   workspace,
 } from "vscode";
-import { Disposable } from "vscode-languageclient";
-import { WebviewHelpers } from "./WebviewHelpers";
+
 import { LanguageClient } from "vscode-languageclient/node";
 import type { TraitViewI18n } from "../../src/types/TraitViewI18n";
 import type { OpenInFileMessage } from "../../src/types/OpenInFileMessage";
 import type { DocumentRange } from "../../src/types/DocumentRange";
 import { TraitKind, type TraitDto } from "../../src/dto/TraitDto";
+import { BaseView } from "./BaseView";
 
-export class TraitView {
+export class TraitView extends BaseView {
   public static currentPanel: TraitView | undefined;
-  private readonly _panel: WebviewPanel;
-  private _disposables: Disposable[] = [];
+  private static readonly Id = "traitsView";
 
-  private constructor(panel: WebviewPanel, context: ExtensionContext) {
-    this._panel = panel;
-
-    this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
-    this._panel.webview.html = WebviewHelpers.getHtml(this._panel.webview, context, "traitsView");
+  private constructor(panel: WebviewPanel, context: ExtensionContext, client: LanguageClient) {
+    super(panel, context, client, TraitView.Id);
   }
 
-  public static render(context: ExtensionContext, client: LanguageClient) {
-    if (TraitView.currentPanel) {
-      TraitView.currentPanel._panel.reveal(ViewColumn.One);
-    } else {
+  public static render(context: ExtensionContext, client: LanguageClient): TraitView {
+    return super.renderOrReveal<TraitView>(() => {
       const panel = window.createWebviewPanel(
-        "traitsView",
+        TraitView.Id,
         l10n.t("TraitsView.Title"),
         ViewColumn.One,
         {
@@ -43,30 +37,11 @@ export class TraitView {
         }
       );
 
-      TraitView.currentPanel = new TraitView(panel, context);
-
-      const i18n: TraitViewI18n = {
-        search: l10n.t("TraitsView.Search"),
-        searchButton: l10n.t("SearchButton"),
-        origin: l10n.t("TraitsView.Origin"),
-        all: l10n.t("TraitsView.All"),
-        gameOnly: l10n.t("TraitsView.GameOnly"),
-        modOnly: l10n.t("TraitsView.ModOnly"),
-        traitType: l10n.t("TraitsView.TraitType"),
-        copyTraitId: l10n.t("TraitsView.CopyTraitId"),
-        openInFile: l10n.t("TraitsView.OpenInFile"),
-        refresh: l10n.t("TraitsView.Refresh"),
-        loading: l10n.t("TraitsView.Loading"),
-        general: l10n.t("TraitsView.General"),
-        leader: l10n.t("TraitsView.Leader"),
-        generalTraitType: l10n.t("TraitsView.GeneralTraitType"),
-      };
+      TraitView.currentPanel = new TraitView(panel, context, client);
 
       panel.webview.onDidReceiveMessage(
         async (message: string) => {
-          if (message == "init_complete") {
-            panel.webview.postMessage({ type: "i18n", data: i18n });
-          } else if (message == "refreshTraits") {
+          if (message == "refreshTraits") {
             const generalTraits = await client.sendRequest<TraitDto[]>("getGeneralTraits");
             const leaderTraits = await client.sendRequest<TraitDto[]>("getLeaderTraits");
 
@@ -128,24 +103,28 @@ export class TraitView {
         null,
         TraitView.currentPanel._disposables
       );
-    }
+
+      return TraitView.currentPanel;
+    });
   }
 
-  /**
-   * Cleans up and disposes of webview resources when the webview panel is closed.
-   */
-  public dispose() {
-    TraitView.currentPanel = undefined;
-
-    // Dispose of the current webview panel
-    this._panel.dispose();
-
-    // Dispose of all disposables (i.e. commands) for the current webview panel
-    while (this._disposables.length) {
-      const disposable = this._disposables.pop();
-      if (disposable) {
-        disposable.dispose();
-      }
-    }
+  protected getI18n(): TraitViewI18n {
+    const i18n: TraitViewI18n = {
+      search: l10n.t("TraitsView.Search"),
+      searchButton: l10n.t("SearchButton"),
+      origin: l10n.t("TraitsView.Origin"),
+      all: l10n.t("TraitsView.All"),
+      gameOnly: l10n.t("TraitsView.GameOnly"),
+      modOnly: l10n.t("TraitsView.ModOnly"),
+      traitType: l10n.t("TraitsView.TraitType"),
+      copyTraitId: l10n.t("TraitsView.CopyTraitId"),
+      openInFile: l10n.t("TraitsView.OpenInFile"),
+      refresh: l10n.t("TraitsView.Refresh"),
+      loading: l10n.t("TraitsView.Loading"),
+      general: l10n.t("TraitsView.General"),
+      leader: l10n.t("TraitsView.Leader"),
+      generalTraitType: l10n.t("TraitsView.GeneralTraitType"),
+    };
+    return i18n;
   }
 }

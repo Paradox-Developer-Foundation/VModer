@@ -1,31 +1,20 @@
 import { type ExtensionContext, l10n, ViewColumn, type WebviewPanel, window } from "vscode";
-import { Disposable } from "vscode-languageclient";
-import { WebviewHelpers } from "./WebviewHelpers";
 import { LanguageClient } from "vscode-languageclient/node";
 import type { ModifierQuerierViewI18n } from "../../src/types/ModifierQuerierViewI18";
+import { BaseView } from "./BaseView";
 
-export class ModifierQuerierView {
+export class ModifierQuerierView extends BaseView {
   public static currentPanel: ModifierQuerierView | undefined;
-  private readonly _panel: WebviewPanel;
-  private _disposables: Disposable[] = [];
+  private static readonly Id = "modifierQuerierView";
 
-  constructor(panel: WebviewPanel, context: ExtensionContext) {
-    this._panel = panel;
-
-    this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
-    this._panel.webview.html = WebviewHelpers.getHtml(
-      this._panel.webview,
-      context,
-      "modifierQuerierView"
-    );
+  private constructor(panel: WebviewPanel, context: ExtensionContext, client: LanguageClient) {
+    super(panel, context, client, ModifierQuerierView.Id);
   }
 
   public static render(context: ExtensionContext, client: LanguageClient) {
-    if (ModifierQuerierView.currentPanel) {
-      ModifierQuerierView.currentPanel._panel.reveal(ViewColumn.One);
-    } else {
+    return super.renderOrReveal<ModifierQuerierView>(() => {
       const panel = window.createWebviewPanel(
-        "traitsView",
+        ModifierQuerierView.Id,
         l10n.t("ModifierQuerierView.Title"),
         ViewColumn.One,
         {
@@ -34,42 +23,26 @@ export class ModifierQuerierView {
         }
       );
 
-      const i18n: ModifierQuerierViewI18n = {
-        searchPlaceholder: l10n.t("ModifierQuerierView.SearchPlaceholder"),
-        searchButton: l10n.t("SearchButton"),
-        categories: l10n.t("ModifierQuerierView.Categories"),
-        name: l10n.t("ModifierQuerierView.Name"),
-        localizedName: l10n.t("ModifierQuerierView.LocalizedName"),
-      };
-
-      ModifierQuerierView.currentPanel = new ModifierQuerierView(panel, context);
-
-      panel.webview.onDidReceiveMessage(async (message: string) => {
-        if (message == "init_complete") {
-          panel.webview.postMessage({
-            type: "modifierList",
-            data: await client.sendRequest("getAllModifier"),
-          });
-
-          panel.webview.postMessage({
-            type: "i18n",
-            data: i18n,
-          });
-        }
-      });
-    }
+      ModifierQuerierView.currentPanel = new ModifierQuerierView(panel, context, client);
+      return ModifierQuerierView.currentPanel;
+    });
   }
 
-  public dispose() {
-    ModifierQuerierView.currentPanel = undefined;
+  protected getI18n(): ModifierQuerierViewI18n {
+    const i18n: ModifierQuerierViewI18n = {
+      searchPlaceholder: l10n.t("ModifierQuerierView.SearchPlaceholder"),
+      searchButton: l10n.t("SearchButton"),
+      categories: l10n.t("ModifierQuerierView.Categories"),
+      name: l10n.t("ModifierQuerierView.Name"),
+      localizedName: l10n.t("ModifierQuerierView.LocalizedName"),
+    };
+    return i18n;
+  }
 
-    this._panel.dispose();
-
-    while (this._disposables.length) {
-      const disposable = this._disposables.pop();
-      if (disposable) {
-        disposable.dispose();
-      }
-    }
+  protected override async onInitialized(panel: WebviewPanel, client: LanguageClient) {
+    panel.webview.postMessage({
+      type: "modifierList",
+      data: await client.sendRequest("getAllModifier"),
+    });
   }
 }
