@@ -78,7 +78,7 @@ export async function activate(context: ExtensionContext) {
         break;
       case "linux":
         command = path.join(context.extensionPath, "server", "linux-x64", "VModer.Core");
-        fs.chmodSync(command, "777");
+        fs.chmodSync(command, "755");
         break;
       case "darwin":
         command = path.join(context.extensionPath, "server", "osx-x64", "VModer.Core");
