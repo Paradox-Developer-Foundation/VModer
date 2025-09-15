@@ -23,7 +23,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         traitsView: resolve(__dirname, "src", "html", "traitsView.html"),
-        modifierQuerierView: resolve(__dirname, "src", "html", "modifierQuerierView.html")
+        modifierQuerierView: resolve(__dirname, "src", "html", "modifierQuerierView.html"),
+        characterEditorView: resolve(__dirname, "src", "html", "characterEditorView.html"),
       },
     },
   },

@@ -192,6 +192,7 @@ vscode.on<TraitDto[]>("traits", (receivedTraits) => {
   isLoading.value = false;
 });
 
+// 初始化右键菜单
 vscode.on<TraitViewI18n>("i18n", (i18nData) => {
   i18n.value = i18nData;
 

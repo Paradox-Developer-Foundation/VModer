@@ -4,6 +4,7 @@ import {
   type ExtensionContext,
   ExtensionMode,
   l10n,
+  QuickPickItemKind,
   StatusBarAlignment,
   type StatusBarItem,
   Uri,
@@ -25,6 +26,7 @@ import * as path from "path";
 import { TraitView } from "./views/TraitsView";
 import { TelemetryReporter } from "@vscode/extension-telemetry";
 import { ModifierQuerierView } from "./views/ModifierQuerierView";
+import { CharacterEditorView } from './views/CharacterEditorView';
 
 let client: LanguageClient;
 let analyzeAllFilesEnd = false;
@@ -47,6 +49,8 @@ export async function activate(context: ExtensionContext) {
   const openLogs = commands.registerCommand("vmoder.openLogs", () => {
     const dirPath = path.dirname(command);
     commands.executeCommand("revealFileInOS", Uri.file(path.join(dirPath, "Logs")));
+
+    reporter.sendTelemetryEvent("openLogs");
   });
 
   context.subscriptions.push(openLogs, statusBarItem);
@@ -134,10 +138,13 @@ export async function activate(context: ExtensionContext) {
   } else {
     client.info(l10n.t("UnableStart"));
   }
+
+  statusBarItem.command = "vmoder.openMenu";
   statusBarItem.show();
   updateStatusBarItem(statusBarItem, client);
   const clearImageCache = commands.registerCommand("vmoder.clearImageCache", () => {
     client.sendNotification("clearImageCache");
+    reporter.sendTelemetryEvent("clearImageCache");
   });
 
   const openTraitsView = commands.registerCommand("vmoder.openTraitsView", () => {
@@ -158,10 +165,23 @@ export async function activate(context: ExtensionContext) {
     reporter.sendTelemetryEvent("openModifierQuerierView");
   });
 
+  const openCharcaterEditor = commands.registerCommand("vmoder.openCharacterEditor", () => {
+    if (!client.isRunning()) {
+      return;
+    }
+
+    CharacterEditorView.render(context, client);
+    reporter.sendTelemetryEvent("openCharacterEditorView");
+  });
+
+  const openMenu = createMenu(config, reporter);
+
   context.subscriptions.push(
     client.onDidChangeState(() => updateStatusBarItem(statusBarItem, client)),
     clearImageCache,
     openTraitsView,
+    openCharcaterEditor,
+    openMenu,
     openModifierQuerierView
   );
 }
@@ -210,6 +230,85 @@ function formatBytes(bytes: number): string {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   const size = (bytes / Math.pow(k, i)).toFixed(2);
   return `${size} ${sizes[i]}`;
+}
+
+function createMenu(config: WorkspaceConfiguration, reporter: TelemetryReporter) {
+  const openMenu = commands.registerCommand("vmoder.openMenu", async () => {
+    reporter.sendTelemetryEvent("openMenu");
+    const options = [
+      {
+        label: l10n.t("Menu.OpenTraitsView"),
+        description: l10n.t("Menu.OpenTraitsViewDesc"),
+        action: "openTraitsView",
+      },
+      {
+        label: l10n.t("Menu.OpenModifierQuerierView"),
+        description: l10n.t("Menu.OpenModifierQuerierViewDesc"),
+        action: "openModifierQuerierView",
+      },
+      {
+        label: l10n.t("Menu.OpenCharacterEditorView"),
+        description: l10n.t("Menu.OpenCharacterEditorViewDesc"),
+        action: "openCharacterEditor",
+      },
+      {
+        kind: QuickPickItemKind.Separator,
+        label: ""
+      },
+      {
+        label: l10n.t("Menu.ClearImageCache"),
+        description: l10n.t("Menu.ClearImageCacheDesc"),
+        action: "clearImageCache",
+      },
+      {
+        label: l10n.t("Menu.OpenLogs"),
+        description: l10n.t("Menu.OpenLogsDesc"),
+        action: "openLogs",
+      },
+      {
+        label: l10n.t("Menu.SetGameRootFolderPath"),
+        description: l10n.t("Menu.SetGameRootFolderPathDesc"),
+        action: "setGameRootFolderPath",
+      },
+      {
+        label: l10n.t("Menu.ReportIssue"),
+        description: l10n.t("Menu.ReportIssueDesc"),
+        action: "reportIssue",
+      }
+    ];
+
+    const selection = await window.showQuickPick(options);
+    if (!selection) {
+      return;
+    }
+
+    switch (selection.action) {
+      case "openTraitsView":
+        commands.executeCommand("vmoder.openTraitsView");
+        break;
+      case "openModifierQuerierView":
+        commands.executeCommand("vmoder.openModifierQuerierView");
+        break;
+      case "openCharacterEditor":
+        commands.executeCommand("vmoder.openCharacterEditor");
+        break;
+      case "clearImageCache":
+        commands.executeCommand("vmoder.clearImageCache");
+        break;
+      case "openLogs":
+        commands.executeCommand("vmoder.openLogs");
+        break;
+      case "setGameRootFolderPath":
+        await pickGameRootFolderPath(config);
+        break;
+      case "reportIssue":
+        env.openExternal(Uri.parse('https://github.com/textGamex/VModer/issues/new'));
+        reporter.sendTelemetryEvent("reportIssue");
+        break;
+    }
+  });
+
+  return openMenu;
 }
 
 export function deactivate(): Thenable<void> | undefined {

@@ -26,5 +26,20 @@
   "CopyContentToClipboard": "Copy content to clipboard successfully",
   "OpenFileFailed": "Open file failed",
   "ServerStarting": "VModer Server is starting...",
-  "UnableStart": "The workspace has not been opened, Unable to start VModer server"
+  "UnableStart": "The workspace has not been opened, Unable to start VModer server",
+  "CharacterEditor.Title": "Character Editor",
+  "Menu.OpenLogs": "Open VModer Log Folder",
+  "Menu.OpenLogsDesc": "Open the folder where VModer log files are stored",
+  "Menu.ClearImageCache": "Clear Local Image Cache",
+  "Menu.ClearImageCacheDesc": "Delete locally cached image files, such as Icons",
+  "Menu.ReportIssue": "Report Issue",
+  "Menu.ReportIssueDesc": "Report issues on GitHub",
+  "Menu.OpenCharacterEditorView": "Open Character Editor",
+  "Menu.OpenCharacterEditorViewDesc": "Open Character Editor",
+  "Menu.OpenModifierQuerierView": "Open Modifier Querier",
+  "Menu.OpenModifierQuerierViewDesc": "Open Modifier Querier",
+  "Menu.OpenTraitsView": "Open Traits View",
+  "Menu.OpenTraitsViewDesc": "Open Traits View",
+  "Menu.SetGameRootFolderPath": "Set Game Root Folder Path",
+  "Menu.SetGameRootFolderPathDesc": "Set the root directory of the game to enable VModer"
 }
