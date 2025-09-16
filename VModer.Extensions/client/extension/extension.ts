@@ -196,8 +196,8 @@ async function pickGameRootFolderPath(config: WorkspaceConfiguration) {
   });
   if (uri && uri[0]) {
     await config.update("VModer.GameRootPath", uri[0].fsPath, true);
+    await window.showInformationMessage(l10n.t("MustRestart"));
   }
-  await window.showInformationMessage(l10n.t("MustRestart"));
 }
 
 function updateStatusBarItem(statusBarItem: StatusBarItem, client: LanguageClient) {
