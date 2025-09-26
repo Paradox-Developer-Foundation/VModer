@@ -1,11 +1,14 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using EmmyLua.LanguageServer.Framework.Protocol.Model.Diagnostic;
 using NLog;
 using ParadoxPower.CSharpExtensions;
 using ParadoxPower.Process;
+using ParadoxPower.Utilities;
 using VModer.Core.Extensions;
+using VModer.Core.Models;
 using VModer.Core.Services.GameResource;
 using VModer.Languages;
+using ZLinq;
 
 namespace VModer.Core.Analyzers;
 
@@ -41,9 +44,79 @@ public sealed class StateAnalyzerService
             return list;
         }
 
+        AnalyzeVictoryPoints(stateNode, historyNode, list);
         AnalyzeBuildings(historyNode, list);
 
         return list;
+    }
+
+    private void AnalyzeVictoryPoints(Node stateNode, Node historyNode, List<Diagnostic> list)
+    {
+        var victoryPoints = new List<(VictoryPoint, Position.Range)>();
+        foreach (
+            var item in historyNode.Nodes.Where(node =>
+                node.Key.Equals("victory_points", StringComparison.OrdinalIgnoreCase)
+            )
+        )
+        {
+            var values = item.LeafValues.ToArray();
+            if (values.Length != 2)
+            {
+                continue;
+            }
+
+            var provinceIdLeafValue = values[0];
+            var valueLeafValue = values[1];
+            if (
+                !provinceIdLeafValue.Value.TryGetInt(out var provinceId)
+                || !valueLeafValue.Value.TryGetInt(out var value)
+            )
+            {
+                continue;
+            }
+
+            victoryPoints.Add((new VictoryPoint(provinceId, value), item.Position));
+        }
+
+        if (victoryPoints.Count == 0)
+        {
+            return;
+        }
+
+        if (!stateNode.TryGetNode("provinces", out var provincesNode))
+        {
+            return;
+        }
+
+        var provinceIds = provincesNode
+            .LeafValues.AsValueEnumerable()
+            .Where(leafValue => leafValue.Value.IsInt)
+            .Select(leafValue =>
+            {
+                leafValue.Value.TryGetInt(out var id);
+                return id;
+            })
+            .ToHashSet();
+
+        foreach (var item in victoryPoints)
+        {
+            var victoryPoint = item.Item1;
+            if (!provinceIds.Contains(victoryPoint.ProvinceId))
+            {
+                list.Add(
+                    new Diagnostic
+                    {
+                        Code = ErrorCode.VM2001,
+                        Range = item.Item2.ToDocumentRange(),
+                        Message = string.Format(
+                            Resources.ErrorMessage_VictoryPointProvinceNotInState,
+                            victoryPoint.ProvinceId
+                        ),
+                        Severity = DiagnosticSeverity.Hint
+                    }
+                );
+            }
+        }
     }
 
     private void AnalyzeBuildings(Node historyNode, List<Diagnostic> list)

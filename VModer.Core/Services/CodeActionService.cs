@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using EmmyLua.LanguageServer.Framework.Protocol.Message.CodeAction;
 using EmmyLua.LanguageServer.Framework.Protocol.Model;
 using EmmyLua.LanguageServer.Framework.Protocol.Model.Diagnostic;
@@ -19,7 +19,7 @@ public sealed class CodeActionService(GameFilesService gameFilesService)
 
         foreach (var diagnostic in request.Context.Diagnostics)
         {
-            if (diagnostic.Code?.StringValue == ErrorCode.VM1005)
+            if (diagnostic.Code?.StringValue == ErrorCode.VM2000)
             {
                 var codeAction = new CodeAction
                 {
@@ -43,7 +43,7 @@ public sealed class CodeActionService(GameFilesService gameFilesService)
                         Kind = CodeActionKind.QuickFix,
                         Data = new LSPAny(
                             JsonSerializer.Serialize(
-                                new CodeActionData(ErrorCode.VM1005, request.TextDocument.Uri.Uri),
+                                new CodeActionData(ErrorCode.VM2000, request.TextDocument.Uri.Uri),
                                 CodeActionDataContext.Default.CodeActionData
                             )
                         )
@@ -63,7 +63,7 @@ public sealed class CodeActionService(GameFilesService gameFilesService)
                 CodeActionDataContext.Default.CodeActionData
             ) ?? throw new ArgumentException();
 
-        if (data.ErrorCode == ErrorCode.VM1005)
+        if (data.ErrorCode == ErrorCode.VM2000)
         {
             return GetCodeActionForRemoveUnusedStatement(request, data.FilePath);
         }

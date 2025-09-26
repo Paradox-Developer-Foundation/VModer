@@ -1,4 +1,4 @@
-﻿namespace VModer.Core;
+namespace VModer.Core;
 
 public static class ErrorCode
 {
@@ -25,5 +25,9 @@ public static class ErrorCode
     /// <summary>
     /// 未使用的语句
     /// </summary>
-    public const string VM1005 = nameof(VM1005);
+    public const string VM2000 = nameof(VM2000);
+    /// <summary>
+    /// 定义的胜利点不在本 state 中
+    /// </summary>
+    public const string VM2001 = nameof(VM2001);
 }

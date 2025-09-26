@@ -1,4 +1,4 @@
-﻿using EmmyLua.LanguageServer.Framework.Protocol.Model.Diagnostic;
+using EmmyLua.LanguageServer.Framework.Protocol.Model.Diagnostic;
 using ParadoxPower.Process;
 using VModer.Core.Extensions;
 using VModer.Languages;
@@ -17,7 +17,7 @@ public static class AnalyzeHelper
                     new Diagnostic
                     {
                         Range = childNode.Position.ToDocumentRange(),
-                        Code = ErrorCode.VM1005,
+                        Code = ErrorCode.VM2000,
                         Message = Resources.Analyzer_UnusedStatement,
                         Severity = DiagnosticSeverity.Warning,
                         Tags = [DiagnosticTag.Unnecessary]
