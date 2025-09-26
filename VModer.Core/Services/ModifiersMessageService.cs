@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CsvHelper;
@@ -58,8 +58,7 @@ public sealed class ModifiersMessageService
             {
                 Name = message.Name,
                 Categories = message.Categories,
-                LocalizedName = string.Join(
-                        string.Empty,
+                LocalizedName = string.Concat(
                         localizationFormatService
                             .GetFormatTextInfo(modifierService.GetLocalizationName(message.Name))
                             .Select(info => info.DisplayText)
