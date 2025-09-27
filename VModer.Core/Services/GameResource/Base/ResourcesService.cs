@@ -233,6 +233,7 @@ public abstract partial class ResourcesService<TType, TContent, TParseResult> : 
         Log.Info("{ServiceName}: Mod 资源重命名成功", _serviceName);
     }
 
+    // TODO: 多个服务监听同一文件夹时, 能否重用 Node, 避免重复解析?
     /// <summary>
     /// 解析 folderRelativePath 目录下的所有文件, 并将解析结果添加到 <see cref="Resources"/> 中
     /// </summary>
