@@ -205,6 +205,15 @@ namespace VModer.Languages {
         }
         
         /// <summary>
+        ///   查找类似 移动到对应的 State 文件中 的本地化字符串。
+        /// </summary>
+        public static string QuickFix_MoveVictoryPointsToOccupiedStateFile {
+            get {
+                return ResourceManager.GetString("QuickFix.MoveVictoryPointsToOccupiedStateFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 移除未使用的语句 的本地化字符串。
         /// </summary>
         public static string QuickFix_RemoveUnusedStatement {

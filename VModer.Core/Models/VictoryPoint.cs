@@ -1,4 +1,9 @@
+using System.Text.Json.Serialization;
+
 namespace VModer.Core.Models;
+
+[JsonSerializable(typeof(VictoryPoint))]
+internal partial class VictoryPointContext : JsonSerializerContext;
 
 public readonly struct VictoryPoint(int provinceId, int value)
 {

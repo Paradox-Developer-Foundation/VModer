@@ -30,7 +30,7 @@ public sealed class StatesProvincesMapService : CommonResourcesService<StatesPro
         return string.Empty;
     }
 
-    public bool TryGetProvionces(string filePath, [NotNullWhen(true)] out int[]? provinces)
+    public bool TryGetProvinces(string filePath, [NotNullWhen(true)] out int[]? provinces)
     {
         if (Resources.TryGetValue(filePath, out provinces))
         {

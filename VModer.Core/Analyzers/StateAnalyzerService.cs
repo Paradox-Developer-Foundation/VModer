@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text.Json;
 using EmmyLua.LanguageServer.Framework.Protocol.Model.Diagnostic;
 using NLog;
 using ParadoxPower.CSharpExtensions;
@@ -15,15 +16,20 @@ namespace VModer.Core.Analyzers;
 public sealed class StateAnalyzerService
 {
     private readonly BuildingsService _buildingService;
+    private readonly StatesProvincesMapService _statesProvincesMapService;
 
     // private readonly GlobalValue _provinces = new("province");
     // private readonly GlobalValue _idSet = new("id");
 
     private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-    public StateAnalyzerService(BuildingsService buildingService)
+    public StateAnalyzerService(
+        BuildingsService buildingService,
+        StatesProvincesMapService statesProvincesMapService
+    )
     {
         _buildingService = buildingService;
+        _statesProvincesMapService = statesProvincesMapService;
     }
 
     public List<Diagnostic> Analyze(Node node, string filePath)
@@ -44,13 +50,13 @@ public sealed class StateAnalyzerService
             return list;
         }
 
-        AnalyzeVictoryPoints(stateNode, historyNode, list);
+        AnalyzeVictoryPoints(filePath, historyNode, list);
         AnalyzeBuildings(historyNode, list);
 
         return list;
     }
 
-    private void AnalyzeVictoryPoints(Node stateNode, Node historyNode, List<Diagnostic> list)
+    private void AnalyzeVictoryPoints(string filePath, Node historyNode, List<Diagnostic> list)
     {
         var victoryPoints = new List<(VictoryPoint, Position.Range)>();
         foreach (
@@ -68,8 +74,8 @@ public sealed class StateAnalyzerService
             var provinceIdLeafValue = values[0];
             var valueLeafValue = values[1];
             if (
-                !provinceIdLeafValue.Value.TryGetInt(out var provinceId)
-                || !valueLeafValue.Value.TryGetInt(out var value)
+                !provinceIdLeafValue.Value.TryGetInt(out int provinceId)
+                || !valueLeafValue.Value.TryGetInt(out int value)
             )
             {
                 continue;
@@ -83,37 +89,30 @@ public sealed class StateAnalyzerService
             return;
         }
 
-        if (!stateNode.TryGetNode("provinces", out var provincesNode))
+        if (!_statesProvincesMapService.TryGetProvinces(filePath, out int[]? provinceIds))
         {
-            return;
+            provinceIds = [];
         }
-        
-        // TODO: 替换为 StatesProvincesMapService
-        var provinceIds = provincesNode
-            .LeafValues.AsValueEnumerable()
-            .Where(leafValue => leafValue.Value.IsInt)
-            .Select(leafValue =>
-            {
-                leafValue.Value.TryGetInt(out var id);
-                return id;
-            })
-            .ToHashSet();
 
-        foreach (var item in victoryPoints)
+        var provinceIdsSpan = provinceIds.AsSpan();
+        foreach (var (victoryPoint, range) in victoryPoints)
         {
-            var victoryPoint = item.Item1;
-            if (!provinceIds.Contains(victoryPoint.ProvinceId))
+            if (!provinceIdsSpan.Contains(victoryPoint.ProvinceId))
             {
                 list.Add(
                     new Diagnostic
                     {
                         Code = ErrorCode.VM2001,
-                        Range = item.Item2.ToDocumentRange(),
+                        Range = range.ToDocumentRange(),
                         Message = string.Format(
                             Resources.ErrorMessage_VictoryPointProvinceNotInState,
-                            victoryPoint.ProvinceId
+                            victoryPoint.ProvinceId.ToString()
                         ),
-                        Severity = DiagnosticSeverity.Hint
+                        Severity = DiagnosticSeverity.Hint,
+                        Data = JsonSerializer.Serialize(
+                            victoryPoint,
+                            VictoryPointContext.Default.VictoryPoint
+                        )
                     }
                 );
             }

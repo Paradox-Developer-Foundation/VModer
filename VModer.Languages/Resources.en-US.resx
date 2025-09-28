@@ -174,4 +174,7 @@
   <data name="ErrorMessage.VictoryPointProvinceNotInState" xml:space="preserve">
     <value>The defined victory point {0} is not in this state.</value>
   </data>
+  <data name="QuickFix.MoveVictoryPointsToOccupiedStateFile" xml:space="preserve">
+    <value>Move it to the corresponding State file</value>
+  </data>
 </root>

@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using EmmyLua.LanguageServer.Framework.Protocol.Message.Client.ShowMessage;
@@ -101,6 +101,7 @@ builder.Services.AddSingleton<IdeologiesService>();
 builder.Services.AddSingleton<OperationsService>();
 builder.Services.AddSingleton<SpecialProjectsService>();
 builder.Services.AddSingleton<ModifiersMessageService>();
+builder.Services.AddSingleton<StatesProvincesMapService>();
 
 builder.Services.AddHostedService<LanguageServerHostedService>();
 

@@ -1,9 +1,12 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using EmmyLua.LanguageServer.Framework.Protocol.Message.TextDocument;
 using EmmyLua.LanguageServer.Framework.Protocol.Model;
 using MethodTimer;
 using NLog;
+using ParadoxPower.CSharpExtensions;
+using ParadoxPower.Process;
+using VModer.Core.Extensions;
 
 namespace VModer.Core.Services;
 
@@ -167,5 +170,16 @@ public sealed class GameFilesService
         // TODO: 能否不额外创建字符串?
         fileText = fileTextBuilder.ToString();
         return true;
+    }
+
+    public bool TryGetParsedFile(Uri filePathUri, [NotNullWhen(true)] out Node? rootNode)
+    {
+        if (!TryGetFileText(filePathUri, out string? fileText))
+        {
+            rootNode = null;
+            return false;
+        }
+
+        return TextParser.TryParse(filePathUri.ToSystemPath(), fileText, out rootNode, out _);
     }
 }

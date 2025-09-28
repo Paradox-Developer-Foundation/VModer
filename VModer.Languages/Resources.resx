@@ -174,4 +174,7 @@
   <data name="ErrorMessage.VictoryPointProvinceNotInState" xml:space="preserve">
     <value>定义的胜利点 {0} 不在这个 State 中</value>
   </data>
+  <data name="QuickFix.MoveVictoryPointsToOccupiedStateFile" xml:space="preserve">
+    <value>移动到对应的 State 文件中</value>
+  </data>
 </root>
