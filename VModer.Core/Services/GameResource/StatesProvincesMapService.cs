@@ -43,7 +43,7 @@ public sealed class StatesProvincesMapService : CommonResourcesService<StatesPro
 
     protected override int[]? ParseFileToContent(Node rootNode)
     {
-        if (!rootNode.TryGetNode(StatesKeyword, out var statesNode))
+        if (!rootNode.TryGetNode(Keywords.State, out var statesNode))
         {
             return [];
         }
