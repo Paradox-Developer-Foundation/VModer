@@ -50,13 +50,13 @@ public sealed class StateAnalyzerService
             return list;
         }
 
-        AnalyzeVictoryPoints(filePath, historyNode, list);
+        AnalyzeVictoryPoints(stateNode, historyNode, list);
         AnalyzeBuildings(historyNode, list);
 
         return list;
     }
 
-    private void AnalyzeVictoryPoints(string filePath, Node historyNode, List<Diagnostic> list)
+    private void AnalyzeVictoryPoints(Node stateNode, Node historyNode, List<Diagnostic> list)
     {
         var victoryPoints = new List<(VictoryPoint, Position.Range)>();
         foreach (
@@ -89,15 +89,25 @@ public sealed class StateAnalyzerService
             return;
         }
 
-        if (!_statesProvincesMapService.TryGetProvinces(filePath, out int[]? provinceIds))
+        if (!stateNode.TryGetNode("provinces", out var provincesNode))
         {
-            provinceIds = [];
+            return;
         }
 
-        var provinceIdsSpan = provinceIds.AsSpan();
+        // 手动解析而不是调用 StatesProvincesMapService 是为了防止无法获取用户缓冲区中对provinces的修改.
+        var provinceIds = provincesNode
+            .LeafValues.AsValueEnumerable()
+            .Where(leafValue => leafValue.Value.IsInt)
+            .Select(leafValue =>
+            {
+                leafValue.Value.TryGetInt(out int id);
+                return id;
+            })
+            .ToHashSet();
+
         foreach (var (victoryPoint, range) in victoryPoints)
         {
-            if (!provinceIdsSpan.Contains(victoryPoint.ProvinceId))
+            if (!provinceIds.Contains(victoryPoint.ProvinceId))
             {
                 list.Add(
                     new Diagnostic
