@@ -49,8 +49,7 @@ export abstract class BaseView implements Disposable {
 
   protected abstract getI18n(): object;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected async onInitialized(panel: WebviewPanel, client: LanguageClient): Promise<void> {}
+  protected async onInitialized(_panel: WebviewPanel, _client: LanguageClient): Promise<void> {}
 
   /**
    * Cleans up and disposes of webview resources when the webview panel is closed.

@@ -231,7 +231,7 @@ function formatBytes(bytes: number): string {
 
 function createMenu(config: WorkspaceConfiguration, reporter: TelemetryReporter) {
   const openMenu = commands.registerCommand("vmoder.openMenu", async () => {
-    reporter.sendTelemetryEvent("openMenu");
+    reporter.sendTelemetryEvent("openStateBarMenu");
     const options = [
       {
         label: l10n.t("Menu.OpenTraitsView"),
@@ -243,11 +243,11 @@ function createMenu(config: WorkspaceConfiguration, reporter: TelemetryReporter)
         description: l10n.t("Menu.OpenModifierQuerierViewDesc"),
         action: "openModifierQuerierView",
       },
-      {
-        label: l10n.t("Menu.OpenCharacterEditorView"),
-        description: l10n.t("Menu.OpenCharacterEditorViewDesc"),
-        action: "openCharacterEditor",
-      },
+      // {
+      //   label: l10n.t("Menu.OpenCharacterEditorView"),
+      //   description: l10n.t("Menu.OpenCharacterEditorViewDesc"),
+      //   action: "openCharacterEditor",
+      // },
       {
         kind: QuickPickItemKind.Separator,
         label: ""
