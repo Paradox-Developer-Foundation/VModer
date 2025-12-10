@@ -20,9 +20,9 @@ public sealed class CodeActionHandler : CodeActionHandlerBase, IHandler
         return Task.Run(() => _codeActionService.GetCodeActions(request), token);
     }
 
-    protected override Task<CodeAction> Resolve(CodeAction request, CancellationToken token)
+    protected override Task<CodeAction?> Resolve(CodeAction request, CancellationToken token)
     {
-        return Task.Run(() => _codeActionService.GetCodeAction(request), token);
+        return Task.Run<CodeAction?>(() => _codeActionService.GetCodeAction(request), token);
     }
 
     public override void RegisterCapability(
