@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".csharpierrc" />
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="VModer.Extensions/client/CHANGELOG.md" />
+    <File Path="VModer.Extensions/client/README.md" />
+  </Folder>
+  <Project Path="VModer.Core/VModer.Core.csproj" />
+  <Project Path="VModer.DocumentParser/VModer.DocumentParser.csproj" />
+  <Project Path="VModer.Languages/VModer.Languages.csproj" />
+  <Project Path="VModer.UnitTests/VModer.UnitTests.csproj" />
+</Solution>
