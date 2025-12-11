@@ -1,3 +1,13 @@
+# Changelog
+
+## 0.13.1
+
+- fix: 补充新版本更新的 Modifiers (更新由 爱发电@雨诉 驱动)
+- fix: 补充缺失的 Modifiers 本地化 (更新由 爱发电@雨诉 驱动):
+  - `foreign_subversive_activites`
+  - `air_close_air_support_org_damage_factor`
+- deps: 更新项目依赖
+
 ## 0.13.0
 
 - feat: 新增状态栏菜单, 左键点击状态栏可打开菜单

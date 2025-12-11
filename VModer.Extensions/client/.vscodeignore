@@ -9,7 +9,7 @@ contributing.md
 node_modules/**
 
 
-
+vite.config.mts
 package.cmd
 server/**/Logs/*.*
 .idea/**
