@@ -21,7 +21,7 @@
 		"language server"
 	],
 	"engines": {
-		"vscode": "^1.75.0"
+		"vscode": "^1.86.0"
 	},
 	"activationEvents": [
 		"onLanguage:hoi4"
@@ -134,7 +134,7 @@
 		"@tomjs/vite-plugin-vscode": "^3.2.1",
 		"@types/lodash-es": "^4.17.12",
 		"@types/node": "^20",
-		"@types/vscode": "^1.75.1",
+		"@types/vscode": "^1.86.0",
 		"@vitejs/plugin-vue": "^6.0.2",
 		"eslint": "^9.39.1",
 		"typescript": "^5.9.3",
