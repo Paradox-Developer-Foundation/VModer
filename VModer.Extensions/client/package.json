@@ -125,8 +125,7 @@
 		"vscode:prepublish": "npm run build",
 		"dev": "vite",
 		"build": "vue-tsc --noEmit && vite build",
-		"lint": "eslint",
-		"postinstall": "npm install"
+		"lint": "eslint"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.13.0",
@@ -136,19 +135,19 @@
 		"@types/lodash-es": "^4.17.12",
 		"@types/node": "^20",
 		"@types/vscode": "^1.75.1",
-		"@vitejs/plugin-vue": "^5.2.1",
-		"eslint": "^9.13.0",
-		"typescript": "^5.7.2",
-		"typescript-eslint": "^8.16.0",
-		"vue-tsc": "^3.0.6"
+		"@vitejs/plugin-vue": "^6.0.2",
+		"eslint": "^9.39.1",
+		"typescript": "^5.9.3",
+		"typescript-eslint": "^8.49.0",
+		"vue-tsc": "^3.1.8"
 	},
 	"dependencies": {
 		"@tomjs/vscode-webview": "^2.0.2",
-		"@vscode-elements/elements": "^2.3.0",
-		"@vscode/extension-telemetry": "^1.0.0",
+		"@vscode-elements/elements": "^2.3.1",
+		"@vscode/extension-telemetry": "^1.2.0",
 		"lodash-es": "^4.17.21",
-		"marked": "^16.2.0",
+		"marked": "^17.0.1",
 		"vscode-languageclient": "^9.0.1",
-		"vue": "^3.5.13"
+		"vue": "^3.5.25"
 	}
 }

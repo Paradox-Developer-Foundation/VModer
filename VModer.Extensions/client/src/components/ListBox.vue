@@ -6,7 +6,7 @@
       class="list-item"
       :class="{ selected: index === selectedIndex }"
       :data-index="index"
-      @mouseover="handleMouseOver($event, item)"
+      @mouseover="handleMouseOver($event, item as any)"
       @mouseout="handleMouseOut"
       @mousemove="handleMouseMove"
     >

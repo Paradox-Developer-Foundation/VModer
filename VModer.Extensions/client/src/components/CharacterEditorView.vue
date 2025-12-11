@@ -44,7 +44,7 @@
 
 <script lang="ts" setup>
 // import { WebviewApi } from "@tomjs/vscode-webview";
-import type { VscodeSingleSelect } from "@vscode-elements/elements";
+// import type { VscodeSingleSelect } from "@vscode-elements/elements";
 import { ref } from "vue";
 
 const navyLeader = "navy_leader";
