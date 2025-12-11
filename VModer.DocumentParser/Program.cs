@@ -26,47 +26,63 @@ foreach (var element in document.All)
         isReady = true;
     }
 
-    if (element.Id == "a-id-technology-_cost_factortechnology_cost_factor")
+    if (isReady && element is { TagName: "h2", Id: "_drift_from_guarantees" })
     {
         break;
     }
 
     if (isReady && element.TagName.Equals("li", StringComparison.OrdinalIgnoreCase))
     {
-        string? query = element.Children[0].GetAttribute("href");
+        var link = element.Children[0];
+        string? query = link.GetAttribute("href");
         if (string.IsNullOrWhiteSpace(query))
         {
             continue;
         }
 
-        if (element.TextContent.Contains('<'))
+        string innerHtml = link.InnerHtml;
+        if (innerHtml.Contains('<'))
         {
             addToDynamicModifiers = true;
         }
+        
+        string modifierName = addToDynamicModifiers 
+            ? System.Text.RegularExpressions.Regex.Replace(innerHtml, @"</[^>]+>", "") 
+            : link.TextContent;
 
         var modifier = document.QuerySelector(query);
         var ulElement = modifier?.NextElementSibling;
-        if (ulElement is null)
+        
+        if (ulElement is null || !ulElement.TagName.Equals("UL", StringComparison.OrdinalIgnoreCase))
         {
             // 如果没有找到下一个元素, 可能是一个动态生成的修饰符, 嵌套在在一个 <h2> 中
-            ulElement = modifier?.ParentElement?.NextElementSibling;
-            if (ulElement is null)
+            var parentNext = modifier?.ParentElement?.NextElementSibling;
+            if (parentNext != null && parentNext.TagName.Equals("UL", StringComparison.OrdinalIgnoreCase))
             {
-                continue;
+                ulElement = parentNext;
             }
         }
 
-        var categoriesElement = addToDynamicModifiers
-            ? ulElement.Children[0].Children.First(item => item.TextContent.Contains("Categories"))
-            : ulElement.Children.First(item => item.TextContent.Contains("Categories"));
+        if (ulElement is null)
+        {
+            continue;
+        }
+
+        var categoriesElement = ulElement.Children.FirstOrDefault(item => item.TextContent.Contains("Categories"));
+        if (categoriesElement == null)
+        {
+            continue;
+        }
+        
         string categories = categoriesElement.TextContent.Split(':')[1];
+
         if (addToDynamicModifiers)
         {
-            dynamicModifiers[modifier!.TextContent] = categories.Split(',', StringSplitOptions.TrimEntries);
+            dynamicModifiers[modifierName] = categories.Split(',', StringSplitOptions.TrimEntries);
         }
         else
         {
-            modifiers[modifier!.TextContent] = categories.Split(',', StringSplitOptions.TrimEntries);
+            modifiers[modifierName] = categories.Split(',', StringSplitOptions.TrimEntries);
         }
     }
 }
